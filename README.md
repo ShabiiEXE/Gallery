@@ -9,14 +9,21 @@ npm install
 npm run dev
 ```
 
-The app works locally with browser storage. Cloudflare sync requires:
+The app works locally with browser storage. Cloudflare sync is optional and requires:
 
 - `EDIT_PASSWORD` secret for login.
 - `MAGIC_GALLERY` KV namespace bound in `wrangler.toml`.
 
 ## Cloudflare
 
-1. Create a KV namespace and replace `replace_with_cloudflare_kv_namespace_id` in `wrangler.toml`.
+1. Deploy as-is for local browser storage, or create a KV namespace and add it to `wrangler.toml` for Cloudflare sync:
+
+```toml
+[[kv_namespaces]]
+binding = "MAGIC_GALLERY"
+id = "your_cloudflare_kv_namespace_id"
+```
+
 2. Add an `EDIT_PASSWORD` secret in Cloudflare.
 3. Deploy with `npm run deploy`.
 

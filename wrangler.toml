@@ -9,7 +9,3 @@ EDITOR_AUTH_SCOPE = "gallery"
 [assets]
 directory = "public"
 binding = "ASSETS"
-
-[[kv_namespaces]]
-binding = "MAGIC_GALLERY"
-id = "00000000000000000000000000000000"
