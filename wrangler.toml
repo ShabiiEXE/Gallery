@@ -1,0 +1,15 @@
+name = "magic-gallery"
+main = "worker.js"
+compatibility_date = "2026-09-10"
+workers_dev = true
+
+[vars]
+EDITOR_AUTH_SCOPE = "magic-gallery"
+
+[assets]
+directory = "public"
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "MAGIC_GALLERY"
+id = "00000000000000000000000000000000"

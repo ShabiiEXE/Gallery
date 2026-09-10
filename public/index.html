@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#161619" />
+    <title>Magic Gallery</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script type="module" src="js/app.js"></script>
+  </head>
+  <body>
+    <div class="backdrop" aria-hidden="true"></div>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Magic Gallery home">
+          <span class="brand-mark">MG</span>
+          <span>
+            <strong>Magic Gallery</strong>
+            <small data-i18n="tagline">Signed cards, proofs, alters and proxies</small>
+          </span>
+        </a>
+        <nav class="top-actions" aria-label="Primary actions">
+          <button class="icon-button" id="settingsButton" type="button" title="Settings" aria-label="Settings">
+            <span aria-hidden="true">⚙</span>
+          </button>
+          <button class="button ghost" id="loginButton" type="button" data-i18n="login">Log in</button>
+          <button class="button primary" id="addCardButton" type="button" data-i18n="add_card">Add card</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="module" data-module="gallery">
+          <div class="module-head">
+            <div>
+              <p class="eyebrow" data-i18n="collection">Collection</p>
+              <h1 data-i18n="gallery_title">Card Gallery</h1>
+            </div>
+            <div class="module-count" id="resultCount"></div>
+          </div>
+
+          <form class="toolbar" id="filterForm">
+            <label class="search-box">
+              <span data-i18n="search">Search</span>
+              <input id="searchInput" type="search" placeholder="Search by name, artist, set..." autocomplete="off" />
+            </label>
+            <label>
+              <span data-i18n="type">Type</span>
+              <select id="typeFilter"></select>
+            </label>
+            <label>
+              <span data-i18n="set">Set</span>
+              <select id="setFilter"></select>
+            </label>
+            <label>
+              <span data-i18n="artist">Artist</span>
+              <select id="artistFilter"></select>
+            </label>
+            <label class="check-filter">
+              <input id="bundleToggle" type="checkbox" />
+              <span data-i18n="bundle">Bundle same name</span>
+            </label>
+          </form>
+
+          <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
+          <div class="empty-state" id="emptyState" hidden>
+            <h2 data-i18n="empty_title">Start the binder</h2>
+            <p data-i18n="empty_copy">Add a signed card, proof, alter or custom proxy to begin.</p>
+            <button class="button primary" type="button" data-open-add data-i18n="add_card">Add card</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="modal" id="loginDialog">
+      <form method="dialog" class="modal-card compact" id="loginForm">
+        <div class="modal-head">
+          <h2 data-i18n="login">Log in</h2>
+          <button class="icon-button" value="cancel" aria-label="Close" type="submit">×</button>
+        </div>
+        <label>
+          <span data-i18n="password">Password</span>
+          <input id="passwordInput" type="password" autocomplete="current-password" />
+        </label>
+        <p class="form-message" id="loginMessage"></p>
+        <div class="modal-actions">
+          <button class="button ghost" value="cancel" type="submit" data-i18n="cancel">Cancel</button>
+          <button class="button primary" id="submitLogin" type="button" data-i18n="login">Log in</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="settingsDialog">
+      <form method="dialog" class="modal-card" id="settingsForm">
+        <div class="modal-head">
+          <h2 data-i18n="settings">Settings</h2>
+          <button class="icon-button" value="cancel" aria-label="Close" type="submit">×</button>
+        </div>
+        <div class="settings-grid">
+          <label>
+            <span data-i18n="language">Language</span>
+            <select id="languageSelect">
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
+          </label>
+          <section class="module-order">
+            <h3 data-i18n="modules">Modules</h3>
+            <div id="moduleSettings"></div>
+          </section>
+        </div>
+        <div class="modal-actions">
+          <button class="button ghost" value="cancel" type="submit" data-i18n="cancel">Cancel</button>
+          <button class="button primary" id="saveSettings" type="button" data-i18n="save">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="cardDialog">
+      <article class="modal-card detail-card" id="cardDetail"></article>
+    </dialog>
+
+    <dialog class="modal" id="editDialog">
+      <form method="dialog" class="modal-card edit-card" id="cardForm">
+        <div class="modal-head">
+          <h2 id="editTitle" data-i18n="add_card">Add card</h2>
+          <button class="icon-button" value="cancel" aria-label="Close" type="submit">×</button>
+        </div>
+        <div class="lookup-panel">
+          <label>
+            <span data-i18n="find_card">Find card</span>
+            <input id="lookupInput" type="search" placeholder="Card name, Scryfall link, Cardmarket or TCGplayer link" />
+          </label>
+          <button class="button ghost" id="lookupButton" type="button" data-i18n="search">Search</button>
+        </div>
+        <div class="lookup-results" id="lookupResults"></div>
+        <input type="hidden" id="editingId" />
+        <div class="form-grid">
+          <label>
+            <span data-i18n="card_name">Card name</span>
+            <input id="cardName" required />
+          </label>
+          <label>
+            <span data-i18n="kind">Kind</span>
+            <select id="cardKind"></select>
+          </label>
+          <label>
+            <span data-i18n="language">Language</span>
+            <select id="cardLanguage"></select>
+          </label>
+          <label class="check-filter stars-check">
+            <input id="foilInput" type="checkbox" />
+            <span data-i18n="foil">Foil</span>
+          </label>
+          <label>
+            <span data-i18n="front_photo">Front photo</span>
+            <input id="frontPhoto" type="file" accept="image/*" />
+          </label>
+          <label>
+            <span data-i18n="back_photo">Back photo</span>
+            <input id="backPhoto" type="file" accept="image/*" />
+          </label>
+          <label>
+            <span id="artistLabel" data-i18n="artist">Artist</span>
+            <input id="collectorArtist" />
+          </label>
+          <label>
+            <span data-i18n="year">Year</span>
+            <input id="signatureYear" type="number" min="1993" max="2100" />
+          </label>
+          <label>
+            <span data-i18n="where_how">Where/How</span>
+            <input id="signaturePlace" />
+          </label>
+          <label class="wide">
+            <span data-i18n="description">Description</span>
+            <textarea id="descriptionInput" rows="3"></textarea>
+          </label>
+          <label class="wide">
+            <span data-i18n="moxfield">Moxfield deck link</span>
+            <input id="moxfieldInput" />
+          </label>
+          <label>
+            <span data-i18n="deck_name">Deck name</span>
+            <input id="deckNameInput" />
+          </label>
+          <label>
+            <span data-i18n="format">Format</span>
+            <input id="deckFormatInput" />
+          </label>
+          <label>
+            <span data-i18n="bracket">Bracket</span>
+            <input id="deckBracketInput" />
+          </label>
+          <label>
+            <span data-i18n="deck_owner">Deck owner</span>
+            <input id="deckOwnerInput" />
+          </label>
+        </div>
+        <section class="actual-info">
+          <h3 data-i18n="actual_card_info">Actual card info</h3>
+          <div class="info-grid">
+            <label><span data-i18n="set">Set</span><input id="setNameInput" /></label>
+            <label><span data-i18n="set_code">Set code</span><input id="setCodeInput" /></label>
+            <label><span data-i18n="number">Number</span><input id="collectorNumberInput" /></label>
+            <label><span data-i18n="set_year">Set year</span><input id="setYearInput" type="number" /></label>
+            <label><span data-i18n="card_artist">Card artist</span><input id="cardArtistInput" /></label>
+            <label><span data-i18n="scryfall">Scryfall</span><input id="scryfallInput" /></label>
+          </div>
+        </section>
+        <p class="form-message" id="cardFormMessage"></p>
+        <div class="modal-actions">
+          <button class="button danger" id="deleteCardButton" type="button" data-i18n="delete">Delete</button>
+          <span class="spacer"></span>
+          <button class="button ghost" value="cancel" type="submit" data-i18n="cancel">Cancel</button>
+          <button class="button primary" id="saveCardButton" type="button" data-i18n="save">Save</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

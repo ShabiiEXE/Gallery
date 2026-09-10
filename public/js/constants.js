@@ -1,0 +1,70 @@
+export const CARD_KINDS = [
+  "Signed",
+  "Altered",
+  "Signed + Altered",
+  "Artist Proof",
+  "Altered Artist Proof",
+  "Custom Proxy",
+];
+
+export const LANGUAGES = [
+  { value: "en", label: "English", flag: "us" },
+  { value: "es", label: "Spanish", flag: "es" },
+  { value: "jp", label: "Japanese", flag: "jp" },
+  { value: "fr", label: "French", flag: "fr" },
+  { value: "de", label: "German", flag: "de" },
+  { value: "it", label: "Italian", flag: "it" },
+];
+
+export const MODULES = [
+  { id: "gallery", label: "Gallery" },
+];
+
+export const SAMPLE_CARDS = [
+  {
+    id: "sample-1",
+    name: "Lightning Bolt",
+    kind: "Signed",
+    foil: true,
+    language: "en",
+    frontImage: "https://cards.scryfall.io/normal/front/6/1/61cbb015-5468-42e0-8e70-c0c15397db52.jpg",
+    backImage: "",
+    artist: "Christopher Rush",
+    signatureYear: "2024",
+    signaturePlace: "MagicCon",
+    description: "Gold signature across the text box. The card catches light beautifully in person.",
+    setName: "Secret Lair Drop",
+    setCode: "sld",
+    collectorNumber: "675",
+    setYear: "2021",
+    cardArtist: "Christopher Rush",
+    scryfallUrl: "https://scryfall.com/card/sld/675/lightning-bolt",
+    moxfieldUrl: "https://www.moxfield.com/decks/example",
+    deckName: "Storm Keepsakes",
+    deckFormat: "Commander",
+    deckBracket: "3",
+    deckOwner: "Shabii",
+    commanderImage: "https://cards.scryfall.io/normal/front/0/4/0424a78f-7a09-4a9f-b28c-8f3542b64f52.jpg",
+    createdAt: "2026-09-10T00:00:00.000Z",
+  },
+  {
+    id: "sample-2",
+    name: "Brainstorm",
+    kind: "Artist Proof",
+    foil: false,
+    language: "en",
+    frontImage: "https://cards.scryfall.io/normal/front/8/2/823a7864-b37b-4ca0-a1f7-a6df75fc7828.jpg",
+    backImage: "",
+    artist: "Mark Tedin",
+    signatureYear: "2023",
+    signaturePlace: "AP sketch on back",
+    description: "Artist proof with a blank proof back ready for a sketch scan.",
+    setName: "Mystical Archive",
+    setCode: "sta",
+    collectorNumber: "13",
+    setYear: "2021",
+    cardArtist: "Mark Tedin",
+    scryfallUrl: "https://scryfall.com/card/sta/13/brainstorm",
+    createdAt: "2026-09-10T00:00:00.000Z",
+  },
+];
