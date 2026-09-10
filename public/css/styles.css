@@ -117,19 +117,38 @@ body {
   will-change: transform, background-position;
 }
 
-.backdrop::after {
-  content: "";
-  position: absolute;
-  inset: 0;
+html.theme-no-glow .backdrop {
   background:
-    var(--grid-texture),
-    var(--grid-fade);
-  background-size: 26px 26px, auto;
-  background-position:
-    var(--grid-x) var(--grid-y),
-    center;
-  opacity: 0.82;
-  pointer-events: none;
+    linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 38%),
+    var(--custom-backdrop-image) top left / cover repeat,
+    var(--bg);
+}
+
+html.theme-light .backdrop {
+  background:
+    radial-gradient(circle at 78% 9%, var(--glow-primary), transparent 30%),
+    radial-gradient(circle at 11% 84%, var(--glow-secondary), transparent 34%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.55), transparent 38%),
+    var(--custom-backdrop-image) top left / cover repeat,
+    var(--bg);
+}
+
+body.theme-kash .backdrop {
+  background:
+    radial-gradient(circle at 78% 9%, rgba(0, 92, 255, 0.24), transparent 30%),
+    radial-gradient(circle at 11% 84%, rgb(0 89 255 / 16%), transparent 34%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 38%),
+    url("../assets/backdrop.png") top left / auto repeat,
+    #111723;
+}
+
+html.theme-no-glow .backdrop,
+html.theme-no-glow.theme-light .backdrop,
+html.theme-no-glow body.theme-kash .backdrop {
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.035), transparent 38%),
+    var(--custom-backdrop-image) top left / cover repeat,
+    var(--bg) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -229,7 +248,7 @@ label > span {
   grid-template-columns: minmax(0, 1fr);
   width: min(1620px, 100%);
   margin: 0 auto;
-  padding: 0 clamp(18px, 4vw, 48px) clamp(18px, 4vw, 48px);
+  padding: clamp(8px, 2vw, 24px) clamp(18px, 4vw, 48px) clamp(18px, 4vw, 48px);
 }
 
 .page-shell > * {
@@ -241,11 +260,10 @@ label > span {
   position: relative;
   z-index: 20;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
   gap: 12px 18px;
   max-width: 100%;
-  margin: 0 calc(clamp(18px, 4vw, 48px) * -1) 8px;
   padding: 18px clamp(16px, 4vw, 46px);
   background: transparent;
   border-bottom: 0;
@@ -305,6 +323,7 @@ h2 {
 }
 
 .topbar > .top-actions {
+  grid-column: 3;
   justify-self: end;
 }
 
@@ -888,12 +907,6 @@ h2 {
 }
 
 @media (max-width: 820px) {
-  .page-shell {
-    width: min(100% - 16px, 720px);
-    padding-top: 8px;
-  }
-
-  .topbar,
   .module-head,
   .detail-layout {
     grid-template-columns: 1fr;
@@ -931,5 +944,22 @@ h2 {
 
   .brand small {
     white-space: normal;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 28px 14px 12px;
+    background: linear-gradient(179deg, #00000075, transparent);
+    transition:
+      transform 180ms ease,
+      padding-top 180ms ease;
+  }
+
+  .topbar > .top-actions {
+    grid-column: 2;
   }
 }

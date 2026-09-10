@@ -11,8 +11,7 @@
   </head>
   <body>
     <div class="backdrop" aria-hidden="true"></div>
-    <div class="page-shell">
-      <header class="topbar">
+    <header class="topbar">
         <a class="brand" href="/" aria-label="Gallery home">
           <span class="brand-mark">G</span>
           <span>
@@ -27,9 +26,9 @@
           <button class="button ghost" id="loginButton" type="button" data-i18n="login">Log in</button>
           <button class="button primary" id="addCardButton" type="button" data-i18n="add_card">Add card</button>
         </nav>
-      </header>
+    </header>
 
-      <main>
+    <main class="page-shell">
         <section class="module" data-module="gallery">
           <div class="module-head">
             <div>
@@ -69,8 +68,7 @@
             <button class="button primary" type="button" data-open-add data-i18n="add_card">Add card</button>
           </div>
         </section>
-      </main>
-    </div>
+    </main>
 
     <dialog class="modal" id="loginDialog">
       <form method="dialog" class="modal-card compact" id="loginForm">

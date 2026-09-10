@@ -87,15 +87,21 @@ function bindEvents() {
 }
 
 function bindBackdrop() {
-  const root = document.documentElement;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let frame = 0;
   window.addEventListener("pointermove", (event) => {
-    const x = (event.clientX / window.innerWidth - 0.5) * 18;
-    const y = (event.clientY / window.innerHeight - 0.5) * 18;
-    root.style.setProperty("--backdrop-x", `${x}px`);
-    root.style.setProperty("--backdrop-y", `${y}px`);
-    root.style.setProperty("--grid-x", `${x * 0.45}px`);
-    root.style.setProperty("--grid-y", `${y * 0.45}px`);
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const x = ((event.clientX / window.innerWidth) - 0.5) * -14;
+      const y = ((event.clientY / window.innerHeight) - 0.5) * -14;
+      const backdropX = ((event.clientX / window.innerWidth) - 0.5) * -26;
+      const backdropY = ((event.clientY / window.innerHeight) - 0.5) * -26;
+      document.documentElement.style.setProperty("--grid-x", `${x.toFixed(2)}px`);
+      document.documentElement.style.setProperty("--grid-y", `${y.toFixed(2)}px`);
+      document.documentElement.style.setProperty("--backdrop-x", `${backdropX.toFixed(2)}px`);
+      document.documentElement.style.setProperty("--backdrop-y", `${backdropY.toFixed(2)}px`);
+    });
   }, { passive: true });
 }
 
