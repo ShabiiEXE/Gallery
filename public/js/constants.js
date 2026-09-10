@@ -44,6 +44,7 @@ export const SAMPLE_CARDS = [
     deckFormat: "Commander",
     deckBracket: "3",
     deckOwner: "Shabii",
+    deckImage: "https://cards.scryfall.io/art_crop/front/0/4/0424a78f-7a09-4a9f-b28c-8f3542b64f52.jpg",
     commanderImage: "https://cards.scryfall.io/normal/front/0/4/0424a78f-7a09-4a9f-b28c-8f3542b64f52.jpg",
     createdAt: "2026-09-10T00:00:00.000Z",
   },

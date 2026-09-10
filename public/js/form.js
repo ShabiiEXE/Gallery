@@ -22,6 +22,7 @@ const signatureYear = $("signatureYear");
 const signaturePlace = $("signaturePlace");
 const descriptionInput = $("descriptionInput");
 const moxfieldInput = $("moxfieldInput");
+const fetchDeckButton = $("fetchDeckButton");
 const deckNameInput = $("deckNameInput");
 const deckFormatInput = $("deckFormatInput");
 const deckBracketInput = $("deckBracketInput");
@@ -41,6 +42,7 @@ export function initForm({ onSave, onDelete }) {
 
   cardKind.addEventListener("change", updateArtistLabel);
   lookupButton.addEventListener("click", runLookup);
+  fetchDeckButton.addEventListener("click", fetchDeck);
   saveCardButton.addEventListener("click", () => saveCurrent(onSave));
   deleteCardButton.addEventListener("click", () => onDelete(editingId.value));
   updateArtistLabel();
@@ -77,8 +79,34 @@ export function openCardForm(card = null) {
   cardForm.dataset.frontImage = data.frontImage || "";
   cardForm.dataset.backImage = data.backImage || "";
   cardForm.dataset.commanderImage = data.commanderImage || "";
+  cardForm.dataset.deckImage = data.deckImage || "";
   updateArtistLabel();
   editDialog.showModal();
+}
+
+async function fetchDeck() {
+  const deckUrl = moxfieldInput.value.trim();
+  if (!deckUrl) return;
+  cardFormMessage.textContent = "Fetching Moxfield deck...";
+  try {
+    const response = await fetch(`/api/moxfield-deck?url=${encodeURIComponent(deckUrl)}`);
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.ok) throw new Error(payload.error || "Could not fetch that deck.");
+    applyDeck(payload.deck);
+    cardFormMessage.textContent = "Deck info added.";
+  } catch (error) {
+    cardFormMessage.textContent = error.message;
+  }
+}
+
+function applyDeck(deck) {
+  moxfieldInput.value = deck.url || moxfieldInput.value;
+  if (deck.name) deckNameInput.value = deck.name;
+  if (deck.format) deckFormatInput.value = deck.format;
+  if (deck.bracket) deckBracketInput.value = deck.bracket;
+  if (deck.owner) deckOwnerInput.value = deck.owner;
+  if (deck.deckImage) cardForm.dataset.deckImage = deck.deckImage;
+  if (deck.commanderImage) cardForm.dataset.commanderImage = deck.commanderImage;
 }
 
 async function runLookup() {
@@ -164,6 +192,7 @@ async function saveCurrent(onSave) {
     deckFormat: deckFormatInput.value.trim(),
     deckBracket: deckBracketInput.value.trim(),
     deckOwner: deckOwnerInput.value.trim(),
+    deckImage: cardForm.dataset.deckImage || "",
     commanderImage: cardForm.dataset.commanderImage || frontImage,
     setName: setNameInput.value.trim(),
     setCode: setCodeInput.value.trim(),

@@ -90,7 +90,7 @@ function deckBox(card) {
   if (!card.deckName && !card.moxfieldUrl) return "";
   return `
     <a class="deck-box" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer">
-      <img src="${card.commanderImage || card.frontImage}" alt="">
+      <img src="${card.deckImage || card.commanderImage || card.frontImage}" alt="">
       <span>
         <b>${escapeHtml(card.deckName || "Moxfield deck")}</b><br>
         ${escapeHtml(card.deckFormat || "")}

@@ -174,10 +174,13 @@
             <span data-i18n="description">Description</span>
             <textarea id="descriptionInput" rows="3"></textarea>
           </label>
-          <label class="wide">
+          <div class="wide moxfield-field">
             <span data-i18n="moxfield">Moxfield deck link</span>
-            <input id="moxfieldInput" />
-          </label>
+            <div class="inline-fetch">
+              <input id="moxfieldInput" />
+              <button class="button ghost" id="fetchDeckButton" type="button" data-i18n="fetch_deck">Fetch</button>
+            </div>
+          </div>
           <label>
             <span data-i18n="deck_name">Deck name</span>
             <input id="deckNameInput" />

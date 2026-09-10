@@ -706,6 +706,16 @@ h2 {
   margin-bottom: 10px;
 }
 
+.moxfield-field > span {
+  display: block;
+}
+
+.inline-fetch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
 .lookup-results {
   display: grid;
   gap: 8px;
@@ -869,7 +879,7 @@ h2 {
 
 .deck-box {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: minmax(112px, 168px) minmax(0, 1fr);
   gap: 10px;
   align-items: center;
   margin-top: 14px;
@@ -880,8 +890,8 @@ h2 {
 }
 
 .deck-box img {
-  width: 72px;
-  aspect-ratio: 63 / 88;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   border-radius: 6px;
   object-fit: cover;
 }
@@ -924,7 +934,8 @@ h2 {
   .settings-grid,
   .form-grid,
   .info-grid,
-  .lookup-panel {
+  .lookup-panel,
+  .inline-fetch {
     grid-template-columns: 1fr;
   }
 

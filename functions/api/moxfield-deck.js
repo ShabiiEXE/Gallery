@@ -1,0 +1,157 @@
+export async function onRequestGet({ request }) {
+  const url = new URL(request.url);
+  const input = url.searchParams.get("url") || url.searchParams.get("id") || "";
+  const id = moxfieldDeckId(input);
+  if (!id) return json({ ok: false, error: "Paste a valid Moxfield deck link." }, 400);
+
+  const response = await fetch(`https://api2.moxfield.com/v3/decks/all/${encodeURIComponent(id)}`, {
+    headers: {
+      "Accept": "application/json",
+      "User-Agent": "Gallery/0.1 (+https://github.com/ShabiiEXE/Gallery)",
+    },
+  });
+
+  if (!response.ok) {
+    return json({
+      ok: false,
+      error: `Moxfield returned ${response.status}. The deck may be private, missing, or temporarily blocking server fetches.`,
+    }, response.status === 404 ? 404 : 502);
+  }
+
+  const deck = await response.json();
+  return json({ ok: true, deck: normalizeDeck(deck, id) });
+}
+
+function normalizeDeck(deck, id) {
+  const commanders = zoneCards(deck.commanders || deck.commander || deck.boards?.commanders);
+  const primaryCommander = commanders[0] || {};
+  const owner = deck.createdByUser || deck.owner || deck.author || deck.user || {};
+  const commanderImage = firstUrl([
+    pickNamedUrl(primaryCommander, ["image", "normal", "art_crop", "thumbnail"]),
+    pickNamedUrl(commanders, ["image", "normal", "art_crop", "thumbnail"]),
+    moxfieldCardImage(primaryCommander.card || primaryCommander),
+  ]);
+  const mainImage = firstUrl([
+    pickNamedUrl(deck.main, ["image", "normal", "art_crop", "thumbnail"]),
+    moxfieldCardImage(deck.main),
+  ]);
+  const deckImage = firstUrl([
+    pickNamedUrl(deck.media, ["banner", "header", "cover", "thumbnail", "preview", "url"]),
+    pickDirectNamedUrl(deck, ["banner", "header", "cover", "thumbnail", "preview", "image"]),
+    commanderImage,
+    mainImage,
+  ]);
+
+  return {
+    id,
+    url: `https://www.moxfield.com/decks/${id}`,
+    name: text(deck.name || deck.title),
+    format: formatName(deck.format || deck.formatName || deck.deckFormat),
+    bracket: text(deck.bracket || deck.commanderBracket || deck.edhBracket || deck.powerLevel || deck.power_level),
+    owner: text(owner.displayName || owner.userName || owner.username || owner.name || deck.createdBy || deck.authorName),
+    deckImage,
+    commanderImage,
+  };
+}
+
+function moxfieldDeckId(value) {
+  const textValue = String(value || "").trim();
+  if (!textValue) return "";
+  try {
+    const url = new URL(textValue);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const deckIndex = parts.findIndex((part) => part.toLowerCase() === "decks");
+    return deckIndex >= 0 ? sanitizeId(parts[deckIndex + 1]) : "";
+  } catch {
+    return sanitizeId(textValue);
+  }
+}
+
+function sanitizeId(value) {
+  return /^[A-Za-z0-9_-]{8,80}$/.test(String(value || "")) ? String(value) : "";
+}
+
+function zoneCards(zone) {
+  if (!zone) return [];
+  if (Array.isArray(zone)) return zone;
+  if (Array.isArray(zone.cards)) return zone.cards;
+  return Object.values(zone).filter(Boolean);
+}
+
+function formatName(value) {
+  if (!value) return "";
+  if (typeof value === "string") return titleCase(value);
+  return titleCase(value.name || value.displayName || value.key || value.id || "");
+}
+
+function titleCase(value) {
+  return text(value).replace(/[-_]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function text(value) {
+  return String(value || "").trim();
+}
+
+function firstUrl(values) {
+  return values.find((value) => /^https?:\/\//i.test(value || "")) || "";
+}
+
+function moxfieldCardImage(card) {
+  const id = card?.card?.id || card?.id || card?.cardId || "";
+  return id ? `https://assets.moxfield.net/cards/card-${id}-normal.webp` : "";
+}
+
+function pickDirectNamedUrl(value, hints) {
+  if (!value || typeof value !== "object") return "";
+  const urls = Object.entries(value)
+    .filter(([key, item]) => typeof item === "string"
+      && hints.some((hint) => key.toLowerCase().includes(hint))
+      && isImageLikeUrl(item))
+    .map(([, item]) => item);
+  return urls[0] || "";
+}
+
+function pickNamedUrl(value, hints) {
+  const seen = new Set();
+  const queue = [value];
+  const fallback = [];
+  while (queue.length) {
+    const current = queue.shift();
+    if (!current || seen.has(current)) continue;
+    if (typeof current === "object") seen.add(current);
+    if (typeof current === "string") {
+      if (isImageLikeUrl(current)) fallback.push(current);
+      continue;
+    }
+    if (Array.isArray(current)) {
+      current.forEach((item) => queue.push(item));
+      continue;
+    }
+    Object.entries(current).forEach(([key, item]) => {
+      const normalizedKey = key.toLowerCase();
+      if (typeof item === "string" && /^https?:\/\//i.test(item)) {
+        if (!isImageLikeUrl(item)) return;
+        if (hints.some((hint) => normalizedKey.includes(hint))) fallback.unshift(item);
+        else fallback.push(item);
+      } else if (item && typeof item === "object") {
+        queue.push(item);
+      }
+    });
+  }
+  return fallback[0] || "";
+}
+
+function isImageLikeUrl(value) {
+  return /^https?:\/\//i.test(value)
+    && (/\.(webp|png|jpe?g)(\?|$)/i.test(value) || /^https:\/\/assets\.moxfield\.net\//i.test(value));
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    },
+  });
+}

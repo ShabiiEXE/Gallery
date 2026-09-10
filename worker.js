@@ -1,9 +1,11 @@
 import * as auth from "./functions/api/auth.js";
 import * as cards from "./functions/api/cards.js";
+import * as moxfieldDeck from "./functions/api/moxfield-deck.js";
 
 const routes = {
   "/api/auth": auth,
   "/api/cards": cards,
+  "/api/moxfield-deck": moxfieldDeck,
 };
 
 export default {
