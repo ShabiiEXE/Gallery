@@ -1,6 +1,6 @@
 import { LANGUAGES } from "./constants.js";
 
-export function renderCardDetail({ card, cards, onEdit, onSwitch, onClose }) {
+export function renderCardDetail({ card, cards, canEdit = false }) {
   const related = cards.filter((item) => item.name === card.name && item.id !== card.id);
   const language = LANGUAGES.find((item) => item.value === card.language) || LANGUAGES[0];
   const back = card.backImage
@@ -15,7 +15,7 @@ export function renderCardDetail({ card, cards, onEdit, onSwitch, onClose }) {
     <div class="modal-head">
       <h2>Overview</h2>
       <div class="modal-head-actions">
-        <button class="button ghost" type="button" data-edit-card>Edit</button>
+        ${canEdit ? `<button class="button ghost" type="button" data-edit-card>Edit</button>` : ""}
         <button class="icon-button" type="button" data-close-detail aria-label="Close">×</button>
       </div>
     </div>

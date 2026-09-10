@@ -69,8 +69,8 @@ function bindEvents() {
   bindBackdrop();
   loginButton.addEventListener("click", () => app.authed ? doLogout() : loginDialog.showModal());
   submitLogin.addEventListener("click", doLogin);
-  addCardButton.addEventListener("click", () => openCardForm());
-  document.querySelectorAll("[data-open-add]").forEach((button) => button.addEventListener("click", () => openCardForm()));
+  addCardButton.addEventListener("click", openAddCard);
+  document.querySelectorAll("[data-open-add]").forEach((button) => button.addEventListener("click", openAddCard));
   settingsButton.addEventListener("click", openSettings);
   saveSettingsButton.addEventListener("click", commitSettings);
   filterForm.addEventListener("input", () => {
@@ -146,7 +146,24 @@ function commitSettings() {
   render();
 }
 
+function openAddCard() {
+  if (!app.authed) {
+    loginDialog.showModal();
+    return;
+  }
+  openCardForm();
+}
+
+function openEditCard(card) {
+  if (!app.authed) {
+    loginDialog.showModal();
+    return;
+  }
+  openCardForm(card);
+}
+
 function upsertCard(card) {
+  if (!app.authed) return;
   const existing = app.cards.findIndex((item) => item.id === card.id);
   if (existing >= 0) app.cards.splice(existing, 1, { ...app.cards[existing], ...card });
   else app.cards.unshift({ ...card, createdAt: new Date().toISOString() });
@@ -155,6 +172,7 @@ function upsertCard(card) {
 }
 
 function deleteCard(id) {
+  if (!app.authed) return;
   if (!id) return;
   app.cards = app.cards.filter((card) => card.id !== id);
   editDialog.close();
@@ -166,9 +184,9 @@ function deleteCard(id) {
 function openDetail(id) {
   const card = app.cards.find((item) => item.id === id);
   if (!card) return;
-  cardDetail.innerHTML = renderCardDetail({ card, cards: app.cards });
+  cardDetail.innerHTML = renderCardDetail({ card, cards: app.cards, canEdit: app.authed });
   bindDetailInteractions(cardDetail, {
-    onEdit: () => openCardForm(card),
+    onEdit: () => openEditCard(card),
     onClose: () => cardDialog.close(),
     onSwitch: openDetail,
   });
@@ -179,7 +197,12 @@ function render() {
   document.documentElement.lang = app.settings.language;
   applyTranslations(app.settings);
   loginButton.textContent = app.authed ? t(app.settings, "logout") : t(app.settings, "login");
-  addCardButton.disabled = false;
+  addCardButton.disabled = !app.authed;
+  addCardButton.title = app.authed ? "" : "Log in to add cards";
+  document.querySelectorAll("[data-open-add]").forEach((button) => {
+    button.disabled = !app.authed;
+    button.title = app.authed ? "" : "Log in to add cards";
+  });
   bundleToggle.checked = app.device.bundleSameName;
   applyModuleSettings();
   renderFilters(app.cards, app.filters);

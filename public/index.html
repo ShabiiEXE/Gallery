@@ -76,7 +76,7 @@
       <form method="dialog" class="modal-card compact" id="loginForm">
         <div class="modal-head">
           <h2 data-i18n="login">Log in</h2>
-          <button class="icon-button" value="cancel" aria-label="Close" type="submit">×</button>
+          <button class="icon-button" value="cancel" aria-label="Close" type="submit" formnovalidate>×</button>
         </div>
         <label>
           <span data-i18n="password">Password</span>
@@ -84,7 +84,7 @@
         </label>
         <p class="form-message" id="loginMessage"></p>
         <div class="modal-actions">
-          <button class="button ghost" value="cancel" type="submit" data-i18n="cancel">Cancel</button>
+          <button class="button ghost" value="cancel" type="submit" formnovalidate data-i18n="cancel">Cancel</button>
           <button class="button primary" id="submitLogin" type="button" data-i18n="login">Log in</button>
         </div>
       </form>
@@ -124,7 +124,7 @@
       <form method="dialog" class="modal-card edit-card" id="cardForm">
         <div class="modal-head">
           <h2 id="editTitle" data-i18n="add_card">Add card</h2>
-          <button class="icon-button" value="cancel" aria-label="Close" type="submit">×</button>
+          <button class="icon-button" value="cancel" aria-label="Close" type="submit" formnovalidate>×</button>
         </div>
         <div class="lookup-panel">
           <label>
@@ -212,7 +212,7 @@
         <div class="modal-actions">
           <button class="button danger" id="deleteCardButton" type="button" data-i18n="delete">Delete</button>
           <span class="spacer"></span>
-          <button class="button ghost" value="cancel" type="submit" data-i18n="cancel">Cancel</button>
+          <button class="button ghost" value="cancel" type="submit" formnovalidate data-i18n="cancel">Cancel</button>
           <button class="button primary" id="saveCardButton" type="button" data-i18n="save">Save</button>
         </div>
       </form>
