@@ -26,7 +26,11 @@
   --accent-1: #79f2ce;
   --accent-2: #79f2ce;
   --accent-3: #ee32b3;
-  --scrollbar-track: color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, 0.08));
+  --scrollbar-track: color-mix(
+    in srgb,
+    var(--accent) 10%,
+    rgba(255, 255, 255, 0.08)
+  );
   --scrollbar-thumb: var(--accent);
   --scrollbar-thumb-hover: var(--accent-2);
   --glow-primary: rgba(255, 0, 81, 0.22);
@@ -35,7 +39,8 @@
   --custom-backdrop-image: var(--default-backdrop-image);
   --danger: #ff6f85;
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
-  --display-title-font: "Antique Olive Nord", "Arial Black", Impact, "Cascadia Code", sans-serif;
+  --display-title-font:
+    "Antique Olive Nord", "Arial Black", Impact, "Cascadia Code", sans-serif;
   --title-font: var(--display-title-font);
   --grid-x: 0px;
   --grid-y: 0px;
@@ -90,7 +95,12 @@ body {
   min-height: 100vh;
   overscroll-behavior-y: none;
   color: var(--text);
-  font: 14px/1.45 "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font:
+    14px/1.45 "Cascadia Code",
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
   background: var(--bg);
 }
 
@@ -110,7 +120,12 @@ body {
     calc(50% + var(--grid-x)) calc(50% + var(--grid-y)),
     calc(var(--backdrop-x) * 0.45) calc(var(--backdrop-y) * 0.45),
     center;
-  transform: translate3d(calc(var(--backdrop-x) * -0.35), calc(var(--backdrop-y) * -0.35), 0) scale(1.02);
+  transform: translate3d(
+      calc(var(--backdrop-x) * -0.35),
+      calc(var(--backdrop-y) * -0.35),
+      0
+    )
+    scale(1.02);
   transition:
     transform 80ms linear,
     background-position 80ms linear;
@@ -293,8 +308,9 @@ label > span {
     #1b1d24;
   font-family: var(--title-font);
   letter-spacing: 0;
-  filter:
-    drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 44%, transparent))
+  filter: drop-shadow(
+      0 0 10px color-mix(in srgb, var(--accent) 44%, transparent)
+    )
     drop-shadow(0 7px 18px rgba(0, 0, 0, 0.32));
 }
 
@@ -358,7 +374,11 @@ h2 {
 .primary {
   border-color: color-mix(in srgb, var(--accent) 72%, transparent);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent) 72%, #14161c), rgba(121, 242, 206, 0.16)),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 72%, #14161c),
+      rgba(121, 242, 206, 0.16)
+    ),
     #20151a;
 }
 
@@ -419,7 +439,11 @@ h2 {
   border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
   border-radius: 7px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
+    ),
     rgba(20, 22, 28, 0.38);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.045),
@@ -461,13 +485,15 @@ h2 {
 .check-filter input:checked {
   border-color: var(--accent);
   background:
-    center / 14px 14px no-repeat url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 14 14' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 7.2 5.8 10 11.3 4.1' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    center / 14px 14px no-repeat
+      url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 14 14' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 7.2 5.8 10 11.3 4.1' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
     var(--accent);
 }
 
 .stars-check input:checked {
   background:
-    center / 15px 15px no-repeat url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m8 1.7 1.8 4.1 4.5.4-3.4 3 1 4.4L8 11.3 4.1 13.6l1-4.4-3.4-3 4.5-.4L8 1.7Z' fill='%23fff'/%3E%3C/svg%3E"),
+    center / 15px 15px no-repeat
+      url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m8 1.7 1.8 4.1 4.5.4-3.4 3 1 4.4L8 11.3 4.1 13.6l1-4.4-3.4-3 4.5-.4L8 1.7Z' fill='%23fff'/%3E%3C/svg%3E"),
     linear-gradient(135deg, #ffd86f, #ff4fd8);
 }
 
@@ -487,7 +513,11 @@ h2 {
   color: inherit;
   text-align: left;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.024)),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.062),
+      rgba(255, 255, 255, 0.024)
+    ),
     var(--panel);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
@@ -503,7 +533,11 @@ h2 {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--accent) 32%, transparent);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.078), rgba(255, 255, 255, 0.032)),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.078),
+      rgba(255, 255, 255, 0.032)
+    ),
     color-mix(in srgb, var(--panel) 88%, transparent);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -516,7 +550,6 @@ h2 {
   overflow: hidden;
   aspect-ratio: 63 / 88;
   border-radius: 7px;
-  border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -536,14 +569,26 @@ h2 {
   mix-blend-mode: screen;
   opacity: 0.56;
   background:
-    linear-gradient(115deg, transparent 0 32%, rgba(255, 255, 255, 0.62) 42%, transparent 52% 100%),
-    linear-gradient(45deg, rgba(255, 0, 120, 0.16), rgba(0, 255, 230, 0.14), rgba(255, 224, 72, 0.16));
+    linear-gradient(
+      115deg,
+      transparent 0 32%,
+      rgba(255, 255, 255, 0.62) 42%,
+      transparent 52% 100%
+    ),
+    linear-gradient(
+      45deg,
+      rgba(255, 0, 120, 0.16),
+      rgba(0, 255, 230, 0.14),
+      rgba(255, 224, 72, 0.16)
+    );
   transform: translateX(-35%);
   animation: foilMove 4s ease-in-out infinite;
 }
 
 @keyframes foilMove {
-  50% { transform: translateX(35%); }
+  50% {
+    transform: translateX(35%);
+  }
 }
 
 .tile-meta {
@@ -780,7 +825,6 @@ h2 {
   inset: 0;
   overflow: hidden;
   backface-visibility: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 14px;
   background: #eee;
   box-shadow: 0 24px 54px rgba(0, 0, 0, 0.42);
@@ -809,8 +853,12 @@ h2 {
   display: grid;
   place-items: center;
   color: #f3c05f;
-  background:
-    radial-gradient(circle, #283b79 0 28%, #6e311e 29% 43%, #10131e 44% 100%);
+  background: radial-gradient(
+    circle,
+    #283b79 0 28%,
+    #6e311e 29% 43%,
+    #10131e 44% 100%
+  );
   font-family: var(--title-font);
   font-size: 30px;
 }
