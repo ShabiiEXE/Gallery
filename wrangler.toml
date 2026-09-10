@@ -1,10 +1,10 @@
-name = "magic-gallery"
+name = "gallery"
 main = "worker.js"
 compatibility_date = "2026-09-10"
 workers_dev = true
 
 [vars]
-EDITOR_AUTH_SCOPE = "magic-gallery"
+EDITOR_AUTH_SCOPE = "gallery"
 
 [assets]
 directory = "public"

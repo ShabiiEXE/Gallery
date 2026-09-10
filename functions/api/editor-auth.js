@@ -37,7 +37,7 @@ function authScope(request, env = {}) {
   const configured = String(env.EDITOR_AUTH_SCOPE || env.AUTH_SCOPE || "").trim();
   if (configured) return configured;
   const url = new URL(request.url);
-  return `${url.origin}|magic-gallery`;
+  return `${url.origin}|gallery`;
 }
 
 async function sign(value, secret) {

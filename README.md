@@ -1,6 +1,6 @@
-# Magic Gallery
+# Gallery
 
-Magic Gallery is a Cloudflare-ready web app for signed Magic cards, artist proofs, alters, and custom proxies. The static app lives in `public/`; API/auth code lives in `functions/api/` and is routed by `worker.js`.
+Gallery is a Cloudflare-ready web app for signed Magic cards, artist proofs, alters, and custom proxies. The static app lives in `public/`; API/auth code lives in `functions/api/` and is routed by `worker.js`.
 
 ## Local
 
