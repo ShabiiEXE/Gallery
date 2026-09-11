@@ -4,7 +4,7 @@ import { bindDetailInteractions, renderCardDetail } from "./detail.js";
 import { applyTranslations, t } from "./i18n.js";
 import { initForm, openCardForm } from "./form.js";
 import { LANGUAGES } from "./constants.js";
-import { closeFlagSelects, syncFlagSelect } from "./custom-select.js";
+import { closeFlagSelects, syncFlagSelect, syncSetSelect } from "./custom-select.js";
 import { icon } from "./icons.js";
 import {
   loadCards,
@@ -222,6 +222,7 @@ function render() {
   bundleToggle.checked = app.device.bundleSameName;
   applyModuleSettings();
   renderFilters(app.cards, app.filters);
+  syncSetSelect(setFilter);
   renderGalleryOnly();
 }
 

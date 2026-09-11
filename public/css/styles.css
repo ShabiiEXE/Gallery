@@ -486,6 +486,23 @@ select:hover {
   object-fit: cover;
 }
 
+.set-logo-select .platform-logo-choice-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+}
+
+.set-logo-select .platform-logo-choice-icon img {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  object-fit: contain;
+  filter: invert(1);
+}
+
 .platform-logo-option:hover .platform-logo-choice-label,
 .platform-logo-option:focus-visible .platform-logo-choice-label,
 .platform-logo-option.is-selected .platform-logo-choice-label {
@@ -701,6 +718,11 @@ h2 {
   width: 17px;
   height: 17px;
   place-items: center;
+}
+
+.edit-card [data-save-card] {
+  min-width: 108px;
+  padding-inline: 20px;
 }
 
 .plus-icon,
@@ -996,9 +1018,9 @@ h2 {
 }
 
 .tile-foil-star {
-  width: 13px;
-  height: 13px;
-  margin-left: 6px;
+  width: 12px;
+  height: 12px;
+  margin-left: 3px;
   vertical-align: -1px;
   fill: #ffd86f;
   filter:
@@ -1031,11 +1053,11 @@ h2 {
 .set-icon {
   display: inline-grid;
   place-items: center;
-  min-width: 28px;
-  height: 22px;
-  border-radius: 5px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
+  min-width: 18px;
+  height: 18px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1424,6 +1446,12 @@ h2 {
   gap: 8px;
 }
 
+.detail-title-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
 .detail-title-artist,
 .detail-title-note {
   display: inline-flex;
@@ -1447,7 +1475,7 @@ h2 {
 .foil-title-star {
   width: 18px;
   height: 18px;
-  margin-left: 9px;
+  margin-left: 5px;
   vertical-align: 1px;
   fill: #ffd86f;
   filter:
@@ -1476,12 +1504,12 @@ h2 {
 
 .detail-set-icon {
   display: inline-grid;
-  width: 24px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.06);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .detail-set-icon img {
@@ -1513,6 +1541,9 @@ h2 {
   grid-template-columns: 140px minmax(0, 1fr);
   gap: 10px;
   padding-bottom: 8px;
+}
+
+.card-info-lines .detail-line {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -1529,10 +1560,8 @@ h2 {
 
 .description-copy {
   margin-top: 12px;
-  padding-top: 12px;
   color: var(--text);
   line-height: 1.55;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .scryfall-logo-row {
@@ -1667,8 +1696,8 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 32px;
+  gap: 10px;
+  min-height: 42px;
 }
 
 .card-control-button,
@@ -1676,9 +1705,9 @@ h2 {
   position: relative;
   z-index: 3;
   display: inline-grid;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   place-items: center;
   color: var(--text);
   border: 1px solid var(--line);
@@ -1697,8 +1726,8 @@ h2 {
 }
 
 .eye-icon {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2.2;
@@ -1707,8 +1736,8 @@ h2 {
 }
 
 .flip-icon {
-  width: 17px;
-  height: 17px;
+  width: 23px;
+  height: 23px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2.2;
@@ -1724,6 +1753,17 @@ h2 {
   align-items: center;
   gap: 8px;
   color: var(--muted);
+}
+
+.deck-role-pill {
+  min-height: 22px;
+  padding: 2px 6px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 9px;
+  font-weight: 850;
 }
 
 .deck-owner-list {

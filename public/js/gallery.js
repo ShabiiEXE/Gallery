@@ -8,7 +8,7 @@ const galleryGrid = $("galleryGrid");
 
 export function renderFilters(cards, filters) {
   fillFilter(typeFilter, [["", "All types"], ...CARD_KINDS.map((kind) => [kind, kind])], filters.type);
-  fillFilter(setFilter, [["", "All sets"], ...unique(cards.map((card) => card.setName || card.setCode)).map((set) => [set, set])], filters.set);
+  fillFilter(setFilter, [["", "All sets", "built-in"], ...uniqueSets(cards)], filters.set);
   fillFilter(artistFilter, [["", "All artists"], ...unique(cards.map((card) => card.artist || card.cardArtist)).map((artist) => [artist, artist])], filters.artist);
 }
 
@@ -56,7 +56,7 @@ function cardTile(card, count) {
           <span>${escapeHtml(artist)}</span>
         </span>
         <span class="tile-foot">
-          <span class="set-icon">${setIcon(card.setCode || card.setName)}</span>
+          ${isProxy(card) ? "" : `<span class="set-icon">${setIcon(card.setCode || card.setName)}</span>`}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
           <span>${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
@@ -73,8 +73,14 @@ function isArtistProof(card) {
   return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
 }
 
+function isProxy(card) {
+  return String(card.kind || "").toLowerCase().includes("proxy");
+}
+
 function shortKind(kind) {
-  return String(kind || "").replace("Artist Proof", "AP");
+  return String(kind || "")
+    .replace("Signed + Altered", "Signed + Alt")
+    .replace("Artist Proof", "AP");
 }
 
 function foilStar() {
@@ -94,8 +100,18 @@ function setIcon(code) {
 
 function fillFilter(select, entries, value) {
   const previous = value || select.value || "";
-  select.innerHTML = entries.map(([entryValue, label]) => `<option value="${escapeHtml(entryValue)}">${escapeHtml(label)}</option>`).join("");
+  select.innerHTML = entries.map(([entryValue, label, icon]) => `<option value="${escapeHtml(entryValue)}" data-icon="${escapeHtml(icon || "")}">${escapeHtml(label)}</option>`).join("");
   select.value = entries.some(([entryValue]) => entryValue === previous) ? previous : "";
+}
+
+function uniqueSets(cards) {
+  const sets = new Map();
+  cards.forEach((card) => {
+    const value = card.setName || card.setCode;
+    if (!value || sets.has(value)) return;
+    sets.set(value, [value, value, card.setCode || card.setName || ""]);
+  });
+  return [...sets.values()].sort((a, b) => a[1].localeCompare(b[1]));
 }
 
 function unique(values) {

@@ -6,10 +6,10 @@ const DEFAULT_CARD_BACK = "https://static.wikia.nocookie.net/mtgsalvation_gamepe
 export function renderCardDetail({ card, cards, canEdit = false }) {
   const related = cards.filter((item) => item.name === card.name && item.id !== card.id);
   const language = LANGUAGES.find((item) => item.value === card.language) || LANGUAGES[0];
-  const shownFront = card.frontImage;
-  const shownBack = card.backImage || DEFAULT_CARD_BACK;
+  const shownFront = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
+  const shownBack = isArtistProof(card) && card.backImage ? card.frontImage : card.backImage || DEFAULT_CARD_BACK;
   const canFlip = Boolean(card.backImage);
-  const originalImage = card.originalImage && card.originalImage !== card.frontImage ? card.originalImage : "";
+  const originalImage = originalCardImage(card);
 
   return `
     <div class="modal-head">
@@ -35,15 +35,18 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       <div class="detail-info">
         <div class="detail-title">
           <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
+          <div class="detail-title-pills">
+            <span class="tag">${escapeHtml(shortKind(card.kind))}</span>
+          </div>
           <div class="detail-lines detail-title-lines">
-            ${line(card.kind, artistValue(card))}
+            ${line(shortKind(card.kind), artistValue(card))}
             ${line(signatureLabel(card), escapeHtml(signatureValue(card)))}
           </div>
         </div>
         <div class="detail-lines card-info-lines">
-          ${line("Collection", `${setIcon(card.setCode || card.setName)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
+          ${line("Collection", `${setIcon(card)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
           ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
-          ${line("Card artist", escapeHtml(card.cardArtist || card.artist))}
+          ${line("Original Card Artist", escapeHtml(card.cardArtist || card.artist))}
           ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
@@ -168,6 +171,7 @@ function deckBox(card) {
         </span>
         <span class="deck-meta-row">
           ${deckFormatPill(card)}
+          ${commanderRolePill(card)}
         </span>
         ${deckOwners(card)}
       </span>
@@ -209,6 +213,11 @@ function deckFormatPill(card) {
   return `<span class="tag bracket-tag bracket-${escapeHtml(bracket)}">Commander Bracket ${escapeHtml(card.deckBracket)}</span>`;
 }
 
+function commanderRolePill(card) {
+  if (card.deckFormat?.toLowerCase() !== "commander") return "";
+  return `<span class="deck-role-pill">${card.deckCommander ? "Commander" : "Part of the 99"}</span>`;
+}
+
 function deckOwners(card) {
   const owners = Array.isArray(card.deckOwners) && card.deckOwners.length
     ? card.deckOwners
@@ -240,6 +249,15 @@ function signatureValue(card) {
 function artistValue(card) {
   if (!card.artist) return "";
   return `${escapeHtml(card.artist)}${socialLink(card.artistSocialUrl)}`;
+}
+
+function originalCardImage(card) {
+  const candidates = [card.originalImage, card.commanderImage].filter(Boolean);
+  return candidates.find((image) => image !== card.frontImage) || "";
+}
+
+function isArtistProof(card) {
+  return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
 }
 
 function scryfallLink(card) {
@@ -289,7 +307,8 @@ function line(label, value) {
 }
 
 function setIcon(code) {
-  const normalized = String(code || "").trim().toLowerCase();
+  if (isProxy(code)) return "";
+  const normalized = String(code.setCode || code.setName || code || "").trim().toLowerCase();
   if (!normalized) return "";
   const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
   return `<span class="detail-set-icon"><img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}"></span>`;
@@ -303,7 +322,7 @@ function relatedCard(card) {
       <span class="tile-meta">
         <span class="tile-name">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
         <span class="tile-foot">
-          <span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>
+          ${isProxy(card) ? "" : `<span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>`}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
         </span>
       </span>
@@ -319,7 +338,13 @@ function setIconImage(code) {
 }
 
 function shortKind(kind) {
-  return String(kind || "").replace("Artist Proof", "AP");
+  return String(kind || "")
+    .replace("Signed + Altered", "Signed + Alt")
+    .replace("Artist Proof", "AP");
+}
+
+function isProxy(card) {
+  return String(card?.kind || "").toLowerCase().includes("proxy");
 }
 
 function tileFoilStar() {
