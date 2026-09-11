@@ -51,13 +51,13 @@ function cardTile(card, count) {
         <span class="card-image-wrap"><img data-card-image src="${showImage}" alt=""></span>
       </button>
       <span class="tile-meta">
-        <span class="tile-name">${escapeHtml(card.name)}</span>
+        <span class="tile-name">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
         <span class="tile-sub">
           <span>${escapeHtml(artist)}</span>
         </span>
         <span class="tile-foot">
           <span class="set-icon">${setIcon(card.setCode || card.setName)}</span>
-          <span class="tag tile-kind">${escapeHtml(card.kind)}</span>
+          <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
           <span>${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
       </span>
@@ -71,6 +71,18 @@ function pickBundleCover(cards) {
 
 function isArtistProof(card) {
   return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
+}
+
+function shortKind(kind) {
+  return String(kind || "").replace("Artist Proof", "AP");
+}
+
+function foilStar() {
+  return `
+    <svg class="tile-foil-star" viewBox="0 0 18 18" aria-hidden="true">
+      <path d="m9 1.7 1.35 4.08 4.3-1.2-2.28 3.62 3.68 2.45-4.38.38.47 4.45L9 12.45l-3.14 3.03.47-4.45-4.38-.38L5.63 8.2 3.35 4.58l4.3 1.2L9 1.7Z"></path>
+    </svg>
+  `;
 }
 
 function setIcon(code) {

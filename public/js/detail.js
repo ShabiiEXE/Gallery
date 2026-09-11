@@ -35,21 +35,21 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       <div class="detail-info">
         <div class="detail-title">
           <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
-          <div class="detail-title-meta">
-            ${collectionPill(card)}
-            ${signatureValue(card) ? `<span class="detail-title-note">${escapeHtml(signatureLabel(card))}: ${escapeHtml(signatureValue(card))}</span>` : ""}
+          <div class="detail-lines detail-title-lines">
+            ${line(card.kind, artistValue(card))}
+            ${line(signatureLabel(card), escapeHtml(signatureValue(card)))}
           </div>
         </div>
-        <div class="detail-lines">
+        <div class="detail-lines card-info-lines">
           ${line("Collection", `${setIcon(card.setCode || card.setName)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
           ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
           ${line("Card artist", escapeHtml(card.cardArtist || card.artist))}
           ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
+        ${deckBox(card)}
       </div>
     </div>
-    ${deckBox(card)}
     ${related.length ? relatedList(related) : ""}
   `;
 
@@ -67,7 +67,6 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
 
 export function bindDetailInteractions(root, handlers) {
   const preview = root.querySelector("[data-preview-card]");
-  const stage = root.querySelector("[data-card-stage]");
   if (preview) {
     const canFlip = preview.dataset.canFlip === "true";
     const manual = { x: 0, y: 0 };
@@ -85,7 +84,7 @@ export function bindDetailInteractions(root, handlers) {
       preview.style.setProperty("--shine-x", `${Math.max(0, Math.min(100, x * 100)).toFixed(1)}%`);
       preview.style.setProperty("--shine-y", `${Math.max(0, Math.min(100, y * 100)).toFixed(1)}%`);
     };
-    stage?.addEventListener("pointermove", (event) => {
+    root.addEventListener("pointermove", (event) => {
       updateShine(event);
       if (drag) {
         event.preventDefault();
@@ -97,7 +96,7 @@ export function bindDetailInteractions(root, handlers) {
         applyRotation();
         return;
       }
-      const rect = stage.getBoundingClientRect();
+      const rect = root.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) - 0.5;
       const y = ((event.clientY - rect.top) / rect.height) - 0.5;
       tilt.y = x * 34;
@@ -127,7 +126,7 @@ export function bindDetailInteractions(root, handlers) {
       tilt.y = 0;
       applyRotation();
     });
-    stage?.addEventListener("pointerleave", () => {
+    root.addEventListener("pointerleave", () => {
       if (drag) return;
       tilt.x = 0;
       tilt.y = 0;
@@ -168,10 +167,8 @@ function deckBox(card) {
           <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
         </span>
         <span class="deck-meta-row">
-          ${card.deckFormat ? `<span>${escapeHtml(card.deckFormat)}</span>` : ""}
-          ${bracketTag(card)}
+          ${deckFormatPill(card)}
         </span>
-        ${commanderRoleTag(card)}
         ${deckOwners(card)}
       </span>
       <span class="deck-commander-art"></span>
@@ -199,13 +196,15 @@ function flipIcon() {
   `;
 }
 
-function commanderRoleTag(card) {
-  if (card.deckFormat?.toLowerCase() !== "commander") return "";
-  return `<span class="deck-role-pill">${card.deckCommander ? "Commander" : "Part of the 99"}</span>`;
-}
-
-function bracketTag(card) {
-  if (card.deckFormat?.toLowerCase() !== "commander" || !card.deckBracket) return "";
+function deckFormatPill(card) {
+  const format = String(card.deckFormat || "").trim();
+  if (!format) return "";
+  if (format.toLowerCase() !== "commander") {
+    return `<span class="tag bracket-tag">${escapeHtml(format)}</span>`;
+  }
+  if (!card.deckBracket) {
+    return `<span class="tag bracket-tag">Commander</span>`;
+  }
   const bracket = String(card.deckBracket).trim().match(/\d+/)?.[0] || "";
   return `<span class="tag bracket-tag bracket-${escapeHtml(bracket)}">Commander Bracket ${escapeHtml(card.deckBracket)}</span>`;
 }
@@ -238,9 +237,9 @@ function signatureValue(card) {
   return parts.join(", ");
 }
 
-function collectionPill(card) {
-  const artist = card.artist ? `: ${card.artist}` : "";
-  return `<span class="tag detail-kind-pill">${escapeHtml(card.kind)}${escapeHtml(artist)}${socialLink(card.artistSocialUrl)}</span>`;
+function artistValue(card) {
+  if (!card.artist) return "";
+  return `${escapeHtml(card.artist)}${socialLink(card.artistSocialUrl)}`;
 }
 
 function scryfallLink(card) {
@@ -302,10 +301,10 @@ function relatedCard(card) {
     <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
       <span class="card-image-wrap"><img src="${escapeAttribute(image)}" alt="" draggable="false"></span>
       <span class="tile-meta">
-        <span class="tile-name">${escapeHtml(card.name)}</span>
+        <span class="tile-name">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
         <span class="tile-foot">
           <span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>
-          <span class="tag tile-kind">${escapeHtml(card.kind)}</span>
+          <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
         </span>
       </span>
     </button>
@@ -317,6 +316,18 @@ function setIconImage(code) {
   if (!normalized) return "?";
   const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
   return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
+}
+
+function shortKind(kind) {
+  return String(kind || "").replace("Artist Proof", "AP");
+}
+
+function tileFoilStar() {
+  return `
+    <svg class="tile-foil-star" viewBox="0 0 18 18" aria-hidden="true">
+      <path d="m9 1.7 1.35 4.08 4.3-1.2-2.28 3.62 3.68 2.45-4.38.38.47 4.45L9 12.45l-3.14 3.03.47-4.45-4.38-.38L5.63 8.2 3.35 4.58l4.3 1.2L9 1.7Z"></path>
+    </svg>
+  `;
 }
 
 function foilStar() {

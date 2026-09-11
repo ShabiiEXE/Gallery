@@ -159,6 +159,19 @@
           </div>
         </div>
         <input type="hidden" id="editingId" />
+        <div class="lookup-panel">
+          <label>
+            <span data-i18n="find_card">Find card</span>
+            <input id="lookupInput" type="search" placeholder="Card name, Scryfall link, Cardmarket or TCGplayer link" />
+          </label>
+          <button class="ghost-button icon-only-button" id="lookupButton" type="button" title="Search" aria-label="Search">
+            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5"></circle>
+              <path d="m16 16 4 4"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="lookup-results" id="lookupResults"></div>
         <div class="form-grid">
           <label>
             <span data-i18n="card_name">Card name</span>
@@ -211,20 +224,6 @@
           </label>
         </div>
         <section class="form-section actual-info">
-          <h3>MTG Card info</h3>
-          <div class="lookup-panel">
-            <label>
-              <span data-i18n="find_card">Find card</span>
-              <input id="lookupInput" type="search" placeholder="Card name, Scryfall link, Cardmarket or TCGplayer link" />
-            </label>
-            <button class="ghost-button icon-only-button" id="lookupButton" type="button" title="Search" aria-label="Search">
-              <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="11" cy="11" r="6.5"></circle>
-                <path d="m16 16 4 4"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="lookup-results" id="lookupResults"></div>
           <div class="info-grid">
             <label><span data-i18n="set">Set</span><input id="setNameInput" /></label>
             <label><span data-i18n="set_code">Set code</span><span class="input-with-set-icon"><img id="setCodeIcon" alt=""><input id="setCodeInput" /></span></label>
