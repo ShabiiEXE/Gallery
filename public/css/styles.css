@@ -1758,7 +1758,12 @@ label:has(> .platform-logo-select.is-open),
   color: inherit;
   text-decoration: none;
   background:
-    linear-gradient(90deg, rgba(18, 19, 23, 0.92) 0%, rgba(18, 19, 23, 0.76) 42%, rgba(18, 19, 23, 0.2) 100%),
+    linear-gradient(
+      90deg,
+      rgba(18, 19, 23, 0.92) 0%,
+      rgba(18, 19, 23, 0.76) 42%,
+      rgba(18, 19, 23, 0.2) 100%
+    ),
     rgba(255, 255, 255, 0.045);
 }
 
@@ -1794,15 +1799,32 @@ label:has(> .platform-logo-select.is-open),
   inset: 0;
   background: var(--deck-bg) right center / auto 100% no-repeat;
   opacity: 0.98;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 48%, rgba(0, 0, 0, 0.62) 68%, #000 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, transparent 48%, rgba(0, 0, 0, 0.62) 68%, #000 100%);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 59%,
+    rgba(0, 0, 0, 0.32) 78%,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 59%,
+    rgba(0, 0, 0, 0.32) 78%,
+    #000 100%
+  );
 }
 
 .deck-commander-art::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, transparent 54%, rgba(8, 8, 11, 0.48) 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 54%,
+    rgba(8, 8, 11, 0.48) 100%
+  );
 }
 
 .deck-copy {
@@ -2031,8 +2053,18 @@ label:has(> .platform-logo-select.is-open),
   .deck-commander-art::before {
     opacity: 0.42;
     background-size: auto 100%;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.34) 44%, #000 100%);
-    mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.34) 44%, #000 100%);
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.34) 44%,
+      #000 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.34) 44%,
+      #000 100%
+    );
   }
 
   .brand small {
