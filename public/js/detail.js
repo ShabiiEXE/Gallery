@@ -43,7 +43,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
         <div class="detail-lines card-info-lines">
           ${line("Collection", `${setIcon(card)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
           ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
-          ${line("Original Card Artist", escapeHtml(card.cardArtist || card.artist))}
+          ${line("Original Artist", escapeHtml(card.cardArtist || card.artist))}
           ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
@@ -56,7 +56,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
   function relatedList(items) {
     return `
       <section class="related-list">
-        <h3>Also in gallery</h3>
+        <h3>Also in Collection</h3>
         <div class="related-grid">
           ${items.map((item) => relatedCard(item)).join("")}
         </div>
