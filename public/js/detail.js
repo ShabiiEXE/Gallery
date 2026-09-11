@@ -337,7 +337,8 @@ function setIconImage(code) {
 function shortKind(kind) {
   return String(kind || "")
     .replace("Signed + Altered", "Signed + Alt")
-    .replace("Artist Proof", "AP");
+    .replace("Artist Proof", "Artist Proof")
+    .replace("Altered Artist Proof", "Altered AP");
 }
 
 function isProxy(card) {
