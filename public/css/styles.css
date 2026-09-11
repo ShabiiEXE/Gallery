@@ -1593,6 +1593,7 @@ label:has(> .platform-logo-select.is-open),
 .detail-title {
   display: grid;
   gap: 8px;
+  margin-top: 20px;
 }
 
 .detail-title-artist,
