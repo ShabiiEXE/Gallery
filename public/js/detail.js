@@ -13,7 +13,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
 
   return `
     <div class="modal-head">
-      <h2>Overview</h2>
+      <span></span>
       <div class="modal-head-actions">
         ${canEdit ? `<button class="icon-button" type="button" data-edit-card title="Edit" aria-label="Edit">${pencilIcon()}</button>` : ""}
         <button class="icon-button" type="button" data-close-detail aria-label="Close">×</button>
@@ -92,7 +92,7 @@ function deckBox(card) {
   if (!card.deckName && !card.moxfieldUrl) return "";
   return `
     <a class="deck-box" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer">
-      <span class="moxfield-mark" aria-hidden="true">M</span>
+      <span class="moxfield-mark" aria-hidden="true"><img src="assets/moxfield-favicon.ico" alt=""></span>
       <span class="deck-commander-art" style="--deck-bg: url('${escapeAttribute(card.deckImage || card.commanderImage || card.frontImage)}')">
         <img src="${escapeAttribute(card.commanderImage || card.deckImage || card.frontImage)}" alt="">
       </span>
@@ -131,7 +131,7 @@ function signatureValue(card) {
 
 function scryfallLink(card) {
   if (!card.scryfallUrl) return "";
-  return `<div class="scryfall-logo-row"><a href="${escapeAttribute(card.scryfallUrl)}" target="_blank" rel="noreferrer" aria-label="Open on Scryfall">${scryfallLogo()}</a></div>`;
+  return `<div class="scryfall-logo-row"><a href="${escapeAttribute(card.scryfallUrl)}" target="_blank" rel="noreferrer" aria-label="Open on Scryfall"><img src="assets/scryfall-favicon.ico" alt=""></a></div>`;
 }
 
 function descriptionBlock(description) {
@@ -164,16 +164,6 @@ function faviconUrl(url) {
   } catch {
     return "";
   }
-}
-
-function scryfallLogo() {
-  return `
-    <svg class="scryfall-logo" viewBox="0 0 64 64" aria-hidden="true">
-      <circle cx="32" cy="32" r="27"></circle>
-      <path d="M18 34c7-15 24-17 31-3-9-5-19-4-31 3Z"></path>
-      <path d="M20 40c10 7 23 6 32-5-5 17-25 20-32 5Z"></path>
-    </svg>
-  `;
 }
 
 function pencilIcon() {

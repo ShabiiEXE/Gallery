@@ -1,10 +1,10 @@
 import { CARD_KINDS, LANGUAGES } from "./constants.js";
+import { syncFlagSelect } from "./custom-select.js";
 import { searchScryfall } from "./scryfall.js";
 
 const $ = (id) => document.getElementById(id);
 const cardKind = $("cardKind");
 const cardLanguage = $("cardLanguage");
-const cardLanguageFlag = $("cardLanguageFlag");
 const lookupInput = $("lookupInput");
 const lookupButton = $("lookupButton");
 const lookupResults = $("lookupResults");
@@ -42,9 +42,10 @@ const deleteCardButton = $("deleteCardButton");
 export function initForm({ onSave, onDelete }) {
   fillSelect(cardKind, CARD_KINDS.map((kind) => [kind, kind]));
   fillSelect(cardLanguage, LANGUAGES.map((language) => [language.value, language.label]));
+  syncFlagSelect(cardLanguage, LANGUAGES);
 
   cardKind.addEventListener("change", updateArtistLabel);
-  cardLanguage.addEventListener("change", updateLanguageFlag);
+  cardLanguage.addEventListener("change", () => syncFlagSelect(cardLanguage, LANGUAGES));
   lookupButton.addEventListener("click", runLookup);
   fetchDeckButton.addEventListener("click", fetchDeck);
   moxfieldInput.addEventListener("input", scheduleDeckFetch);
@@ -100,7 +101,7 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckImage = data.deckImage || "";
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
   updateArtistLabel();
-  updateLanguageFlag();
+  syncFlagSelect(cardLanguage, LANGUAGES);
   updateSetIcon();
   editDialog.showModal();
 }
@@ -259,12 +260,6 @@ async function saveCurrent(onSave) {
 function updateArtistLabel() {
   const kind = cardKind.value;
   artistLabel.textContent = kind.includes("Proxy") ? "Proxy artist" : kind.includes("Alter") ? "Alter artist" : "Artist";
-}
-
-function updateLanguageFlag() {
-  const language = LANGUAGES.find((item) => item.value === cardLanguage.value) || LANGUAGES[0];
-  cardLanguageFlag.src = `assets/flags/${language.flag}.svg`;
-  cardLanguageFlag.alt = language.label;
 }
 
 function updateSetIcon() {

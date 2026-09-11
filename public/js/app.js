@@ -4,6 +4,7 @@ import { bindDetailInteractions, renderCardDetail } from "./detail.js";
 import { applyTranslations, t } from "./i18n.js";
 import { initForm, openCardForm } from "./form.js";
 import { LANGUAGES } from "./constants.js";
+import { closeFlagSelects, syncFlagSelect } from "./custom-select.js";
 import {
   loadCards,
   loadDevice,
@@ -26,7 +27,6 @@ const settingsButton = $("settingsButton");
 const settingsDialog = $("settingsDialog");
 const saveSettingsButton = $("saveSettings");
 const languageSelect = $("languageSelect");
-const settingsLanguageFlag = $("settingsLanguageFlag");
 const moduleSettings = $("moduleSettings");
 const filterForm = $("filterForm");
 const searchInput = $("searchInput");
@@ -73,7 +73,8 @@ function bindEvents() {
   settingsButton.addEventListener("click", openSettings);
   saveSettingsButton.addEventListener("click", commitSettings);
   clearCacheButton.addEventListener("click", clearBrowserCache);
-  languageSelect.addEventListener("change", () => updateSettingsLanguageFlag());
+  languageSelect.addEventListener("change", () => syncFlagSelect(languageSelect, LANGUAGES));
+  document.addEventListener("click", () => closeFlagSelects());
   [loginDialog, settingsDialog, editDialog, cardDialog].forEach((dialog) => {
     dialog?.addEventListener("close", () => render());
   });
@@ -131,7 +132,7 @@ async function doLogout() {
 
 function openSettings() {
   languageSelect.value = app.settings.language;
-  updateSettingsLanguageFlag();
+  syncFlagSelect(languageSelect, LANGUAGES);
   moduleSettings.innerHTML = MODULES.map((module, index) => {
     const item = app.settings.modules.find((entry) => entry.id === module.id) || { order: index + 1, hidden: false };
     return `
@@ -242,12 +243,6 @@ function applyModuleSettings() {
       element.style.order = index;
       element.hidden = item.hidden;
     });
-}
-
-function updateSettingsLanguageFlag() {
-  const language = LANGUAGES.find((item) => item.value === languageSelect.value) || LANGUAGES[0];
-  settingsLanguageFlag.src = `assets/flags/${language.flag}.svg`;
-  settingsLanguageFlag.alt = language.label;
 }
 
 async function clearBrowserCache() {
