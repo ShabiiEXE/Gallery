@@ -1520,6 +1520,7 @@ label:has(> .platform-logo-select.is-open),
   justify-items: center;
   gap: 10px;
   perspective: 1200px;
+  margin-top: 25px;
 }
 
 .preview-card {
