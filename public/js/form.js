@@ -1,5 +1,5 @@
 import { CARD_KINDS, LANGUAGES } from "./constants.js";
-import { syncFlagSelect } from "./custom-select.js";
+import { syncCustomSelect, syncFlagSelect } from "./custom-select.js";
 import { searchScryfall } from "./scryfall.js";
 
 const $ = (id) => document.getElementById(id);
@@ -47,9 +47,13 @@ const closeEditButton = document.querySelector("[data-close-edit]");
 export function initForm({ onSave, onDelete }) {
   fillSelect(cardKind, CARD_KINDS.map((kind) => [kind, kind]));
   fillSelect(cardLanguage, LANGUAGES.map((language) => [language.value, language.label]));
+  syncCustomSelect(cardKind);
   syncFlagSelect(cardLanguage, LANGUAGES);
 
-  cardKind.addEventListener("change", updateArtistLabel);
+  cardKind.addEventListener("change", () => {
+    updateArtistLabel();
+    syncCustomSelect(cardKind);
+  });
   cardLanguage.addEventListener("change", () => syncFlagSelect(cardLanguage, LANGUAGES));
   lookupButton.addEventListener("click", runLookup);
   lookupInput.addEventListener("keydown", (event) => {
@@ -121,11 +125,13 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckOwners = JSON.stringify(Array.isArray(data.deckOwners) ? data.deckOwners : []);
   renderDeckOwnersEditor();
   updateArtistLabel();
+  syncCustomSelect(cardKind);
   syncFlagSelect(cardLanguage, LANGUAGES);
   updateSetIcon();
   updateSocialFavicon();
   updateCommanderRoleField();
   editDialog.showModal();
+  document.body.classList.add("has-modal-open");
 }
 
 async function fetchDeck() {
@@ -180,7 +186,7 @@ async function runLookup() {
   if (!query) return;
   lookupResults.innerHTML = `<p class="form-message">Searching...</p>`;
   try {
-    const results = await searchScryfall(query);
+    const results = await searchScryfall(query, cardLanguage.value);
     lookupResults.innerHTML = results.map((card, index) => resultTemplate(card, index)).join("");
     lookupResults.querySelectorAll("[data-result-index]").forEach((button) => {
       button.addEventListener("click", () => applyScryfall(results[Number(button.dataset.resultIndex)]));
@@ -299,6 +305,7 @@ function updateArtistLabel() {
 }
 
 function updateSetIcon() {
+  if (!setCodeIcon) return;
   const code = setCodeInput.value.trim().toLowerCase();
   setCodeIcon.hidden = !code;
   if (!code) return;
@@ -308,6 +315,7 @@ function updateSetIcon() {
 }
 
 function updateSocialFavicon() {
+  if (!artistSocialFavicon) return;
   const src = faviconUrl(artistSocialInput.value.trim());
   artistSocialFavicon.hidden = !src;
   if (!src) {
@@ -320,6 +328,9 @@ function updateSocialFavicon() {
 function faviconUrl(url) {
   try {
     const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    if (host.includes("scryfall")) return "assets/scryfall-favicon.ico";
+    if (host.includes("moxfield")) return "assets/moxfield-favicon.ico";
     return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(parsed.hostname)}&sz=64`;
   } catch {
     return "";
@@ -334,6 +345,7 @@ function preventAccidentalSubmit(event) {
 }
 
 function updateCommanderRoleField() {
+  if (!commanderRoleField) return;
   commanderRoleField.hidden = !isCommanderDeck();
 }
 
@@ -422,7 +434,7 @@ function readFileAsDataUrl(file) {
 
 async function compressImage(file) {
   const bitmap = await createImageBitmap(file);
-  const maxSide = 1400;
+  const maxSide = 1000;
   const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * scale));
   const height = Math.max(1, Math.round(bitmap.height * scale));
@@ -432,7 +444,7 @@ async function compressImage(file) {
   const context = canvas.getContext("2d");
   context.drawImage(bitmap, 0, 0, width, height);
   bitmap.close?.();
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.72));
   if (!blob) throw new Error("Could not compress image.");
   return readFileAsDataUrl(blob);
 }

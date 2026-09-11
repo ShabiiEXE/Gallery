@@ -23,12 +23,12 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       <div class="card-stage" data-card-stage>
         <div class="preview-card ${card.foil ? "foil-sheen" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
           ${imageFace(shownFront || card.frontImage, "preview-front", "data-preview-front-image")}
-          ${imageFace(shownBack, "preview-back")}
+          ${imageFace(shownBack, "preview-back", "data-preview-back-image")}
         </div>
         ${canFlip || originalImage ? `
           <div class="card-stage-controls">
             ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(card.frontImage)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(DEFAULT_CARD_BACK)}" data-custom-back="${escapeAttribute(shownBack)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
           </div>
         ` : ""}
       </div>
@@ -41,9 +41,9 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
           </div>
         </div>
         <div class="detail-lines card-info-lines">
-          ${line("Collection", `${setIcon(card)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
+          ${line("Collection", collectionValue(card))}
           ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
-          ${line("Original Artist", escapeHtml(card.cardArtist || card.artist))}
+          ${line("Original Card Artist", card.cardArtist ? escapeHtml(card.cardArtist) : "")}
           ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
@@ -73,7 +73,7 @@ export function bindDetailInteractions(root, handlers) {
     const tilt = { x: 0, y: 0 };
     let drag = null;
     const applyRotation = () => {
-      const x = manual.x + tilt.x;
+      const x = Math.max(-58, Math.min(58, manual.x + tilt.x));
       const y = canFlip ? manual.y + tilt.y : Math.max(-48, Math.min(48, manual.y + tilt.y));
       preview.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
     };
@@ -90,6 +90,7 @@ export function bindDetailInteractions(root, handlers) {
         event.preventDefault();
         manual.y = drag.startY + ((event.clientX - drag.x) * 0.55);
         manual.x = drag.startX - ((event.clientY - drag.y) * 0.55);
+        manual.x = Math.max(-58, Math.min(58, manual.x));
         if (!canFlip) {
           manual.y = Math.max(-48, Math.min(48, manual.y));
         }
@@ -138,20 +139,27 @@ export function bindDetailInteractions(root, handlers) {
       tilt.y = 0;
       applyRotation();
     });
+    root.querySelector("[data-card-art-toggle]")?.addEventListener("click", (event) => {
+      const button = event.currentTarget;
+      const front = root.querySelector("[data-preview-front-image]");
+      const back = root.querySelector("[data-preview-back-image]");
+      if (!front) return;
+      const original = button.getAttribute("aria-pressed") !== "true";
+      front.src = original ? button.dataset.originalArt : button.dataset.customArt;
+      if (back) back.src = original ? button.dataset.originalBack : button.dataset.customBack;
+      manual.x = 0;
+      manual.y = 0;
+      tilt.x = 0;
+      tilt.y = 0;
+      applyRotation();
+      button.setAttribute("aria-pressed", original ? "true" : "false");
+      button.title = original ? "Show custom card graphic" : "Show original card graphic";
+    });
   }
   root.querySelector("[data-edit-card]")?.addEventListener("click", handlers.onEdit);
   root.querySelector("[data-close-detail]")?.addEventListener("click", handlers.onClose);
   root.querySelectorAll("[data-switch-card]").forEach((button) => {
     button.addEventListener("click", () => handlers.onSwitch(button.dataset.switchCard));
-  });
-  root.querySelector("[data-card-art-toggle]")?.addEventListener("click", (event) => {
-    const button = event.currentTarget;
-    const image = root.querySelector("[data-preview-front-image]");
-    if (!image) return;
-    const original = button.getAttribute("aria-pressed") !== "true";
-    image.src = original ? button.dataset.originalArt : button.dataset.customArt;
-    button.setAttribute("aria-pressed", original ? "true" : "false");
-    button.title = original ? "Show custom card graphic" : "Show original card graphic";
   });
 }
 
@@ -259,7 +267,7 @@ function isArtistProof(card) {
 
 function scryfallLink(card) {
   if (!card.scryfallUrl) return "";
-  return `<div class="scryfall-logo-row"><a href="${escapeAttribute(card.scryfallUrl)}" target="_blank" rel="noreferrer" aria-label="Open on Scryfall"><img src="assets/scryfall-favicon.ico" alt=""></a></div>`;
+  return `<div class="scryfall-logo-row"><a href="${escapeAttribute(card.scryfallUrl)}" target="_blank" rel="noreferrer" aria-label="Open card link"><img src="${escapeAttribute(faviconUrl(card.scryfallUrl))}" alt=""></a></div>`;
 }
 
 function descriptionBlock(description) {
@@ -288,6 +296,9 @@ function socialName(url) {
 function faviconUrl(url) {
   try {
     const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    if (host.includes("scryfall")) return "assets/scryfall-favicon.ico";
+    if (host.includes("moxfield")) return "assets/moxfield-favicon.ico";
     return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(parsed.hostname)}&sz=64`;
   } catch {
     return "";
@@ -309,6 +320,12 @@ function setIcon(code) {
   if (!normalized) return "";
   const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
   return `<span class="detail-set-icon"><img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}"></span>`;
+}
+
+function collectionValue(card) {
+  const text = [card.setName, card.collectorNumber ? `#${card.collectorNumber}` : "", card.setYear].filter(Boolean).join(" ");
+  if (!text && !card.setCode) return "";
+  return `${setIcon(card)}<span>${escapeHtml(text)}</span>`;
 }
 
 function relatedCard(card) {

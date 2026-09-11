@@ -6,6 +6,8 @@ const DEVICE_KEY = "magic-gallery.device";
 
 export const defaultSettings = {
   language: "en",
+  defaultSort: "artist",
+  defaultSortDirection: "asc",
   modules: MODULES.map((module, index) => ({ id: module.id, order: index + 1, hidden: false })),
 };
 

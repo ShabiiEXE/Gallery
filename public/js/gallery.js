@@ -8,19 +8,17 @@ const galleryGrid = $("galleryGrid");
 
 export function renderFilters(cards, filters) {
   fillFilter(typeFilter, [["", "All types"], ...CARD_KINDS.map((kind) => [kind, kind])], filters.type);
-  fillFilter(setFilter, [["", "All sets", "built-in"], ...uniqueSets(cards)], filters.set);
+  fillFilter(setFilter, [["", "All sets", ""], ...uniqueSets(cards)], filters.set);
   fillFilter(artistFilter, [["", "All artists"], ...unique(cards.map((card) => card.artist || card.cardArtist)).map((artist) => [artist, artist])], filters.artist);
 }
 
 export function filteredCards(cards, filters) {
-  const query = filters.query.trim().toLowerCase();
+  const direction = filters.direction === "desc" ? -1 : 1;
   return cards.filter((card) => {
-    const haystack = [card.name, card.artist, card.cardArtist, card.setName, card.setCode, card.kind].join(" ").toLowerCase();
-    return (!query || haystack.includes(query))
-      && (!filters.type || card.kind === filters.type)
+    return (!filters.type || card.kind === filters.type)
       && (!filters.set || card.setName === filters.set || card.setCode === filters.set)
       && (!filters.artist || card.artist === filters.artist || card.cardArtist === filters.artist);
-  });
+  }).sort((a, b) => compareCards(a, b, filters.sort || "artist") * direction);
 }
 
 export function bundleCards(cards, enabled) {
@@ -109,9 +107,19 @@ function uniqueSets(cards) {
   cards.forEach((card) => {
     const value = card.setName || card.setCode;
     if (!value || sets.has(value)) return;
-    sets.set(value, [value, value, card.setCode || card.setName || ""]);
+    sets.set(value, [value, value, "planeswalker"]);
   });
   return [...sets.values()].sort((a, b) => a[1].localeCompare(b[1]));
+}
+
+function compareCards(a, b, sort) {
+  if (sort === "year") return compareText(a.signatureYear, b.signatureYear) || compareText(a.name, b.name);
+  if (sort === "type") return compareText(a.kind, b.kind) || compareText(a.name, b.name);
+  return compareText(a.artist || a.cardArtist, b.artist || b.cardArtist) || compareText(a.name, b.name);
+}
+
+function compareText(a, b) {
+  return String(a || "").localeCompare(String(b || ""), undefined, { numeric: true, sensitivity: "base" });
 }
 
 function unique(values) {

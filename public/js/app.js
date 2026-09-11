@@ -4,7 +4,7 @@ import { bindDetailInteractions, renderCardDetail } from "./detail.js";
 import { applyTranslations, t } from "./i18n.js";
 import { initForm, openCardForm } from "./form.js";
 import { LANGUAGES } from "./constants.js";
-import { closeFlagSelects, syncFlagSelect, syncSetSelect } from "./custom-select.js";
+import { closeFlagSelects, syncCustomSelect, syncFlagSelect, syncSetSelect } from "./custom-select.js";
 import { icon } from "./icons.js";
 import {
   loadCards,
@@ -30,11 +30,14 @@ const saveSettingsButton = $("saveSettings");
 const languageSelect = $("languageSelect");
 const moduleSettings = $("moduleSettings");
 const filterForm = $("filterForm");
-const searchInput = $("searchInput");
 const typeFilter = $("typeFilter");
 const setFilter = $("setFilter");
 const artistFilter = $("artistFilter");
+const sortSelect = $("sortSelect");
+const sortDirectionButton = $("sortDirectionButton");
 const bundleToggle = $("bundleToggle");
+const defaultSortSelect = $("defaultSortSelect");
+const defaultSortDirectionSelect = $("defaultSortDirectionSelect");
 const editDialog = $("editDialog");
 const cardDialog = $("cardDialog");
 const cardDetail = $("cardDetail");
@@ -47,7 +50,8 @@ const app = {
   cards: loadCards(),
   settings: loadSettings(),
   device: loadDevice(),
-  filters: { query: "", type: "", set: "", artist: "" },
+  filters: { type: "", set: "", artist: "", sort: "artist", direction: "asc" },
+  remoteLoaded: false,
   authed: false,
 };
 
@@ -59,15 +63,25 @@ async function start() {
   app.authed = await getAuthStatus();
   try {
     app.cards = await loadRemoteCards();
+    app.remoteLoaded = true;
   } catch {
-    app.cards = [];
+    app.remoteLoaded = false;
   }
+  app.filters.sort = app.settings.defaultSort;
+  app.filters.direction = app.settings.defaultSortDirection;
   render();
 }
 
 function bindEvents() {
   bindBackdrop();
-  loginButton.addEventListener("click", () => app.authed ? doLogout() : loginDialog.showModal());
+  loginButton.addEventListener("click", () => {
+    if (app.authed) {
+      doLogout();
+      return;
+    }
+    loginDialog.showModal();
+    updateModalScrollLock();
+  });
   submitLogin.addEventListener("click", doLogin);
   addCardButton.addEventListener("click", openAddCard);
   settingsButton.addEventListener("click", openSettings);
@@ -76,18 +90,30 @@ function bindEvents() {
   languageSelect.addEventListener("change", () => syncFlagSelect(languageSelect, LANGUAGES));
   document.addEventListener("click", () => closeFlagSelects());
   [loginDialog, settingsDialog, editDialog, cardDialog].forEach((dialog) => {
-    dialog?.addEventListener("close", () => render());
+    dialog?.addEventListener("close", () => {
+      updateModalScrollLock();
+      render();
+    });
+    dialog?.addEventListener("cancel", () => requestAnimationFrame(updateModalScrollLock));
   });
   filterForm.addEventListener("input", () => {
     app.filters = {
-      query: searchInput.value,
       type: typeFilter.value,
       set: setFilter.value,
       artist: artistFilter.value,
+      sort: sortSelect.value,
+      direction: sortDirectionButton.dataset.direction || "asc",
     };
     app.device.bundleSameName = bundleToggle.checked;
     saveDevice(app.device);
     renderGalleryOnly();
+  });
+  sortDirectionButton.addEventListener("click", () => {
+    const next = sortDirectionButton.dataset.direction === "asc" ? "desc" : "asc";
+    sortDirectionButton.dataset.direction = next;
+    sortDirectionButton.classList.toggle("is-desc", next === "desc");
+    sortDirectionButton.setAttribute("aria-label", next === "asc" ? "Sort up" : "Sort down");
+    filterForm.dispatchEvent(new Event("input", { bubbles: true }));
   });
 }
 
@@ -132,7 +158,11 @@ async function doLogout() {
 
 function openSettings() {
   languageSelect.value = app.settings.language;
+  defaultSortSelect.value = app.settings.defaultSort || "artist";
+  defaultSortDirectionSelect.value = app.settings.defaultSortDirection || "asc";
   syncFlagSelect(languageSelect, LANGUAGES);
+  syncCustomSelect(defaultSortSelect);
+  syncCustomSelect(defaultSortDirectionSelect);
   moduleSettings.innerHTML = MODULES.map((module, index) => {
     const item = app.settings.modules.find((entry) => entry.id === module.id) || { order: index + 1, hidden: false };
     return `
@@ -144,16 +174,21 @@ function openSettings() {
     `;
   }).join("");
   settingsDialog.showModal();
+  updateModalScrollLock();
 }
 
 function commitSettings() {
   app.settings.language = languageSelect.value;
+  app.settings.defaultSort = defaultSortSelect.value || "artist";
+  app.settings.defaultSortDirection = defaultSortDirectionSelect.value || "asc";
   app.settings.modules = [...moduleSettings.querySelectorAll("[data-module-setting]")].map((row, index) => ({
     id: row.dataset.moduleSetting,
     order: Number(row.querySelector("[data-module-order]").value) || index + 1,
     hidden: row.querySelector("[data-module-hidden]").checked,
   }));
   saveSettings(app.settings);
+  app.filters.sort = app.settings.defaultSort;
+  app.filters.direction = app.settings.defaultSortDirection;
   settingsDialog.close();
   render();
 }
@@ -161,6 +196,7 @@ function commitSettings() {
 function openAddCard() {
   if (!app.authed) {
     loginDialog.showModal();
+    updateModalScrollLock();
     return;
   }
   openCardForm();
@@ -169,6 +205,7 @@ function openAddCard() {
 function openEditCard(card) {
   if (!app.authed) {
     loginDialog.showModal();
+    updateModalScrollLock();
     return;
   }
   openCardForm(card);
@@ -176,6 +213,10 @@ function openEditCard(card) {
 
 async function upsertCard(card) {
   if (!app.authed) return;
+  if (!app.remoteLoaded) {
+    app.cards = await loadRemoteCards();
+    app.remoteLoaded = true;
+  }
   const existing = app.cards.findIndex((item) => item.id === card.id);
   const nextCards = [...app.cards];
   if (existing >= 0) nextCards.splice(existing, 1, { ...nextCards[existing], ...card });
@@ -187,6 +228,7 @@ async function upsertCard(card) {
 
 async function deleteCard(id) {
   if (!app.authed) return;
+  if (!app.remoteLoaded) return;
   if (!id) return;
   const nextCards = app.cards.filter((card) => card.id !== id);
   await saveRemoteCards(nextCards);
@@ -206,6 +248,7 @@ function openDetail(id) {
     onSwitch: openDetail,
   });
   if (!cardDialog.open) cardDialog.showModal();
+  updateModalScrollLock();
 }
 
 function render() {
@@ -220,10 +263,21 @@ function render() {
   addCardButton.disabled = !app.authed;
   addCardButton.title = app.authed ? "" : "Log in to add cards";
   bundleToggle.checked = app.device.bundleSameName;
+  sortSelect.value = app.filters.sort || app.settings.defaultSort || "artist";
+  sortDirectionButton.dataset.direction = app.filters.direction || app.settings.defaultSortDirection || "asc";
+  sortDirectionButton.classList.toggle("is-desc", sortDirectionButton.dataset.direction === "desc");
   applyModuleSettings();
   renderFilters(app.cards, app.filters);
+  syncCustomSelect(typeFilter);
   syncSetSelect(setFilter);
+  syncCustomSelect(artistFilter);
+  syncCustomSelect(sortSelect);
   renderGalleryOnly();
+}
+
+function updateModalScrollLock() {
+  const open = [loginDialog, settingsDialog, editDialog, cardDialog].some((dialog) => dialog?.open);
+  document.body.classList.toggle("has-modal-open", open);
 }
 
 function renderGalleryOnly() {

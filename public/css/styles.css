@@ -325,7 +325,7 @@ select:hover {
 }
 
 .platform-logo-select.is-open {
-  z-index: 1300;
+  z-index: 5000;
 }
 
 .platform-logo-button,
@@ -380,7 +380,7 @@ select:hover {
   position: absolute;
   left: 0;
   top: calc(100% + 6px);
-  z-index: 1301;
+  z-index: 5001;
   display: none;
   width: 100%;
   min-width: 160px;
@@ -505,6 +505,10 @@ select:hover {
   box-shadow: none;
   object-fit: contain;
   filter: invert(1);
+}
+
+.basic-logo-select .platform-logo-choice {
+  padding-left: 0;
 }
 
 .platform-logo-option:hover .platform-logo-choice-label,
@@ -724,9 +728,21 @@ h2 {
   place-items: center;
 }
 
+.sort-direction-button .sort-direction-icon {
+  transition: transform 160ms ease;
+}
+
+.sort-direction-button.is-desc .sort-direction-icon {
+  transform: rotate(180deg);
+}
+
+body.has-modal-open {
+  overflow: hidden;
+}
+
 .edit-card [data-save-card] {
-  min-width: 108px;
-  padding-inline: 20px;
+  min-width: 128px;
+  padding-inline: 24px;
 }
 
 .plus-icon,
@@ -736,7 +752,8 @@ h2 {
 .settings-icon,
 .pencil-icon,
 .download-icon,
-.close-icon {
+.close-icon,
+.sort-direction-icon {
   width: 18px;
   height: 18px;
   fill: none;
@@ -789,7 +806,7 @@ h2 {
 
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(150px, 1fr)) auto;
+  grid-template-columns: repeat(4, minmax(150px, 1fr)) auto auto;
   gap: 10px;
   align-items: end;
   margin-bottom: 18px;
@@ -1049,6 +1066,13 @@ h2 {
   white-space: nowrap;
 }
 
+.card-tile.foil .tile-name,
+.related-tile.foil .tile-name {
+  color: transparent;
+  background: linear-gradient(90deg, #fff, #ffd86f, #79f2ce, #ff78d2, #fff);
+  background-clip: text;
+}
+
 .tile-foil-star {
   width: 12px;
   height: 12px;
@@ -1294,6 +1318,10 @@ h2 {
   font-size: 11px;
   font-weight: 740;
   text-transform: uppercase;
+}
+
+.moxfield-info-section h3 {
+  color: var(--accent-2);
 }
 
 .commander-role-field {

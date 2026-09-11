@@ -1,11 +1,24 @@
-export async function searchScryfall(query) {
+export async function searchScryfall(query, language = "en") {
   const parsed = parseCardInput(query);
   if (parsed.kind === "scryfall") return [await fetchScryfallCard(parsed.value)];
   if (parsed.kind === "external") return [{ externalUrl: parsed.value, name: "", note: "External card-market link saved for reference." }];
-  const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(parsed.value)}&unique=prints&order=released`);
+  const scryfallLanguage = scryfallLanguageCode(language);
+  const languageQuery = scryfallLanguage && scryfallLanguage !== "en" ? ` lang:${scryfallLanguage}` : "";
+  const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(`${parsed.value}${languageQuery}`)}&unique=prints&order=released`);
   if (!response.ok) throw new Error("No Scryfall cards found");
   const data = await response.json();
   return (data.data || []).slice(0, 8).map(mapScryfallCard);
+}
+
+function scryfallLanguageCode(language) {
+  return {
+    en: "en",
+    es: "es",
+    jp: "ja",
+    fr: "fr",
+    de: "de",
+    it: "it",
+  }[language] || "en";
 }
 
 export function parseCardInput(value) {
