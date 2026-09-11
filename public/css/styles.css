@@ -865,10 +865,13 @@ h2 {
   display: block;
   width: 100%;
   padding: 0;
+  overflow: hidden;
   color: inherit;
   text-align: left;
   border: 0;
+  border-radius: 8px;
   background: transparent;
+  clip-path: inset(0 round 8px);
 }
 
 .card-tile:hover {
@@ -889,16 +892,24 @@ h2 {
 
 .card-image-wrap {
   position: relative;
+  display: block;
+  width: 100%;
   overflow: hidden;
   aspect-ratio: 63 / 88;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
+  clip-path: inset(0 round 8px);
+  isolation: isolate;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 .card-image-wrap img {
   width: 100%;
   height: 100%;
   display: block;
+  border-radius: inherit;
+  clip-path: inherit;
   object-fit: cover;
 }
 
@@ -918,6 +929,7 @@ h2 {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   pointer-events: none;
 }
 
@@ -1316,10 +1328,12 @@ h2 {
 .detail-layout {
   display: grid;
   grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
-  gap: 18px;
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
 }
 
 .card-stage {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 10px;
@@ -1418,6 +1432,12 @@ h2 {
   font-weight: 850;
 }
 
+.detail-kind-pill {
+  gap: 7px;
+  max-width: 100%;
+  text-transform: none;
+}
+
 .detail-title h2 {
   margin: 0;
   font-size: clamp(22px, 3vw, 38px);
@@ -1477,6 +1497,11 @@ h2 {
   display: grid;
   gap: 8px;
   margin-top: 14px;
+}
+
+.detail-lines {
+  padding-top: 14px;
+  border-top: 2px solid rgba(255, 255, 255, 0.16);
 }
 
 .detail-line {
@@ -1630,15 +1655,23 @@ h2 {
   min-width: 0;
 }
 
+.card-stage-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.card-control-button,
 .deck-art-toggle {
   position: relative;
   z-index: 3;
   display: inline-grid;
-  width: 26px;
-  height: 26px;
-  flex: 0 0 26px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
   place-items: center;
-  margin-left: 2px;
   color: var(--text);
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -1646,6 +1679,8 @@ h2 {
   pointer-events: auto;
 }
 
+.card-control-button:hover,
+.card-control-button[aria-pressed="true"],
 .deck-art-toggle:hover,
 .deck-art-toggle[aria-pressed="true"] {
   color: #fff;
@@ -1656,6 +1691,16 @@ h2 {
 .eye-icon {
   width: 16px;
   height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.flip-icon {
+  width: 17px;
+  height: 17px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2.2;
@@ -1748,6 +1793,7 @@ h2 {
   gap: 0;
   min-width: 0;
   padding: 7px;
+  overflow: hidden;
   color: inherit;
   text-align: left;
   border: 1px solid var(--line);

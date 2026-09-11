@@ -9,6 +9,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
   const shownFront = card.frontImage;
   const shownBack = card.backImage || DEFAULT_CARD_BACK;
   const canFlip = Boolean(card.backImage);
+  const originalImage = card.originalImage && card.originalImage !== card.frontImage ? card.originalImage : "";
 
   return `
     <div class="modal-head">
@@ -21,17 +22,22 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     <div class="detail-layout">
       <div class="card-stage" data-card-stage>
         <div class="preview-card ${card.foil ? "foil-sheen" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
-          ${imageFace(shownFront || card.frontImage, "preview-front")}
-          ${shownBack ? imageFace(shownBack, "preview-back") : back}
+          ${imageFace(shownFront || card.frontImage, "preview-front", "data-preview-front-image")}
+          ${imageFace(shownBack, "preview-back")}
         </div>
+        ${canFlip || originalImage ? `
+          <div class="card-stage-controls">
+            ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(card.frontImage)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+          </div>
+        ` : ""}
       </div>
       <div class="detail-info">
         <div class="detail-title">
           <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
           <div class="detail-title-meta">
-            <span class="tag">${escapeHtml(card.kind)}</span>
+            ${collectionPill(card)}
             ${signatureValue(card) ? `<span class="detail-title-note">${escapeHtml(signatureLabel(card))}: ${escapeHtml(signatureValue(card))}</span>` : ""}
-            ${card.artist ? `<span class="detail-title-artist">${escapeHtml(card.artist)}${socialLink(card.artistSocialUrl)}</span>` : ""}
           </div>
         </div>
         <div class="detail-lines">
@@ -41,10 +47,10 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
           ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
-        ${deckBox(card)}
-        ${related.length ? relatedList(related) : ""}
       </div>
     </div>
+    ${deckBox(card)}
+    ${related.length ? relatedList(related) : ""}
   `;
 
   function relatedList(items) {
@@ -64,13 +70,13 @@ export function bindDetailInteractions(root, handlers) {
   const stage = root.querySelector("[data-card-stage]");
   if (preview) {
     const canFlip = preview.dataset.canFlip === "true";
-    const rotation = { x: 0, y: 0, baseY: 0 };
+    const manual = { x: 0, y: 0 };
+    const tilt = { x: 0, y: 0 };
     let drag = null;
-    let moved = false;
-    let insideCard = false;
     const applyRotation = () => {
-      const tiltY = canFlip ? rotation.y : Math.max(-38, Math.min(38, rotation.y));
-      preview.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.baseY + tiltY}deg)`;
+      const x = manual.x + tilt.x;
+      const y = canFlip ? manual.y + tilt.y : Math.max(-48, Math.min(48, manual.y + tilt.y));
+      preview.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
     };
     const updateShine = (event) => {
       const rect = preview.getBoundingClientRect();
@@ -79,44 +85,34 @@ export function bindDetailInteractions(root, handlers) {
       preview.style.setProperty("--shine-x", `${Math.max(0, Math.min(100, x * 100)).toFixed(1)}%`);
       preview.style.setProperty("--shine-y", `${Math.max(0, Math.min(100, y * 100)).toFixed(1)}%`);
     };
-    preview.addEventListener("pointerenter", () => {
-      insideCard = true;
-    });
-    preview.addEventListener("pointerleave", () => {
-      insideCard = false;
-    });
     stage?.addEventListener("pointermove", (event) => {
       updateShine(event);
       if (drag) {
         event.preventDefault();
-        moved = moved || Math.abs(event.clientX - drag.x) > 4 || Math.abs(event.clientY - drag.y) > 4;
-        rotation.y = drag.startY + ((event.clientX - drag.x) * 0.45);
-        rotation.x = drag.startX - ((event.clientY - drag.y) * 0.45);
+        manual.y = drag.startY + ((event.clientX - drag.x) * 0.55);
+        manual.x = drag.startX - ((event.clientY - drag.y) * 0.55);
+        if (!canFlip) {
+          manual.y = Math.max(-48, Math.min(48, manual.y));
+        }
         applyRotation();
         return;
       }
-      if (insideCard) return;
       const rect = stage.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) - 0.5;
       const y = ((event.clientY - rect.top) / rect.height) - 0.5;
-      rotation.y = x * 34;
-      rotation.x = y * -28;
+      tilt.y = x * 34;
+      tilt.x = y * -28;
       applyRotation();
     });
     preview.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       preview.setPointerCapture(event.pointerId);
-      drag = { x: event.clientX, y: event.clientY, startX: rotation.x, startY: rotation.y };
-      moved = false;
+      tilt.x = 0;
+      tilt.y = 0;
+      drag = { x: event.clientX, y: event.clientY, startX: manual.x, startY: manual.y };
       preview.classList.add("is-dragging");
     });
     preview.addEventListener("pointerup", () => {
-      if (canFlip && !moved) {
-        rotation.x = 0;
-        rotation.y = 0;
-        rotation.baseY = rotation.baseY === 180 ? 0 : 180;
-        applyRotation();
-      }
       drag = null;
       preview.classList.remove("is-dragging");
     });
@@ -125,15 +121,22 @@ export function bindDetailInteractions(root, handlers) {
       preview.classList.remove("is-dragging");
     });
     preview.addEventListener("dblclick", () => {
-      rotation.x = 0;
-      rotation.y = 0;
-      rotation.baseY = 0;
+      manual.x = 0;
+      manual.y = 0;
+      tilt.x = 0;
+      tilt.y = 0;
       applyRotation();
     });
     stage?.addEventListener("pointerleave", () => {
       if (drag) return;
-      rotation.x = 0;
-      rotation.y = 0;
+      tilt.x = 0;
+      tilt.y = 0;
+      applyRotation();
+    });
+    root.querySelector("[data-card-flip]")?.addEventListener("click", () => {
+      manual.y += 180;
+      tilt.x = 0;
+      tilt.y = 0;
       applyRotation();
     });
   }
@@ -142,33 +145,27 @@ export function bindDetailInteractions(root, handlers) {
   root.querySelectorAll("[data-switch-card]").forEach((button) => {
     button.addEventListener("click", () => handlers.onSwitch(button.dataset.switchCard));
   });
-  root.querySelectorAll("[data-deck-art-toggle]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const box = button.closest("[data-deck-box]");
-      if (!box) return;
-      const custom = box.dataset.customShowing !== "true";
-      box.dataset.customShowing = String(custom);
-      box.style.setProperty("--deck-bg", `url('${custom ? box.dataset.customArt : box.dataset.originalArt}')`);
-      button.setAttribute("aria-pressed", custom ? "true" : "false");
-      button.title = custom ? "Show original card art" : "Show custom card art";
-    });
+  root.querySelector("[data-card-art-toggle]")?.addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    const image = root.querySelector("[data-preview-front-image]");
+    if (!image) return;
+    const original = button.getAttribute("aria-pressed") !== "true";
+    image.src = original ? button.dataset.originalArt : button.dataset.customArt;
+    button.setAttribute("aria-pressed", original ? "true" : "false");
+    button.title = original ? "Show custom card graphic" : "Show original card graphic";
   });
 }
 
 function deckBox(card) {
   if (!card.deckName && !card.moxfieldUrl) return "";
   const originalArt = artCropImage(card.deckImage || card.commanderImage || card.frontImage);
-  const customArt = card.frontImage || originalArt;
   return `
-    <section class="deck-box" data-deck-box data-original-art="${escapeAttribute(originalArt)}" data-custom-art="${escapeAttribute(customArt)}" style="--deck-bg: url('${escapeAttribute(originalArt)}')">
+    <section class="deck-box" data-deck-box style="--deck-bg: url('${escapeAttribute(originalArt)}')">
       <a class="deck-box-link" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer" aria-label="${escapeAttribute(card.deckName || "Moxfield deck")}"></a>
       <span class="deck-copy">
         <span class="deck-title-row">
           <img class="moxfield-mark" src="assets/moxfield-favicon.ico" alt="" aria-hidden="true">
           <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
-          <button class="deck-art-toggle" type="button" data-deck-art-toggle aria-pressed="false" title="Show custom card art" aria-label="Toggle deck art">${eyeIcon()}</button>
         </span>
         <span class="deck-meta-row">
           ${card.deckFormat ? `<span>${escapeHtml(card.deckFormat)}</span>` : ""}
@@ -191,6 +188,17 @@ function eyeIcon() {
   `;
 }
 
+function flipIcon() {
+  return `
+    <svg class="flip-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7.2 7.6A7.2 7.2 0 0 1 19 12.8"></path>
+      <path d="M19 7.4v5.4h-5.4"></path>
+      <path d="M16.8 16.4A7.2 7.2 0 0 1 5 11.2"></path>
+      <path d="M5 16.6v-5.4h5.4"></path>
+    </svg>
+  `;
+}
+
 function commanderRoleTag(card) {
   if (card.deckFormat?.toLowerCase() !== "commander") return "";
   return `<span class="deck-role-pill">${card.deckCommander ? "Commander" : "Part of the 99"}</span>`;
@@ -199,7 +207,7 @@ function commanderRoleTag(card) {
 function bracketTag(card) {
   if (card.deckFormat?.toLowerCase() !== "commander" || !card.deckBracket) return "";
   const bracket = String(card.deckBracket).trim().match(/\d+/)?.[0] || "";
-  return `<span class="tag bracket-tag bracket-${escapeHtml(bracket)}">Bracket ${escapeHtml(card.deckBracket)}</span>`;
+  return `<span class="tag bracket-tag bracket-${escapeHtml(bracket)}">Commander Bracket ${escapeHtml(card.deckBracket)}</span>`;
 }
 
 function deckOwners(card) {
@@ -222,12 +230,17 @@ function deckOwners(card) {
 }
 
 function signatureLabel(card) {
-  return card.kind?.toLowerCase().includes("alter") ? "Alter" : "Signature";
+  return card.kind?.toLowerCase().includes("alter") ? "Altered" : "Signature";
 }
 
 function signatureValue(card) {
   const parts = [card.signaturePlace, card.signatureYear].filter(Boolean);
   return parts.join(", ");
+}
+
+function collectionPill(card) {
+  const artist = card.artist ? `: ${card.artist}` : "";
+  return `<span class="tag detail-kind-pill">${escapeHtml(card.kind)}${escapeHtml(artist)}${socialLink(card.artistSocialUrl)}</span>`;
 }
 
 function scryfallLink(card) {
@@ -267,8 +280,8 @@ function faviconUrl(url) {
   }
 }
 
-function imageFace(src, className) {
-  return `<div class="preview-face ${className}"><img src="${escapeAttribute(src)}" alt="" draggable="false"></div>`;
+function imageFace(src, className, attributes = "") {
+  return `<div class="preview-face ${className}"><img src="${escapeAttribute(src)}" alt="" draggable="false" ${attributes}></div>`;
 }
 
 function line(label, value) {

@@ -114,6 +114,7 @@ export function openCardForm(card = null) {
   artistSocialInput.value = data.artistSocialUrl || "";
   cardForm.dataset.frontImage = data.frontImage || "";
   cardForm.dataset.backImage = data.backImage || "";
+  cardForm.dataset.originalImage = data.originalImage || "";
   cardForm.dataset.commanderImage = data.commanderImage || "";
   cardForm.dataset.deckImage = data.deckImage || "";
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
@@ -222,6 +223,7 @@ function applyScryfall(card) {
   cardArtistInput.value = card.cardArtist || "";
   collectorArtist.value ||= card.cardArtist || "";
   scryfallInput.value = card.scryfallUrl || "";
+  cardForm.dataset.originalImage = card.frontImage || cardForm.dataset.originalImage || "";
   cardForm.dataset.frontImage ||= card.frontImage || "";
   cardForm.dataset.commanderImage ||= card.frontImage || "";
   lookupResults.innerHTML = "";
@@ -252,6 +254,7 @@ async function saveCurrent(onSave) {
       language: cardLanguage.value,
       frontImage,
       backImage,
+      originalImage: cardForm.dataset.originalImage || "",
       artist: collectorArtist.value.trim(),
       signatureYear: signatureYear.value.trim(),
       signaturePlace: signaturePlace.value.trim(),
