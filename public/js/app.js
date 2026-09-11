@@ -9,7 +9,6 @@ import {
   loadDevice,
   loadRemoteCards,
   loadSettings,
-  saveCards,
   saveDevice,
   saveRemoteCards,
   saveSettings,
@@ -57,13 +56,10 @@ async function start() {
   initForm({ onSave: upsertCard, onDelete: deleteCard });
   bindEvents();
   app.authed = await getAuthStatus();
-  if (app.authed) {
-    try {
-      const remoteCards = await loadRemoteCards();
-      if (remoteCards.length) app.cards = remoteCards;
-    } catch {
-      // Local-first fallback keeps the MVP usable without a KV binding.
-    }
+  try {
+    app.cards = await loadRemoteCards();
+  } catch {
+    app.cards = [];
   }
   render();
 }
@@ -123,7 +119,7 @@ async function doLogin() {
   app.authed = true;
   loginDialog.close();
   passwordInput.value = "";
-  await syncRemote();
+  app.cards = await loadRemoteCards();
   render();
 }
 
@@ -177,22 +173,25 @@ function openEditCard(card) {
   openCardForm(card);
 }
 
-function upsertCard(card) {
+async function upsertCard(card) {
   if (!app.authed) return;
   const existing = app.cards.findIndex((item) => item.id === card.id);
-  if (existing >= 0) app.cards.splice(existing, 1, { ...app.cards[existing], ...card });
-  else app.cards.unshift({ ...card, createdAt: new Date().toISOString() });
-  persistCards();
+  const nextCards = [...app.cards];
+  if (existing >= 0) nextCards.splice(existing, 1, { ...nextCards[existing], ...card });
+  else nextCards.unshift({ ...card, createdAt: new Date().toISOString() });
+  await saveRemoteCards(nextCards);
+  app.cards = nextCards;
   render();
 }
 
-function deleteCard(id) {
+async function deleteCard(id) {
   if (!app.authed) return;
   if (!id) return;
-  app.cards = app.cards.filter((card) => card.id !== id);
+  const nextCards = app.cards.filter((card) => card.id !== id);
+  await saveRemoteCards(nextCards);
+  app.cards = nextCards;
   editDialog.close();
   cardDialog.close();
-  persistCards();
   render();
 }
 
@@ -243,19 +242,6 @@ function applyModuleSettings() {
       element.style.order = index;
       element.hidden = item.hidden;
     });
-}
-
-function persistCards() {
-  saveCards(app.cards);
-  if (app.authed) syncRemote();
-}
-
-async function syncRemote() {
-  try {
-    await saveRemoteCards(app.cards);
-  } catch {
-    // Cloudflare KV sync is optional until the project has its namespace bound.
-  }
 }
 
 function updateSettingsLanguageFlag() {

@@ -51,7 +51,17 @@ export function initForm({ onSave, onDelete }) {
   moxfieldInput.addEventListener("paste", scheduleDeckFetch);
   setCodeInput.addEventListener("input", updateSetIcon);
   saveCardButton.addEventListener("click", () => saveCurrent(onSave));
-  deleteCardButton.addEventListener("click", () => onDelete(editingId.value));
+  deleteCardButton.addEventListener("click", async () => {
+    cardFormMessage.textContent = "Saving to Cloudflare...";
+    deleteCardButton.disabled = true;
+    try {
+      await onDelete(editingId.value);
+    } catch (error) {
+      cardFormMessage.textContent = error.message;
+    } finally {
+      deleteCardButton.disabled = false;
+    }
+  });
   updateArtistLabel();
 }
 
@@ -206,36 +216,44 @@ async function saveCurrent(onSave) {
   }
   const backImage = await imageValue(backPhoto, cardForm.dataset.backImage);
 
-  onSave({
-    id: editingId.value || crypto.randomUUID(),
-    name: cardName.value.trim(),
-    kind: cardKind.value,
-    foil: foilInput.checked,
-    language: cardLanguage.value,
-    frontImage,
-    backImage,
-    artist: collectorArtist.value.trim(),
-    signatureYear: signatureYear.value.trim(),
-    signaturePlace: signaturePlace.value.trim(),
-    description: descriptionInput.value.trim(),
-    artistSocialUrl: artistSocialInput.value.trim(),
-    moxfieldUrl: moxfieldInput.value.trim(),
-    deckName: deckNameInput.value.trim(),
-    deckFormat: deckFormatInput.value.trim(),
-    deckBracket: deckBracketInput.value.trim(),
-    deckOwner: deckOwnerInput.value.trim(),
-    deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
-    deckImage: cardForm.dataset.deckImage || "",
-    commanderImage: cardForm.dataset.commanderImage || frontImage,
-    setName: setNameInput.value.trim(),
-    setCode: setCodeInput.value.trim(),
-    collectorNumber: collectorNumberInput.value.trim(),
-    setYear: setYearInput.value.trim(),
-    cardArtist: cardArtistInput.value.trim(),
-    scryfallUrl: scryfallInput.value.trim(),
-    updatedAt: new Date().toISOString(),
-  });
-  editDialog.close();
+  saveCardButton.disabled = true;
+  cardFormMessage.textContent = "Saving to Cloudflare...";
+  try {
+    await onSave({
+      id: editingId.value || crypto.randomUUID(),
+      name: cardName.value.trim(),
+      kind: cardKind.value,
+      foil: foilInput.checked,
+      language: cardLanguage.value,
+      frontImage,
+      backImage,
+      artist: collectorArtist.value.trim(),
+      signatureYear: signatureYear.value.trim(),
+      signaturePlace: signaturePlace.value.trim(),
+      description: descriptionInput.value.trim(),
+      artistSocialUrl: artistSocialInput.value.trim(),
+      moxfieldUrl: moxfieldInput.value.trim(),
+      deckName: deckNameInput.value.trim(),
+      deckFormat: deckFormatInput.value.trim(),
+      deckBracket: deckBracketInput.value.trim(),
+      deckOwner: deckOwnerInput.value.trim(),
+      deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
+      deckImage: cardForm.dataset.deckImage || "",
+      commanderImage: cardForm.dataset.commanderImage || frontImage,
+      setName: setNameInput.value.trim(),
+      setCode: setCodeInput.value.trim(),
+      collectorNumber: collectorNumberInput.value.trim(),
+      setYear: setYearInput.value.trim(),
+      cardArtist: cardArtistInput.value.trim(),
+      scryfallUrl: scryfallInput.value.trim(),
+      updatedAt: new Date().toISOString(),
+    });
+    editDialog.close();
+  } catch (error) {
+    cardFormMessage.textContent = error.message;
+  } finally {
+    saveCardButton.disabled = false;
+  }
 }
 
 function updateArtistLabel() {
