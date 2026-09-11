@@ -1,4 +1,5 @@
 import { LANGUAGES } from "./constants.js";
+import { icon } from "./icons.js";
 
 export function renderCardDetail({ card, cards, canEdit = false }) {
   const related = cards.filter((item) => item.name === card.name && item.id !== card.id);
@@ -15,7 +16,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     <div class="modal-head">
       <span></span>
       <div class="modal-head-actions">
-        ${canEdit ? `<button class="icon-button" type="button" data-edit-card title="Edit" aria-label="Edit">${pencilIcon()}</button>` : ""}
+        ${canEdit ? `<button class="icon-button" type="button" data-edit-card title="Edit" aria-label="Edit">${icon("pencil")}</button>` : ""}
         <button class="icon-button" type="button" data-close-detail aria-label="Close">×</button>
       </div>
     </div>
@@ -164,15 +165,6 @@ function faviconUrl(url) {
   } catch {
     return "";
   }
-}
-
-function pencilIcon() {
-  return `
-    <svg class="pencil-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 20h4l11-11a2.8 2.8 0 0 0-4-4L4 16v4Z"></path>
-      <path d="M13.5 6.5l4 4"></path>
-    </svg>
-  `;
 }
 
 function imageFace(src, className) {

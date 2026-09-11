@@ -5,13 +5,6 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: "Antique Olive Nord";
-  src: url("../assets/fonts/AntiqueOliveNord.woff2") format("woff2");
-  font-weight: 800 950;
-  font-display: swap;
-}
-
 :root {
   --bg: #161619;
   --panel: rgba(20, 22, 28, 0.58);
@@ -39,9 +32,7 @@
   --custom-backdrop-image: var(--default-backdrop-image);
   --danger: #ff6f85;
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
-  --display-title-font:
-    "Antique Olive Nord", "Arial Black", Impact, "Cascadia Code", sans-serif;
-  --title-font: var(--display-title-font);
+  --title-font: "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, monospace;
   --grid-x: 0px;
   --grid-y: 0px;
   --backdrop-x: 0px;
@@ -606,6 +597,28 @@ h2 {
   justify-self: end;
 }
 
+.top-actions #addCardButton {
+  min-height: 42px;
+  padding: 0 12px 0 15px;
+  gap: 8px;
+  line-height: 1;
+}
+
+.top-actions #addCardButton .button-label {
+  transform: translateY(1px);
+}
+
+.top-actions #addCardButton .button-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.top-actions #addCardButton .plus-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.7;
+}
+
 .button,
 .icon-button,
 .ghost-button,
@@ -684,6 +697,7 @@ h2 {
 .plus-icon,
 .search-icon,
 .trash-icon,
+.exit-icon,
 .settings-icon,
 .pencil-icon,
 .download-icon,
@@ -695,6 +709,10 @@ h2 {
   stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.exit-icon {
+  stroke-width: 3;
 }
 
 .module {

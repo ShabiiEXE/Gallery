@@ -15,6 +15,13 @@ const icons = {
       <path d="M13.5 6.5l4 4"></path>
     </svg>
   `,
+  exit: `
+    <svg class="exit-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 5H6.8A2.8 2.8 0 0 0 4 7.8v8.4A2.8 2.8 0 0 0 6.8 19H10"></path>
+      <path d="M14 8l4 4-4 4"></path>
+      <path d="M8 12h10"></path>
+    </svg>
+  `,
   plus: `
     <svg class="plus-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 5v14"></path>

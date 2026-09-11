@@ -5,6 +5,7 @@ import { applyTranslations, t } from "./i18n.js";
 import { initForm, openCardForm } from "./form.js";
 import { LANGUAGES } from "./constants.js";
 import { closeFlagSelects, syncFlagSelect } from "./custom-select.js";
+import { icon } from "./icons.js";
 import {
   loadCards,
   loadDevice,
@@ -69,7 +70,6 @@ function bindEvents() {
   loginButton.addEventListener("click", () => app.authed ? doLogout() : loginDialog.showModal());
   submitLogin.addEventListener("click", doLogin);
   addCardButton.addEventListener("click", openAddCard);
-  document.querySelectorAll("[data-open-add]").forEach((button) => button.addEventListener("click", openAddCard));
   settingsButton.addEventListener("click", openSettings);
   saveSettingsButton.addEventListener("click", commitSettings);
   clearCacheButton.addEventListener("click", clearBrowserCache);
@@ -211,14 +211,14 @@ function openDetail(id) {
 function render() {
   document.documentElement.lang = app.settings.language;
   applyTranslations(app.settings);
-  loginButton.textContent = app.authed ? t(app.settings, "logout") : t(app.settings, "login");
-  loginButton.title = loginButton.textContent;
+  const loginTitle = app.authed ? t(app.settings, "logout") : t(app.settings, "login");
+  loginButton.innerHTML = app.authed ? icon("exit") : icon("pencil");
+  loginButton.title = loginTitle;
+  loginButton.setAttribute("aria-label", loginTitle);
+  settingsButton.hidden = !app.authed;
+  addCardButton.hidden = !app.authed;
   addCardButton.disabled = !app.authed;
   addCardButton.title = app.authed ? "" : "Log in to add cards";
-  document.querySelectorAll("[data-open-add]").forEach((button) => {
-    button.disabled = !app.authed;
-    button.title = app.authed ? "" : "Log in to add cards";
-  });
   bundleToggle.checked = app.device.bundleSameName;
   applyModuleSettings();
   renderFilters(app.cards, app.filters);
