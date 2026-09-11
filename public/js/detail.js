@@ -134,7 +134,9 @@ export function bindDetailInteractions(root, handlers) {
       applyRotation();
     });
     root.querySelector("[data-card-flip]")?.addEventListener("click", () => {
-      manual.y += 180;
+      const facingBack = Math.abs(normalizeRotation(manual.y) - 180) < 90;
+      manual.x = 0;
+      manual.y = facingBack ? 0 : 180;
       tilt.x = 0;
       tilt.y = 0;
       applyRotation();
@@ -257,6 +259,7 @@ function artistValue(card) {
 }
 
 function originalCardImage(card) {
+  if (isArtistProof(card) && card.backImage) return card.originalImage || card.frontImage || "";
   const candidates = [card.originalImage, card.commanderImage].filter(Boolean);
   return candidates.find((image) => image !== card.frontImage) || "";
 }
@@ -307,6 +310,10 @@ function faviconUrl(url) {
 
 function imageFace(src, className, attributes = "") {
   return `<div class="preview-face ${className}"><img src="${escapeAttribute(src)}" alt="" draggable="false" ${attributes}></div>`;
+}
+
+function normalizeRotation(value) {
+  return ((value % 360) + 360) % 360;
 }
 
 function line(label, value) {
