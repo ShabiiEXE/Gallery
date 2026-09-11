@@ -35,9 +35,6 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       <div class="detail-info">
         <div class="detail-title">
           <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
-          <div class="detail-title-pills">
-            <span class="tag">${escapeHtml(shortKind(card.kind))}</span>
-          </div>
           <div class="detail-lines detail-title-lines">
             ${line(shortKind(card.kind), artistValue(card))}
             ${line(signatureLabel(card), escapeHtml(signatureValue(card)))}

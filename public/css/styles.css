@@ -1446,12 +1446,6 @@ h2 {
   gap: 8px;
 }
 
-.detail-title-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
 .detail-title-artist,
 .detail-title-note {
   display: inline-flex;
@@ -1756,14 +1750,17 @@ h2 {
 }
 
 .deck-role-pill {
-  min-height: 22px;
-  padding: 2px 6px;
+  display: inline-grid;
+  min-height: 24px;
+  padding: 0 8px;
+  place-items: center;
   color: var(--muted);
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.045);
   font-size: 9px;
   font-weight: 850;
+  line-height: 1;
 }
 
 .deck-owner-list {
