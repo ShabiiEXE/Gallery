@@ -83,7 +83,7 @@
     </main>
 
     <footer class="site-footer">
-      <button id="clearCacheButton" type="button" title="Clear cache and reload">Version 0.1.1</button>
+      <button id="clearCacheButton" type="button" title="Clear cache and reload">Version 0.1.2</button>
     </footer>
 
     <dialog class="modal" id="loginDialog">
@@ -148,44 +148,36 @@
       <form method="dialog" class="modal-card edit-card" id="cardForm">
         <div class="modal-head">
           <h2 id="editTitle" data-i18n="add_card">Add card</h2>
-          <button class="icon-button" value="cancel" aria-label="Close" type="submit" formnovalidate>
-            <svg class="close-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6.5 6.5l11 11"></path>
-              <path d="M17.5 6.5l-11 11"></path>
-            </svg>
-          </button>
+          <div class="modal-head-actions">
+            <button class="primary-button" type="button" data-save-card data-i18n="save">Save</button>
+            <button class="icon-button" value="cancel" aria-label="Close" type="button" data-close-edit formnovalidate>
+              <svg class="close-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6.5 6.5l11 11"></path>
+                <path d="M17.5 6.5l-11 11"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="lookup-panel">
-          <label>
-            <span data-i18n="find_card">Find card</span>
-            <input id="lookupInput" type="search" placeholder="Card name, Scryfall link, Cardmarket or TCGplayer link" />
-          </label>
-          <button class="ghost-button icon-only-button" id="lookupButton" type="button" title="Search" aria-label="Search">
-            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="6.5"></circle>
-              <path d="m16 16 4 4"></path>
-            </svg>
-          </button>
-        </div>
-        <div class="lookup-results" id="lookupResults"></div>
         <input type="hidden" id="editingId" />
         <div class="form-grid">
           <label>
             <span data-i18n="card_name">Card name</span>
             <input id="cardName" required />
           </label>
-          <label>
-            <span data-i18n="kind">Kind</span>
-            <select id="cardKind"></select>
-          </label>
-          <label>
-            <span data-i18n="language">Language</span>
-            <select id="cardLanguage"></select>
-          </label>
-          <label class="check-filter stars-check">
-            <input id="foilInput" type="checkbox" />
-            <span data-i18n="foil">Foil</span>
-          </label>
+          <div class="form-row-three wide">
+            <label>
+              <span data-i18n="kind">Kind</span>
+              <select id="cardKind"></select>
+            </label>
+            <label>
+              <span data-i18n="language">Language</span>
+              <select id="cardLanguage"></select>
+            </label>
+            <label class="check-filter stars-check">
+              <input id="foilInput" type="checkbox" />
+              <span data-i18n="foil">Foil</span>
+            </label>
+          </div>
           <label>
             <span data-i18n="front_photo">Front photo</span>
             <input id="frontPhoto" type="file" accept="image/*" />
@@ -200,7 +192,10 @@
           </label>
           <label>
             <span>Artist social link</span>
-            <input id="artistSocialInput" type="url" placeholder="https://instagram.com/artist" />
+            <span class="input-with-favicon">
+              <img id="artistSocialFavicon" alt="" hidden>
+              <input id="artistSocialInput" type="url" placeholder="https://instagram.com/artist" />
+            </span>
           </label>
           <label>
             <span data-i18n="year">Year</span>
@@ -214,8 +209,35 @@
             <span data-i18n="description">Description</span>
             <textarea id="descriptionInput" rows="3"></textarea>
           </label>
-          <div class="wide moxfield-field">
-            <span data-i18n="moxfield">Moxfield deck link</span>
+        </div>
+        <section class="form-section actual-info">
+          <h3>MTG Card info</h3>
+          <div class="lookup-panel">
+            <label>
+              <span data-i18n="find_card">Find card</span>
+              <input id="lookupInput" type="search" placeholder="Card name, Scryfall link, Cardmarket or TCGplayer link" />
+            </label>
+            <button class="ghost-button icon-only-button" id="lookupButton" type="button" title="Search" aria-label="Search">
+              <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.5"></circle>
+                <path d="m16 16 4 4"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="lookup-results" id="lookupResults"></div>
+          <div class="info-grid">
+            <label><span data-i18n="set">Set</span><input id="setNameInput" /></label>
+            <label><span data-i18n="set_code">Set code</span><span class="input-with-set-icon"><img id="setCodeIcon" alt=""><input id="setCodeInput" /></span></label>
+            <label><span data-i18n="number">Number</span><input id="collectorNumberInput" /></label>
+            <label><span data-i18n="set_year">Set year</span><input id="setYearInput" type="number" /></label>
+            <label><span data-i18n="card_artist">Card artist</span><input id="cardArtistInput" /></label>
+            <label><span data-i18n="scryfall">Scryfall</span><input id="scryfallInput" /></label>
+          </div>
+        </section>
+        <section class="form-section actual-info">
+          <h3>Moxfield Deck information</h3>
+          <div class="moxfield-field">
+            <span>Moxfield deck URL</span>
             <div class="inline-fetch">
               <input id="moxfieldInput" />
               <button class="ghost-button" id="fetchDeckButton" type="button">
@@ -230,41 +252,33 @@
               </button>
             </div>
           </div>
-          <label>
-            <span data-i18n="deck_name">Deck name</span>
-            <input id="deckNameInput" />
-          </label>
-          <label>
-            <span data-i18n="format">Format</span>
-            <input id="deckFormatInput" />
-          </label>
-          <label>
-            <span data-i18n="bracket">Bracket</span>
-            <input id="deckBracketInput" />
-          </label>
-          <label>
-            <span data-i18n="deck_owner">Deck owner</span>
-            <input id="deckOwnerInput" />
-          </label>
+          <div class="info-grid">
+            <label>
+              <span data-i18n="deck_name">Deck name</span>
+              <input id="deckNameInput" />
+            </label>
+            <label>
+              <span data-i18n="format">Format</span>
+              <input id="deckFormatInput" />
+            </label>
+            <label>
+              <span data-i18n="bracket">Bracket</span>
+              <input id="deckBracketInput" />
+            </label>
+            <label>
+              <span data-i18n="deck_owner">Deck owner</span>
+              <input id="deckOwnerInput" />
+            </label>
+          </div>
           <div class="wide deck-owners-editor" id="deckOwnersEditor"></div>
           <label class="check-filter commander-role-field" id="commanderRoleField" hidden>
             <input id="deckCommanderInput" type="checkbox" />
             <span>Commander</span>
           </label>
-        </div>
-        <section class="actual-info">
-          <h3 data-i18n="actual_card_info">Actual card info</h3>
-          <div class="info-grid">
-            <label><span data-i18n="set">Set</span><input id="setNameInput" /></label>
-            <label><span data-i18n="set_code">Set code</span><span class="input-with-set-icon"><img id="setCodeIcon" alt=""><input id="setCodeInput" /></span></label>
-            <label><span data-i18n="number">Number</span><input id="collectorNumberInput" /></label>
-            <label><span data-i18n="set_year">Set year</span><input id="setYearInput" type="number" /></label>
-            <label><span data-i18n="card_artist">Card artist</span><input id="cardArtistInput" /></label>
-            <label><span data-i18n="scryfall">Scryfall</span><input id="scryfallInput" /></label>
-          </div>
         </section>
         <p class="form-message" id="cardFormMessage"></p>
         <div class="modal-actions">
+          <span class="spacer"></span>
           <button class="danger-button icon-only-button" id="deleteCardButton" type="button" title="Delete" aria-label="Delete">
             <svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 6h18"></path>
@@ -274,9 +288,7 @@
               <path d="M14 11v5"></path>
             </svg>
           </button>
-          <span class="spacer"></span>
-          <button class="ghost-button" value="cancel" type="submit" formnovalidate data-i18n="cancel">Cancel</button>
-          <button class="primary-button" id="saveCardButton" type="button" data-i18n="save">Save</button>
+          <button class="primary-button" id="saveCardButton" type="button" data-save-card data-i18n="save">Save</button>
         </div>
       </form>
     </dialog>

@@ -1,16 +1,13 @@
 import { LANGUAGES } from "./constants.js";
 import { icon } from "./icons.js";
 
+const DEFAULT_CARD_BACK = "https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg/revision/latest/scale-to-width-down/250?cb=20140813141013";
+
 export function renderCardDetail({ card, cards, canEdit = false }) {
   const related = cards.filter((item) => item.name === card.name && item.id !== card.id);
   const language = LANGUAGES.find((item) => item.value === card.language) || LANGUAGES[0];
-  const back = card.backImage
-    ? imageFace(card.backImage, "")
-    : isArtistProof(card)
-      ? `<div class="preview-face preview-back white-back">Artist Proof</div>`
-      : `<div class="preview-face preview-back magic-back">Magic</div>`;
-  const shownFront = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
-  const shownBack = isArtistProof(card) && card.backImage ? card.frontImage : "";
+  const shownFront = card.frontImage;
+  const shownBack = card.backImage || DEFAULT_CARD_BACK;
   const canFlip = Boolean(card.backImage);
 
   return `
@@ -30,15 +27,17 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       </div>
       <div class="detail-info">
         <div class="detail-title">
-          <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}</h2>
-          <span class="tag">${escapeHtml(card.kind)}</span>
-          ${card.artist ? `<span class="detail-title-artist">${escapeHtml(card.artist)}${socialLink(card.artistSocialUrl)}</span>` : ""}
+          <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
+          <div class="detail-title-meta">
+            <span class="tag">${escapeHtml(card.kind)}</span>
+            ${signatureValue(card) ? `<span class="detail-title-note">${escapeHtml(signatureLabel(card))}: ${escapeHtml(signatureValue(card))}</span>` : ""}
+            ${card.artist ? `<span class="detail-title-artist">${escapeHtml(card.artist)}${socialLink(card.artistSocialUrl)}</span>` : ""}
+          </div>
         </div>
         <div class="detail-lines">
-          ${line(signatureLabel(card), signatureValue(card))}
-          ${line("Info", `${setIcon(card.setCode)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
+          ${line("Collection", `${setIcon(card.setCode || card.setName)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
           ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
-          ${differentArtist(card) ? line("Card artist", card.cardArtist) : ""}
+          ${line("Card artist", escapeHtml(card.cardArtist || card.artist))}
           ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
@@ -52,12 +51,9 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     return `
       <section class="related-list">
         <h3>Also in gallery</h3>
-        ${items.map((item) => `
-          <button class="related-card" type="button" data-switch-card="${item.id}">
-            <img src="${item.frontImage}" alt="">
-            <span><b>${escapeHtml(item.kind)}</b><br>${escapeHtml(item.artist || item.cardArtist || "")}</span>
-          </button>
-        `).join("")}
+        <div class="related-grid">
+          ${items.map((item) => relatedCard(item)).join("")}
+        </div>
       </section>
     `;
   }
@@ -68,12 +64,13 @@ export function bindDetailInteractions(root, handlers) {
   const stage = root.querySelector("[data-card-stage]");
   if (preview) {
     const canFlip = preview.dataset.canFlip === "true";
-    const rotation = { x: 0, y: 0 };
+    const rotation = { x: 0, y: 0, baseY: 0 };
     let drag = null;
     let moved = false;
+    let insideCard = false;
     const applyRotation = () => {
-      if (!canFlip) rotation.y = Math.max(-38, Math.min(38, rotation.y));
-      preview.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
+      const tiltY = canFlip ? rotation.y : Math.max(-38, Math.min(38, rotation.y));
+      preview.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.baseY + tiltY}deg)`;
     };
     const updateShine = (event) => {
       const rect = preview.getBoundingClientRect();
@@ -82,7 +79,13 @@ export function bindDetailInteractions(root, handlers) {
       preview.style.setProperty("--shine-x", `${Math.max(0, Math.min(100, x * 100)).toFixed(1)}%`);
       preview.style.setProperty("--shine-y", `${Math.max(0, Math.min(100, y * 100)).toFixed(1)}%`);
     };
-    preview.addEventListener("pointermove", (event) => {
+    preview.addEventListener("pointerenter", () => {
+      insideCard = true;
+    });
+    preview.addEventListener("pointerleave", () => {
+      insideCard = false;
+    });
+    stage?.addEventListener("pointermove", (event) => {
       updateShine(event);
       if (drag) {
         event.preventDefault();
@@ -92,6 +95,13 @@ export function bindDetailInteractions(root, handlers) {
         applyRotation();
         return;
       }
+      if (insideCard) return;
+      const rect = stage.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) - 0.5;
+      const y = ((event.clientY - rect.top) / rect.height) - 0.5;
+      rotation.y = x * 34;
+      rotation.x = y * -28;
+      applyRotation();
     });
     preview.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -103,7 +113,8 @@ export function bindDetailInteractions(root, handlers) {
     preview.addEventListener("pointerup", () => {
       if (canFlip && !moved) {
         rotation.x = 0;
-        rotation.y = Math.abs(normalizeRotation(rotation.y) - 180) < 65 ? 0 : 180;
+        rotation.y = 0;
+        rotation.baseY = rotation.baseY === 180 ? 0 : 180;
         applyRotation();
       }
       drag = null;
@@ -116,21 +127,13 @@ export function bindDetailInteractions(root, handlers) {
     preview.addEventListener("dblclick", () => {
       rotation.x = 0;
       rotation.y = 0;
-      applyRotation();
-    });
-    stage?.addEventListener("pointermove", (event) => {
-      if (drag || preview.matches(":hover")) return;
-      const rect = stage.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) - 0.5;
-      const y = ((event.clientY - rect.top) / rect.height) - 0.5;
-      rotation.y = x * 34;
-      rotation.x = y * -28;
+      rotation.baseY = 0;
       applyRotation();
     });
     stage?.addEventListener("pointerleave", () => {
       if (drag) return;
       rotation.x = 0;
-      rotation.y = canFlip && Math.abs(normalizeRotation(rotation.y) - 180) < 65 ? 180 : 0;
+      rotation.y = 0;
       applyRotation();
     });
   }
@@ -139,15 +142,34 @@ export function bindDetailInteractions(root, handlers) {
   root.querySelectorAll("[data-switch-card]").forEach((button) => {
     button.addEventListener("click", () => handlers.onSwitch(button.dataset.switchCard));
   });
+  root.querySelectorAll("[data-deck-art-toggle]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const box = button.closest("[data-deck-box]");
+      if (!box) return;
+      const custom = box.dataset.customShowing !== "true";
+      box.dataset.customShowing = String(custom);
+      box.style.setProperty("--deck-bg", `url('${custom ? box.dataset.customArt : box.dataset.originalArt}')`);
+      button.setAttribute("aria-pressed", custom ? "true" : "false");
+      button.title = custom ? "Show original card art" : "Show custom card art";
+    });
+  });
 }
 
 function deckBox(card) {
   if (!card.deckName && !card.moxfieldUrl) return "";
+  const originalArt = artCropImage(card.deckImage || card.commanderImage || card.frontImage);
+  const customArt = card.frontImage || originalArt;
   return `
-    <a class="deck-box" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer">
-      <span class="moxfield-mark" aria-hidden="true"><img src="assets/moxfield-favicon.ico" alt=""></span>
+    <section class="deck-box" data-deck-box data-original-art="${escapeAttribute(originalArt)}" data-custom-art="${escapeAttribute(customArt)}" style="--deck-bg: url('${escapeAttribute(originalArt)}')">
+      <a class="deck-box-link" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer" aria-label="${escapeAttribute(card.deckName || "Moxfield deck")}"></a>
       <span class="deck-copy">
-        <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
+        <span class="deck-title-row">
+          <img class="moxfield-mark" src="assets/moxfield-favicon.ico" alt="" aria-hidden="true">
+          <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
+          <button class="deck-art-toggle" type="button" data-deck-art-toggle aria-pressed="false" title="Show custom card art" aria-label="Toggle deck art">${eyeIcon()}</button>
+        </span>
         <span class="deck-meta-row">
           ${card.deckFormat ? `<span>${escapeHtml(card.deckFormat)}</span>` : ""}
           ${bracketTag(card)}
@@ -155,8 +177,17 @@ function deckBox(card) {
         ${commanderRoleTag(card)}
         ${deckOwners(card)}
       </span>
-      <span class="deck-commander-art" style="--deck-bg: url('${escapeAttribute(card.deckImage || card.commanderImage || card.frontImage)}')"></span>
-    </a>
+      <span class="deck-commander-art"></span>
+    </section>
+  `;
+}
+
+function eyeIcon() {
+  return `
+    <svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6-3.2 6-9.2 6-9.2-6-9.2-6Z"></path>
+      <circle cx="12" cy="12" r="2.6"></circle>
+    </svg>
   `;
 }
 
@@ -190,16 +221,12 @@ function deckOwners(card) {
   `;
 }
 
-function differentArtist(card) {
-  return card.artist && card.cardArtist && card.artist.trim().toLowerCase() !== card.cardArtist.trim().toLowerCase();
-}
-
 function signatureLabel(card) {
   return card.kind?.toLowerCase().includes("alter") ? "Alter" : "Signature";
 }
 
 function signatureValue(card) {
-  const parts = [card.signaturePlace, card.signatureYear].filter(Boolean).map(escapeHtml);
+  const parts = [card.signaturePlace, card.signatureYear].filter(Boolean);
   return parts.join(", ");
 }
 
@@ -241,7 +268,7 @@ function faviconUrl(url) {
 }
 
 function imageFace(src, className) {
-  return `<div class="preview-face ${className}"><img src="${src}" alt="" draggable="false"></div>`;
+  return `<div class="preview-face ${className}"><img src="${escapeAttribute(src)}" alt="" draggable="false"></div>`;
 }
 
 function line(label, value) {
@@ -252,15 +279,39 @@ function line(label, value) {
 function setIcon(code) {
   const normalized = String(code || "").trim().toLowerCase();
   if (!normalized) return "";
-  return `<span class="detail-set-icon"><img src="https://svgs.scryfall.io/sets/${escapeHtml(normalized)}.svg" alt="${escapeHtml(normalized)}"></span>`;
+  const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
+  return `<span class="detail-set-icon"><img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}"></span>`;
 }
 
-function normalizeRotation(value) {
-  return ((value % 360) + 360) % 360;
+function relatedCard(card) {
+  const image = card.frontImage || DEFAULT_CARD_BACK;
+  return `
+    <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
+      <span class="card-image-wrap"><img src="${escapeAttribute(image)}" alt="" draggable="false"></span>
+      <span class="tile-meta">
+        <span class="tile-name">${escapeHtml(card.name)}</span>
+        <span class="tile-foot">
+          <span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>
+          <span class="tag tile-kind">${escapeHtml(card.kind)}</span>
+        </span>
+      </span>
+    </button>
+  `;
 }
 
-function isArtistProof(card) {
-  return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
+function setIconImage(code) {
+  const normalized = String(code || "").trim().toLowerCase();
+  if (!normalized) return "?";
+  const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
+  return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
+}
+
+function foilStar() {
+  return `
+    <svg class="foil-title-star" viewBox="0 0 18 18" aria-hidden="true">
+      <path d="m9 1.7 1.35 4.08 4.3-1.2-2.28 3.62 3.68 2.45-4.38.38.47 4.45L9 12.45l-3.14 3.03.47-4.45-4.38-.38L5.63 8.2 3.35 4.58l4.3 1.2L9 1.7Z"></path>
+    </svg>
+  `;
 }
 
 function escapeHtml(value) {
@@ -269,4 +320,8 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
+function artCropImage(value) {
+  return String(value || "").replace("-normal.webp", "-art_crop.webp");
 }

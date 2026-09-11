@@ -28,12 +28,12 @@ function normalizeDeck(deck, id) {
   const owner = deck.createdByUser || deck.owner || deck.author || deck.user || {};
   const owners = deckOwners(deck, owner);
   const commanderImage = firstUrl([
-    pickNamedUrl(primaryCommander, ["image", "normal", "art_crop", "thumbnail"]),
-    pickNamedUrl(commanders, ["image", "normal", "art_crop", "thumbnail"]),
+    pickNamedUrl(primaryCommander, ["art_crop", "image", "normal", "thumbnail"]),
+    pickNamedUrl(commanders, ["art_crop", "image", "normal", "thumbnail"]),
     moxfieldCardImage(primaryCommander.card || primaryCommander),
   ]);
   const mainImage = firstUrl([
-    pickNamedUrl(deck.main, ["image", "normal", "art_crop", "thumbnail"]),
+    pickNamedUrl(deck.main, ["art_crop", "image", "normal", "thumbnail"]),
     moxfieldCardImage(deck.main),
   ]);
   const deckImage = firstUrl([
@@ -139,7 +139,7 @@ function firstUrl(values) {
 
 function moxfieldCardImage(card) {
   const id = card?.card?.id || card?.id || card?.cardId || "";
-  return id ? `https://assets.moxfield.net/cards/card-${id}-normal.webp` : "";
+  return id ? `https://assets.moxfield.net/cards/card-${id}-art_crop.webp` : "";
 }
 
 function pickDirectNamedUrl(value, hints) {

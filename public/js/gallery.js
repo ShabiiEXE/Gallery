@@ -56,7 +56,8 @@ function cardTile(card, count) {
           <span>${escapeHtml(artist)}</span>
         </span>
         <span class="tile-foot">
-          <span class="set-icon">${setIcon(card.setCode)}</span>
+          <span class="set-icon">${setIcon(card.setCode || card.setName)}</span>
+          <span class="tag tile-kind">${escapeHtml(card.kind)}</span>
           <span>${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
       </span>
@@ -75,7 +76,7 @@ function isArtistProof(card) {
 function setIcon(code) {
   const normalized = String(code || "").trim().toLowerCase();
   if (!normalized) return "?";
-  const iconCode = normalized === "sld" ? "star" : normalized;
+  const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
   return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
 }
 

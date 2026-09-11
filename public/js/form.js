@@ -19,6 +19,7 @@ const frontPhoto = $("frontPhoto");
 const backPhoto = $("backPhoto");
 const collectorArtist = $("collectorArtist");
 const artistSocialInput = $("artistSocialInput");
+const artistSocialFavicon = $("artistSocialFavicon");
 const artistLabel = $("artistLabel");
 const signatureYear = $("signatureYear");
 const signaturePlace = $("signaturePlace");
@@ -41,6 +42,7 @@ const cardArtistInput = $("cardArtistInput");
 const scryfallInput = $("scryfallInput");
 const saveCardButton = $("saveCardButton");
 const deleteCardButton = $("deleteCardButton");
+const closeEditButton = document.querySelector("[data-close-edit]");
 
 export function initForm({ onSave, onDelete }) {
   fillSelect(cardKind, CARD_KINDS.map((kind) => [kind, kind]));
@@ -50,12 +52,22 @@ export function initForm({ onSave, onDelete }) {
   cardKind.addEventListener("change", updateArtistLabel);
   cardLanguage.addEventListener("change", () => syncFlagSelect(cardLanguage, LANGUAGES));
   lookupButton.addEventListener("click", runLookup);
+  lookupInput.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    runLookup();
+  });
   fetchDeckButton.addEventListener("click", fetchDeck);
   moxfieldInput.addEventListener("input", scheduleDeckFetch);
   moxfieldInput.addEventListener("paste", scheduleDeckFetch);
+  artistSocialInput.addEventListener("input", updateSocialFavicon);
   deckFormatInput.addEventListener("input", updateCommanderRoleField);
   setCodeInput.addEventListener("input", updateSetIcon);
-  saveCardButton.addEventListener("click", () => saveCurrent(onSave));
+  cardForm.addEventListener("keydown", preventAccidentalSubmit);
+  document.querySelectorAll("[data-save-card]").forEach((button) => {
+    button.addEventListener("click", () => saveCurrent(onSave));
+  });
+  closeEditButton?.addEventListener("click", () => editDialog.close());
   deleteCardButton.addEventListener("click", async () => {
     cardFormMessage.textContent = "Saving to Cloudflare...";
     deleteCardButton.disabled = true;
@@ -110,6 +122,7 @@ export function openCardForm(card = null) {
   updateArtistLabel();
   syncFlagSelect(cardLanguage, LANGUAGES);
   updateSetIcon();
+  updateSocialFavicon();
   updateCommanderRoleField();
   editDialog.showModal();
 }
@@ -228,7 +241,7 @@ async function saveCurrent(onSave) {
   }
   const backImage = await imageValue(backPhoto, cardForm.dataset.backImage);
 
-  saveCardButton.disabled = true;
+  setSaveDisabled(true);
   cardFormMessage.textContent = "Saving to Cloudflare...";
   try {
     await onSave({
@@ -266,8 +279,15 @@ async function saveCurrent(onSave) {
   } catch (error) {
     cardFormMessage.textContent = error.message;
   } finally {
-    saveCardButton.disabled = false;
+    setSaveDisabled(false);
   }
+}
+
+function setSaveDisabled(disabled) {
+  document.querySelectorAll("[data-save-card]").forEach((button) => {
+    button.disabled = disabled;
+  });
+  saveCardButton.disabled = disabled;
 }
 
 function updateArtistLabel() {
@@ -279,8 +299,35 @@ function updateSetIcon() {
   const code = setCodeInput.value.trim().toLowerCase();
   setCodeIcon.hidden = !code;
   if (!code) return;
-  setCodeIcon.src = `https://svgs.scryfall.io/sets/${encodeURIComponent(code)}.svg`;
+  const iconCode = code === "sld" || code.includes("secret lair") ? "star" : code;
+  setCodeIcon.src = `https://svgs.scryfall.io/sets/${encodeURIComponent(iconCode)}.svg`;
   setCodeIcon.alt = code;
+}
+
+function updateSocialFavicon() {
+  const src = faviconUrl(artistSocialInput.value.trim());
+  artistSocialFavicon.hidden = !src;
+  if (!src) {
+    artistSocialFavicon.removeAttribute("src");
+    return;
+  }
+  artistSocialFavicon.src = src;
+}
+
+function faviconUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(parsed.hostname)}&sz=64`;
+  } catch {
+    return "";
+  }
+}
+
+function preventAccidentalSubmit(event) {
+  if (event.key !== "Enter") return;
+  if (event.target === lookupInput) return;
+  if (event.target instanceof HTMLTextAreaElement) return;
+  event.preventDefault();
 }
 
 function updateCommanderRoleField() {
