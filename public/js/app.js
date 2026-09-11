@@ -41,6 +41,7 @@ const cardDetail = $("cardDetail");
 const resultCount = $("resultCount");
 const emptyState = $("emptyState");
 const galleryGrid = $("galleryGrid");
+const clearCacheButton = $("clearCacheButton");
 
 const app = {
   cards: loadCards(),
@@ -75,6 +76,7 @@ function bindEvents() {
   document.querySelectorAll("[data-open-add]").forEach((button) => button.addEventListener("click", openAddCard));
   settingsButton.addEventListener("click", openSettings);
   saveSettingsButton.addEventListener("click", commitSettings);
+  clearCacheButton.addEventListener("click", clearBrowserCache);
   languageSelect.addEventListener("change", () => updateSettingsLanguageFlag());
   [loginDialog, settingsDialog, editDialog, cardDialog].forEach((dialog) => {
     dialog?.addEventListener("close", () => render());
@@ -260,4 +262,23 @@ function updateSettingsLanguageFlag() {
   const language = LANGUAGES.find((item) => item.value === languageSelect.value) || LANGUAGES[0];
   settingsLanguageFlag.src = `assets/flags/${language.flag}.svg`;
   settingsLanguageFlag.alt = language.label;
+}
+
+async function clearBrowserCache() {
+  clearCacheButton.disabled = true;
+  clearCacheButton.textContent = "Clearing cache...";
+  try {
+    if ("caches" in window) {
+      const names = await caches.keys();
+      await Promise.all(names.map((name) => caches.delete(name)));
+    }
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+    }
+  } finally {
+    const url = new URL(window.location.href);
+    url.searchParams.set("fresh", Date.now().toString());
+    window.location.replace(url.toString());
+  }
 }
