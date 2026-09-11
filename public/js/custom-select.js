@@ -13,6 +13,7 @@ export function syncFlagSelect(select, languages) {
     .map((option) => ({
       value: option.value,
       label: option.textContent.trim(),
+      image: option.dataset.image || "",
       selected: option.selected,
     }));
   const selected = options.find((option) => option.selected) || options[0] || { value: "", label: "" };
@@ -184,6 +185,7 @@ function setChoiceMarkup(option) {
 function basicChoiceMarkup(option) {
   return `
     <span class="platform-logo-choice">
+      ${option.image ? `<span class="platform-logo-choice-thumb"><img src="${escapeHtml(option.image)}" alt=""></span>` : ""}
       <span class="platform-logo-choice-label">${escapeHtml(option.label || option.value)}</span>
     </span>
   `;

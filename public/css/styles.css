@@ -512,6 +512,25 @@ select:hover {
   padding-left: 0;
 }
 
+.platform-logo-choice-thumb {
+  position: relative;
+  z-index: 2;
+  width: 24px;
+  height: 32px;
+  flex: 0 0 24px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
+}
+
+.platform-logo-choice-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .platform-logo-option:hover .platform-logo-choice-label,
 .platform-logo-option:focus-visible .platform-logo-choice-label,
 .platform-logo-option.is-selected .platform-logo-choice-label {
@@ -1297,6 +1316,29 @@ label:has(> .platform-logo-select.is-open),
   align-items: end;
 }
 
+.asset-select-preview {
+  display: block;
+  width: min(104px, 100%);
+  aspect-ratio: 488 / 680;
+  margin-top: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.26);
+}
+
+.asset-select-preview[hidden] {
+  display: none;
+}
+
+.asset-select-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .wide,
 .actual-info {
   grid-column: 1 / -1;
@@ -1339,6 +1381,7 @@ label:has(> .platform-logo-select.is-open),
   text-transform: uppercase;
 }
 
+.card-info-section h3,
 .moxfield-info-section h3 {
   color: var(--accent-2);
 }

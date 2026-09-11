@@ -8,7 +8,7 @@ const galleryGrid = $("galleryGrid");
 
 export function renderFilters(cards, filters) {
   fillFilter(typeFilter, [["", "All types"], ...CARD_KINDS.map((kind) => [kind, kind])], filters.type);
-  fillFilter(setFilter, [["", "All sets", "plst"], ...uniqueSets(cards)], filters.set);
+  fillFilter(setFilter, [["", "All sets", "planeswalker"], ...uniqueSets(cards)], filters.set);
   fillFilter(artistFilter, [["", "All artists"], ...unique(cards.map((card) => card.artist || card.cardArtist)).map((artist) => [artist, artist])], filters.artist);
 }
 

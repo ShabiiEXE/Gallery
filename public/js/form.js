@@ -20,6 +20,8 @@ const frontPhoto = $("frontPhoto");
 const backPhoto = $("backPhoto");
 const frontAssetSelect = $("frontAssetSelect");
 const backAssetSelect = $("backAssetSelect");
+const frontAssetPreview = $("frontAssetPreview");
+const backAssetPreview = $("backAssetPreview");
 const collectorArtist = $("collectorArtist");
 const artistSocialInput = $("artistSocialInput");
 const artistSocialFavicon = $("artistSocialFavicon");
@@ -71,10 +73,10 @@ export function initForm({ onSave, onDelete }) {
   fetchDeckButton.addEventListener("click", fetchDeck);
   moxfieldInput.addEventListener("input", scheduleDeckFetch);
   moxfieldInput.addEventListener("paste", scheduleDeckFetch);
-  frontAssetSelect?.addEventListener("change", () => applyPhotoAsset(frontAssetSelect, frontPhoto, "frontImage"));
-  backAssetSelect?.addEventListener("change", () => applyPhotoAsset(backAssetSelect, backPhoto, "backImage"));
-  frontPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(frontAssetSelect, frontPhoto));
-  backPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(backAssetSelect, backPhoto));
+  frontAssetSelect?.addEventListener("change", () => applyPhotoAsset(frontAssetSelect, frontPhoto, frontAssetPreview, "frontImage"));
+  backAssetSelect?.addEventListener("change", () => applyPhotoAsset(backAssetSelect, backPhoto, backAssetPreview, "backImage"));
+  frontPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(frontAssetSelect, frontPhoto, frontAssetPreview));
+  backPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(backAssetSelect, backPhoto, backAssetPreview));
   artistSocialInput.addEventListener("input", updateSocialFavicon);
   deckFormatInput.addEventListener("input", updateCommanderRoleField);
   setCodeInput.addEventListener("input", updateSetIcon);
@@ -135,8 +137,8 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
   cardForm.dataset.deckOwners = JSON.stringify(Array.isArray(data.deckOwners) ? data.deckOwners : []);
   renderDeckOwnersEditor();
-  syncPhotoAssetSelect(frontAssetSelect, cardForm.dataset.frontImage);
-  syncPhotoAssetSelect(backAssetSelect, cardForm.dataset.backImage);
+  syncPhotoAssetSelect(frontAssetSelect, frontAssetPreview, cardForm.dataset.frontImage);
+  syncPhotoAssetSelect(backAssetSelect, backAssetPreview, cardForm.dataset.backImage);
   updateArtistLabel();
   syncCustomSelect(cardKind);
   syncFlagSelect(cardLanguage, LANGUAGES);
@@ -372,27 +374,43 @@ function fillSelect(select, entries) {
 
 function fillPhotoAssetSelect(select) {
   if (!select) return;
-  const options = PHOTO_ASSETS.map((path) => `<option value="${escapeHtml(path)}">${escapeHtml(photoAssetLabel(path))}</option>`);
+  const options = PHOTO_ASSETS.map((path) => `<option value="${escapeHtml(path)}" data-image="${escapeHtml(path)}">${escapeHtml(photoAssetLabel(path))}</option>`);
   select.innerHTML = [`<option value="">Current/uploaded image</option>`, ...options].join("");
 }
 
-function applyPhotoAsset(select, input, datasetKey) {
+function applyPhotoAsset(select, input, preview, datasetKey) {
   if (!select?.value) return;
   cardForm.dataset[datasetKey] = select.value;
   if (input) input.value = "";
+  updatePhotoAssetPreview(preview, select.value);
   syncCustomSelect(select);
 }
 
-function clearPhotoAssetWhenUploaded(select, input) {
+function clearPhotoAssetWhenUploaded(select, input, preview) {
   if (!select || !input?.files?.length) return;
   select.value = "";
+  updatePhotoAssetPreview(preview, "");
   syncCustomSelect(select);
 }
 
-function syncPhotoAssetSelect(select, image) {
+function syncPhotoAssetSelect(select, preview, image) {
   if (!select) return;
   select.value = PHOTO_ASSETS.includes(image) ? image : "";
+  updatePhotoAssetPreview(preview, select.value);
   syncCustomSelect(select);
+}
+
+function updatePhotoAssetPreview(preview, image) {
+  if (!preview) return;
+  const img = preview.querySelector("img");
+  preview.hidden = !image;
+  if (!img) return;
+  if (!image) {
+    img.removeAttribute("src");
+    return;
+  }
+  img.src = image;
+  img.alt = photoAssetLabel(image);
 }
 
 function photoAssetLabel(path) {

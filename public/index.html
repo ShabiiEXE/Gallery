@@ -81,6 +81,7 @@
           </form>
 
           <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
+          <p class="empty-state" id="emptyState" hidden>No cards yet.</p>
         </section>
     </main>
 
@@ -215,6 +216,9 @@
           <label>
             <span>Pick front</span>
             <select id="frontAssetSelect"></select>
+            <span class="asset-select-preview" id="frontAssetPreview" hidden>
+              <img alt="">
+            </span>
           </label>
           <label>
             <span data-i18n="back_photo">Back photo</span>
@@ -223,6 +227,9 @@
           <label>
             <span>Pick back</span>
             <select id="backAssetSelect"></select>
+            <span class="asset-select-preview" id="backAssetPreview" hidden>
+              <img alt="">
+            </span>
           </label>
           <label>
             <span id="artistLabel" data-i18n="artist">Artist</span>

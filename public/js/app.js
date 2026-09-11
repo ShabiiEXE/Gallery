@@ -285,8 +285,8 @@ function renderGalleryOnly() {
   const groups = bundleCards(visible, app.device.bundleSameName);
   renderGallery(groups, { onOpen: openDetail });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
-  emptyState.hidden = app.cards.length > 0;
-  galleryGrid.hidden = app.cards.length === 0;
+  if (emptyState) emptyState.hidden = app.cards.length > 0;
+  if (galleryGrid) galleryGrid.hidden = app.cards.length === 0;
 }
 
 function applyModuleSettings() {
@@ -302,8 +302,10 @@ function applyModuleSettings() {
 
 async function clearBrowserCache() {
   clearCacheButton.disabled = true;
-  clearCacheButton.textContent = "Clearing cache...";
+  clearCacheButton.textContent = "Resetting site...";
   try {
+    localStorage.clear();
+    sessionStorage.clear();
     if ("caches" in window) {
       const names = await caches.keys();
       await Promise.all(names.map((name) => caches.delete(name)));

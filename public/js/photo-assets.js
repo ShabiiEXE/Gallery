@@ -1,7 +1,8 @@
 export const PHOTO_ASSETS = [
   "assets/cards/2B_Nier_Automata.png",
+  "assets/cards/aang_back.webp",
   "assets/cards/aang.png",
-  "assets/cards/absolute-virtu.png",
+  "assets/cards/absolute-virtue_2.png",
   "assets/cards/academy_back.png",
   "assets/cards/academy_front.png",
   "assets/cards/Arbor-Elf.png",
@@ -58,10 +59,9 @@ export const PHOTO_ASSETS = [
   "assets/cards/staff-of-domination.png",
   "assets/cards/tegwyll.png",
   "assets/cards/tiamat.png",
-  "assets/cards/tla-304-aang-destined-savior.webp",
   "assets/cards/virtue.png",
   "assets/cards/vivi sign.png",
-  "assets/cards/Vivi.jpg",
-  "assets/cards/vivi(1).png",
+  "assets/cards/Vivi_1.jpg",
+  "assets/cards/vivi.png",
   "assets/cards/yenna.png"
 ];
