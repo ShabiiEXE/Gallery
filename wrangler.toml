@@ -9,3 +9,7 @@ EDITOR_AUTH_SCOPE = "gallery"
 [assets]
 directory = "public"
 binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "MAGIC_GALLERY"
+id = "d4771fc2020d4580a550bce33ee37cc5"
