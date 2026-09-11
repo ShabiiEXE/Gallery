@@ -73,20 +73,25 @@ export function bindDetailInteractions(root, handlers) {
     const applyRotation = () => {
       preview.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
     };
+    const updateShine = (event) => {
+      const rect = preview.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      preview.style.setProperty("--shine-x", `${Math.max(0, Math.min(100, x * 100)).toFixed(1)}%`);
+      preview.style.setProperty("--shine-y", `${Math.max(0, Math.min(100, y * 100)).toFixed(1)}%`);
+    };
     preview.addEventListener("pointermove", (event) => {
+      updateShine(event);
       if (drag) {
+        event.preventDefault();
         rotation.y = drag.startY + ((event.clientX - drag.x) * 0.45);
         rotation.x = drag.startX - ((event.clientY - drag.y) * 0.45);
         applyRotation();
         return;
       }
-      const rect = preview.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width - 0.5;
-      const y = (event.clientY - rect.top) / rect.height - 0.5;
-      preview.style.setProperty("--shine-x", `${((x + 0.5) * 100).toFixed(1)}%`);
-      preview.style.setProperty("--shine-y", `${((y + 0.5) * 100).toFixed(1)}%`);
     });
     preview.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
       preview.setPointerCapture(event.pointerId);
       drag = { x: event.clientX, y: event.clientY, startX: rotation.x, startY: rotation.y };
       preview.classList.add("is-dragging");
@@ -208,7 +213,7 @@ function faviconUrl(url) {
 }
 
 function imageFace(src, className) {
-  return `<div class="preview-face ${className}"><img src="${src}" alt=""></div>`;
+  return `<div class="preview-face ${className}"><img src="${src}" alt="" draggable="false"></div>`;
 }
 
 function line(label, value) {
