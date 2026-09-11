@@ -173,7 +173,6 @@ function deckBox(card) {
       <span class="deck-copy">
         <span class="deck-title-row">
           <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
-          <img class="moxfield-mark" src="assets/moxfield-favicon.ico" alt="" aria-hidden="true">
         </span>
         <span class="deck-meta-row">
           ${deckFormatPill(card)}
