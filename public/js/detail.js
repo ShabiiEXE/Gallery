@@ -11,6 +11,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       : `<div class="preview-face preview-back magic-back">Magic</div>`;
   const shownFront = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
   const shownBack = isArtistProof(card) && card.backImage ? card.frontImage : "";
+  const canFlip = Boolean(card.backImage);
 
   return `
     <div class="modal-head">
@@ -21,8 +22,8 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       </div>
     </div>
     <div class="detail-layout">
-      <div class="card-stage">
-        <div class="preview-card ${card.foil ? "foil-sheen" : ""}" data-preview-card>
+      <div class="card-stage" data-card-stage>
+        <div class="preview-card ${card.foil ? "foil-sheen" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
           ${imageFace(shownFront || card.frontImage, "preview-front")}
           ${shownBack ? imageFace(shownBack, "preview-back") : back}
         </div>
@@ -33,14 +34,11 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
           <span class="tag">${escapeHtml(card.kind)}</span>
           ${card.artist ? `<span class="detail-title-artist">${escapeHtml(card.artist)}${socialLink(card.artistSocialUrl)}</span>` : ""}
         </div>
-        <div class="detail-set-row">
-          ${setIcon(card.setCode)}
-          <span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>
-        </div>
         <div class="detail-lines">
-          ${differentArtist(card) ? line("Card artist", card.cardArtist) : ""}
-          ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
           ${line(signatureLabel(card), signatureValue(card))}
+          ${line("Info", `${setIcon(card.setCode)}<span>${escapeHtml([card.setName, card.collectorNumber ? `#${card.collectorNumber}` : ""].filter(Boolean).join(" "))}</span>`)}
+          ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
+          ${differentArtist(card) ? line("Card artist", card.cardArtist) : ""}
           ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
@@ -67,10 +65,14 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
 
 export function bindDetailInteractions(root, handlers) {
   const preview = root.querySelector("[data-preview-card]");
+  const stage = root.querySelector("[data-card-stage]");
   if (preview) {
+    const canFlip = preview.dataset.canFlip === "true";
     const rotation = { x: 0, y: 0 };
     let drag = null;
+    let moved = false;
     const applyRotation = () => {
+      if (!canFlip) rotation.y = Math.max(-38, Math.min(38, rotation.y));
       preview.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
     };
     const updateShine = (event) => {
@@ -84,6 +86,7 @@ export function bindDetailInteractions(root, handlers) {
       updateShine(event);
       if (drag) {
         event.preventDefault();
+        moved = moved || Math.abs(event.clientX - drag.x) > 4 || Math.abs(event.clientY - drag.y) > 4;
         rotation.y = drag.startY + ((event.clientX - drag.x) * 0.45);
         rotation.x = drag.startX - ((event.clientY - drag.y) * 0.45);
         applyRotation();
@@ -94,9 +97,15 @@ export function bindDetailInteractions(root, handlers) {
       event.preventDefault();
       preview.setPointerCapture(event.pointerId);
       drag = { x: event.clientX, y: event.clientY, startX: rotation.x, startY: rotation.y };
+      moved = false;
       preview.classList.add("is-dragging");
     });
     preview.addEventListener("pointerup", () => {
+      if (canFlip && !moved) {
+        rotation.x = 0;
+        rotation.y = Math.abs(normalizeRotation(rotation.y) - 180) < 65 ? 0 : 180;
+        applyRotation();
+      }
       drag = null;
       preview.classList.remove("is-dragging");
     });
@@ -107,6 +116,21 @@ export function bindDetailInteractions(root, handlers) {
     preview.addEventListener("dblclick", () => {
       rotation.x = 0;
       rotation.y = 0;
+      applyRotation();
+    });
+    stage?.addEventListener("pointermove", (event) => {
+      if (drag || preview.matches(":hover")) return;
+      const rect = stage.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) - 0.5;
+      const y = ((event.clientY - rect.top) / rect.height) - 0.5;
+      rotation.y = x * 34;
+      rotation.x = y * -28;
+      applyRotation();
+    });
+    stage?.addEventListener("pointerleave", () => {
+      if (drag) return;
+      rotation.x = 0;
+      rotation.y = canFlip && Math.abs(normalizeRotation(rotation.y) - 180) < 65 ? 180 : 0;
       applyRotation();
     });
   }
@@ -122,25 +146,29 @@ function deckBox(card) {
   return `
     <a class="deck-box" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer">
       <span class="moxfield-mark" aria-hidden="true"><img src="assets/moxfield-favicon.ico" alt=""></span>
-      <span class="deck-commander-art" style="--deck-bg: url('${escapeAttribute(card.deckImage || card.commanderImage || card.frontImage)}')">
-        <img src="${escapeAttribute(card.commanderImage || card.deckImage || card.frontImage)}" alt="">
-      </span>
       <span class="deck-copy">
         <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
         <span class="deck-meta-row">
           ${card.deckFormat ? `<span>${escapeHtml(card.deckFormat)}</span>` : ""}
-          ${card.deckFormat?.toLowerCase() === "commander" && card.deckBracket ? `<span class="tag bracket-tag">Bracket ${escapeHtml(card.deckBracket)}</span>` : ""}
-          ${commanderRoleTag(card)}
+          ${bracketTag(card)}
         </span>
+        ${commanderRoleTag(card)}
         ${deckOwners(card)}
       </span>
+      <span class="deck-commander-art" style="--deck-bg: url('${escapeAttribute(card.deckImage || card.commanderImage || card.frontImage)}')"></span>
     </a>
   `;
 }
 
 function commanderRoleTag(card) {
   if (card.deckFormat?.toLowerCase() !== "commander") return "";
-  return `<span class="tag bracket-tag">${card.deckCommander ? "Commander" : "Part of the 99"}</span>`;
+  return `<span class="deck-role-pill">${card.deckCommander ? "Commander" : "Part of the 99"}</span>`;
+}
+
+function bracketTag(card) {
+  if (card.deckFormat?.toLowerCase() !== "commander" || !card.deckBracket) return "";
+  const bracket = String(card.deckBracket).trim().match(/\d+/)?.[0] || "";
+  return `<span class="tag bracket-tag bracket-${escapeHtml(bracket)}">Bracket ${escapeHtml(card.deckBracket)}</span>`;
 }
 
 function deckOwners(card) {
@@ -225,6 +253,10 @@ function setIcon(code) {
   const normalized = String(code || "").trim().toLowerCase();
   if (!normalized) return "";
   return `<span class="detail-set-icon"><img src="https://svgs.scryfall.io/sets/${escapeHtml(normalized)}.svg" alt="${escapeHtml(normalized)}"></span>`;
+}
+
+function normalizeRotation(value) {
+  return ((value % 360) + 360) % 360;
 }
 
 function isArtistProof(card) {

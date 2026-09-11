@@ -29,6 +29,7 @@ const deckNameInput = $("deckNameInput");
 const deckFormatInput = $("deckFormatInput");
 const deckBracketInput = $("deckBracketInput");
 const deckOwnerInput = $("deckOwnerInput");
+const deckOwnersEditor = $("deckOwnersEditor");
 const commanderRoleField = $("commanderRoleField");
 const deckCommanderInput = $("deckCommanderInput");
 const setNameInput = $("setNameInput");
@@ -105,6 +106,7 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckImage = data.deckImage || "";
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
   cardForm.dataset.deckOwners = JSON.stringify(Array.isArray(data.deckOwners) ? data.deckOwners : []);
+  renderDeckOwnersEditor();
   updateArtistLabel();
   syncFlagSelect(cardLanguage, LANGUAGES);
   updateSetIcon();
@@ -138,6 +140,7 @@ function applyDeck(deck) {
   if (Array.isArray(deck.owners)) cardForm.dataset.deckOwners = JSON.stringify(deck.owners);
   if (deck.deckImage) cardForm.dataset.deckImage = deck.deckImage;
   if (deck.commanderImage) cardForm.dataset.commanderImage = deck.commanderImage;
+  renderDeckOwnersEditor();
   updateCommanderRoleField();
 }
 
@@ -292,6 +295,53 @@ function fillSelect(select, entries) {
   select.innerHTML = entries.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
 }
 
+function renderDeckOwnersEditor() {
+  const owners = safeJsonArray(cardForm.dataset.deckOwners);
+  if (!owners.length) {
+    deckOwnersEditor.innerHTML = "";
+    return;
+  }
+  deckOwnersEditor.innerHTML = `
+    <span>Deck owners</span>
+    <div class="deck-owner-editor-list">
+      ${owners.map((owner, index) => `
+        <div class="deck-owner-editor-row" data-owner-index="${index}">
+          ${owner.avatar ? `<img src="${escapeHtml(owner.avatar)}" alt="">` : "<span></span>"}
+          <b>${escapeHtml(owner.name || "")}</b>
+          <button class="icon-button" type="button" data-owner-move="-1" title="Move up" aria-label="Move up">↑</button>
+          <button class="icon-button" type="button" data-owner-move="1" title="Move down" aria-label="Move down">↓</button>
+          <button class="danger-button icon-only-button" type="button" data-owner-remove title="Remove owner" aria-label="Remove owner">×</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  deckOwnersEditor.querySelectorAll("[data-owner-move]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest("[data-owner-index]");
+      const from = Number(row?.dataset.ownerIndex);
+      const to = from + Number(button.dataset.ownerMove);
+      if (to < 0 || to >= owners.length) return;
+      const next = [...owners];
+      [next[from], next[to]] = [next[to], next[from]];
+      setDeckOwners(next);
+    });
+  });
+  deckOwnersEditor.querySelectorAll("[data-owner-remove]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest("[data-owner-index]");
+      const index = Number(row?.dataset.ownerIndex);
+      setDeckOwners(owners.filter((_, ownerIndex) => ownerIndex !== index));
+    });
+  });
+}
+
+function setDeckOwners(owners) {
+  cardForm.dataset.deckOwners = JSON.stringify(owners);
+  deckOwnerInput.value = owners.map((owner) => owner.name).filter(Boolean).join(", ");
+  cardForm.dataset.deckOwnerAvatar = owners[0]?.avatar || "";
+  renderDeckOwnersEditor();
+}
+
 function safeJsonArray(value) {
   try {
     const parsed = JSON.parse(value || "[]");
@@ -299,6 +349,10 @@ function safeJsonArray(value) {
   } catch {
     return [];
   }
+}
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 }
 
 function imageValue(input, fallback) {
