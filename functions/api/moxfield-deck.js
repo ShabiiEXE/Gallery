@@ -26,6 +26,7 @@ function normalizeDeck(deck, id) {
   const commanders = zoneCards(deck.commanders || deck.commander || deck.boards?.commanders);
   const primaryCommander = commanders[0] || {};
   const owner = deck.createdByUser || deck.owner || deck.author || deck.user || {};
+  const owners = deckOwners(deck, owner);
   const commanderImage = firstUrl([
     pickNamedUrl(primaryCommander, ["image", "normal", "art_crop", "thumbnail"]),
     pickNamedUrl(commanders, ["image", "normal", "art_crop", "thumbnail"]),
@@ -48,14 +49,50 @@ function normalizeDeck(deck, id) {
     name: text(deck.name || deck.title),
     format: formatName(deck.format || deck.formatName || deck.deckFormat),
     bracket: text(deck.bracket || deck.commanderBracket || deck.edhBracket || deck.powerLevel || deck.power_level),
-    owner: text(owner.displayName || owner.userName || owner.username || owner.name || deck.createdBy || deck.authorName),
-    ownerAvatar: firstUrl([
-      pickDirectNamedUrl(owner, ["avatar", "profile", "image", "photo", "picture"]),
-      pickNamedUrl(owner, ["avatar", "profile", "image", "photo", "picture"]),
-    ]),
+    owner: text(owners.map((item) => item.name).filter(Boolean).join(", ")),
+    ownerAvatar: owners[0]?.avatar || "",
+    owners,
     deckImage,
     commanderImage,
   };
+}
+
+function deckOwners(deck, primaryOwner) {
+  const rawOwners = [
+    primaryOwner,
+    deck.owners,
+    deck.collaborators,
+    deck.authors,
+    deck.users,
+    deck.sharedWithUsers,
+    deck.contributors,
+  ];
+  const owners = rawOwners.flatMap((value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (Array.isArray(value.users)) return value.users;
+    if (Array.isArray(value.owners)) return value.owners;
+    if (typeof value === "object" && !ownerName(value)) return Object.values(value).filter((item) => item && typeof item === "object");
+    if (typeof value === "object") return [value];
+    return [];
+  });
+  const byName = new Map();
+  owners.forEach((item) => {
+    const name = ownerName(item);
+    if (!name || byName.has(name.toLowerCase())) return;
+    byName.set(name.toLowerCase(), {
+      name,
+      avatar: firstUrl([
+        pickDirectNamedUrl(item, ["avatar", "profile", "image", "photo", "picture"]),
+        pickNamedUrl(item, ["avatar", "profile", "image", "photo", "picture"]),
+      ]),
+    });
+  });
+  return [...byName.values()];
+}
+
+function ownerName(item) {
+  return text(item?.displayName || item?.userName || item?.username || item?.name || item?.ownerName);
 }
 
 function moxfieldDeckId(value) {

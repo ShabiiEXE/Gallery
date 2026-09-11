@@ -39,22 +39,10 @@ export function renderGallery(groups, { onOpen }) {
   galleryGrid.querySelectorAll("[data-card-open]").forEach((button) => {
     button.addEventListener("click", () => onOpen(button.dataset.cardId));
   });
-  galleryGrid.querySelectorAll("[data-original-toggle]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const tile = button.closest("[data-card-tile]");
-      const image = tile?.querySelector("[data-card-image]");
-      if (!tile || !image) return;
-      const original = tile.dataset.originalShowing !== "true";
-      tile.dataset.originalShowing = String(original);
-      image.src = original ? button.dataset.originalSrc : button.dataset.displaySrc;
-      button.textContent = original ? "Shown" : "Original";
-    });
-  });
 }
 
 function cardTile(card, count) {
   const showImage = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
-  const hasOriginalToggle = showImage && card.frontImage && showImage !== card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   return `
     <article class="card-tile ${card.foil ? "foil" : ""}" data-card-tile data-card-id="${card.id}">
@@ -66,7 +54,6 @@ function cardTile(card, count) {
         <span class="tile-name">${escapeHtml(card.name)}</span>
         <span class="tile-sub">
           <span>${escapeHtml(artist)}</span>
-          ${hasOriginalToggle ? `<button class="mini-toggle" type="button" data-original-toggle data-display-src="${escapeHtml(showImage)}" data-original-src="${escapeHtml(card.frontImage)}">Original</button>` : ""}
         </span>
         <span class="tile-foot">
           <span class="set-icon">${setIcon(card.setCode)}</span>

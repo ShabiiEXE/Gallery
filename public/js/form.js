@@ -29,6 +29,8 @@ const deckNameInput = $("deckNameInput");
 const deckFormatInput = $("deckFormatInput");
 const deckBracketInput = $("deckBracketInput");
 const deckOwnerInput = $("deckOwnerInput");
+const commanderRoleField = $("commanderRoleField");
+const deckCommanderInput = $("deckCommanderInput");
 const setNameInput = $("setNameInput");
 const setCodeInput = $("setCodeInput");
 const setCodeIcon = $("setCodeIcon");
@@ -50,6 +52,7 @@ export function initForm({ onSave, onDelete }) {
   fetchDeckButton.addEventListener("click", fetchDeck);
   moxfieldInput.addEventListener("input", scheduleDeckFetch);
   moxfieldInput.addEventListener("paste", scheduleDeckFetch);
+  deckFormatInput.addEventListener("input", updateCommanderRoleField);
   setCodeInput.addEventListener("input", updateSetIcon);
   saveCardButton.addEventListener("click", () => saveCurrent(onSave));
   deleteCardButton.addEventListener("click", async () => {
@@ -88,6 +91,7 @@ export function openCardForm(card = null) {
   deckFormatInput.value = data.deckFormat || "";
   deckBracketInput.value = data.deckBracket || "";
   deckOwnerInput.value = data.deckOwner || "";
+  deckCommanderInput.checked = Boolean(data.deckCommander);
   setNameInput.value = data.setName || "";
   setCodeInput.value = data.setCode || "";
   collectorNumberInput.value = data.collectorNumber || "";
@@ -100,9 +104,11 @@ export function openCardForm(card = null) {
   cardForm.dataset.commanderImage = data.commanderImage || "";
   cardForm.dataset.deckImage = data.deckImage || "";
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
+  cardForm.dataset.deckOwners = JSON.stringify(Array.isArray(data.deckOwners) ? data.deckOwners : []);
   updateArtistLabel();
   syncFlagSelect(cardLanguage, LANGUAGES);
   updateSetIcon();
+  updateCommanderRoleField();
   editDialog.showModal();
 }
 
@@ -129,8 +135,10 @@ function applyDeck(deck) {
   if (deck.bracket) deckBracketInput.value = deck.bracket;
   if (deck.owner) deckOwnerInput.value = deck.owner;
   if (deck.ownerAvatar) cardForm.dataset.deckOwnerAvatar = deck.ownerAvatar;
+  if (Array.isArray(deck.owners)) cardForm.dataset.deckOwners = JSON.stringify(deck.owners);
   if (deck.deckImage) cardForm.dataset.deckImage = deck.deckImage;
   if (deck.commanderImage) cardForm.dataset.commanderImage = deck.commanderImage;
+  updateCommanderRoleField();
 }
 
 let deckFetchTimer = 0;
@@ -238,7 +246,9 @@ async function saveCurrent(onSave) {
       deckFormat: deckFormatInput.value.trim(),
       deckBracket: deckBracketInput.value.trim(),
       deckOwner: deckOwnerInput.value.trim(),
+      deckCommander: isCommanderDeck() ? deckCommanderInput.checked : false,
       deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
+      deckOwners: safeJsonArray(cardForm.dataset.deckOwners),
       deckImage: cardForm.dataset.deckImage || "",
       commanderImage: cardForm.dataset.commanderImage || frontImage,
       setName: setNameInput.value.trim(),
@@ -270,8 +280,25 @@ function updateSetIcon() {
   setCodeIcon.alt = code;
 }
 
+function updateCommanderRoleField() {
+  commanderRoleField.hidden = !isCommanderDeck();
+}
+
+function isCommanderDeck() {
+  return deckFormatInput.value.trim().toLowerCase() === "commander";
+}
+
 function fillSelect(select, entries) {
   select.innerHTML = entries.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+}
+
+function safeJsonArray(value) {
+  try {
+    const parsed = JSON.parse(value || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
 function imageValue(input, fallback) {

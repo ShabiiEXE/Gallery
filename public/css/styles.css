@@ -377,11 +377,11 @@ select:hover {
   max-height: 380px;
   padding: 3px;
   overflow: auto;
-  background-color: rgba(34, 33, 37, 0.96);
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 18px 18px;
+  background:
+    var(--grid-texture),
+    rgba(34, 33, 37, 0.96);
+  background-size: 18px 18px, 18px 18px, auto;
+  background-position: var(--grid-x) var(--grid-y), var(--grid-x) var(--grid-y), center;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
@@ -573,7 +573,6 @@ h1,
 h2 {
   font-family: var(--title-font);
   letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 .brand small {
@@ -831,7 +830,7 @@ h2 {
   position: relative;
   min-width: 0;
   border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: 8px;
   padding: 7px;
   color: inherit;
   text-align: left;
@@ -882,7 +881,7 @@ h2 {
   position: relative;
   overflow: hidden;
   aspect-ratio: 63 / 88;
-  border-radius: 7px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -893,48 +892,52 @@ h2 {
   object-fit: cover;
 }
 
+.foil .card-image-wrap,
+.foil-sheen .preview-face {
+  box-shadow:
+    inset 0 0 18px rgba(255, 255, 255, 0.18),
+    0 0 22px color-mix(in srgb, var(--accent-1) 18%, transparent),
+    0 0 34px color-mix(in srgb, var(--accent-3) 14%, transparent);
+}
+
 .foil .card-image-wrap::after,
-.foil-sheen::after {
+.foil-sheen .preview-face::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   mix-blend-mode: screen;
-  opacity: 0.72;
+  opacity: 0.45;
   background:
-    repeating-linear-gradient(
-      105deg,
-      rgba(255, 255, 255, 0) 0 11%,
-      rgba(255, 255, 255, 0.18) 12% 13%,
-      rgba(255, 255, 255, 0) 15% 28%
+    radial-gradient(
+      circle at var(--shine-x, 42%) var(--shine-y, 28%),
+      rgba(255, 255, 255, 0.48),
+      rgba(255, 255, 255, 0.12) 16%,
+      transparent 36%
     ),
     linear-gradient(
-      115deg,
-      transparent 0 32%,
-      rgba(255, 255, 255, 0.76) 42%,
-      transparent 52% 100%
+      125deg,
+      transparent 0 18%,
+      rgba(255, 255, 255, 0.24) 30%,
+      rgba(121, 242, 206, 0.16) 42%,
+      rgba(238, 50, 179, 0.18) 55%,
+      transparent 74% 100%
     ),
     linear-gradient(
       90deg,
-      rgba(255, 0, 120, 0.2),
-      rgba(121, 242, 206, 0.18),
-      rgba(255, 224, 72, 0.2),
-      rgba(111, 119, 255, 0.18)
+      rgba(255, 216, 111, 0.1),
+      rgba(121, 242, 206, 0.12),
+      rgba(255, 120, 210, 0.12),
+      rgba(255, 216, 111, 0.1)
     );
-  background-size: 180% 180%, 160% 100%, 220% 220%;
-  transform: translateX(-45%);
-  animation: foilMove 3.2s ease-in-out infinite, foilHue 6s linear infinite;
+  background-size: 100% 100%, 180% 180%, 220% 220%;
+  animation: foilGlow 5s ease-in-out infinite;
 }
 
-@keyframes foilMove {
+@keyframes foilGlow {
   50% {
-    transform: translateX(35%);
-  }
-}
-
-@keyframes foilHue {
-  50% {
-    background-position: 100% 50%, 80% 0, 100% 50%;
+    opacity: 0.62;
+    background-position: 50% 50%, 100% 0, 100% 50%;
   }
 }
 
@@ -992,18 +995,6 @@ h2 {
   object-fit: contain;
   filter: invert(1);
   opacity: 0.9;
-}
-
-.mini-toggle {
-  flex: 0 0 auto;
-  min-height: 22px;
-  padding: 2px 6px;
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 10px;
-  font-weight: 850;
 }
 
 .bundle-count {
@@ -1066,7 +1057,11 @@ h2 {
 }
 
 .modal::backdrop {
-  background: rgba(0, 0, 0, 0.66);
+  background:
+    var(--grid-texture),
+    rgba(0, 0, 0, 0.66);
+  background-size: 22px 22px, 22px 22px, auto;
+  background-position: var(--grid-x) var(--grid-y), var(--grid-x) var(--grid-y), center;
   backdrop-filter: blur(8px);
 }
 
@@ -1153,6 +1148,10 @@ h2 {
   display: block;
 }
 
+.commander-role-field {
+  align-self: end;
+}
+
 .inline-fetch {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1213,12 +1212,15 @@ h2 {
   width: min(100%, 360px);
   margin: 0 auto;
   aspect-ratio: 63 / 88;
+  cursor: grab;
+  touch-action: none;
   transform-style: preserve-3d;
-  transition: transform 220ms ease;
+  transition: transform 180ms ease;
 }
 
-.preview-card.is-flipped {
-  transform: rotateY(180deg);
+.preview-card.is-dragging {
+  cursor: grabbing;
+  transition: none;
 }
 
 .preview-face {
@@ -1286,8 +1288,8 @@ h2 {
 
 .detail-title h2 {
   margin: 0;
-  font-size: clamp(28px, 4vw, 54px);
-  line-height: 0.95;
+  font-size: clamp(22px, 3vw, 38px);
+  line-height: 1.05;
 }
 
 .foil-title {
@@ -1307,6 +1309,34 @@ h2 {
   background: rgba(255, 0, 57, 0.16);
   font-size: 12px;
   font-weight: 900;
+}
+
+.detail-set-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.detail-set-icon {
+  display: inline-grid;
+  width: 24px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.detail-set-icon img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  filter: invert(1);
+  opacity: 0.9;
 }
 
 .detail-lines,
@@ -1458,18 +1488,32 @@ h2 {
 
 .deck-copy b {
   font-family: var(--title-font);
-  font-size: clamp(22px, 3vw, 36px);
-  line-height: 0.96;
-  text-transform: uppercase;
+  font-size: clamp(18px, 2.4vw, 28px);
+  line-height: 1.08;
 }
 
 .deck-meta-row,
+.deck-owner-list,
 .deck-owner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   color: var(--muted);
+}
+
+.deck-owner-list {
+  gap: 6px;
+}
+
+.deck-owner {
+  gap: 6px;
+  padding: 3px 7px 3px 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .bracket-tag {
