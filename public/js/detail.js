@@ -235,7 +235,7 @@ function deckOwners(card) {
 }
 
 function signatureLabel(card) {
-  return card.kind?.toLowerCase().includes("alter") ? "Altered" : "Signature";
+  return card.kind?.toLowerCase().includes("alter") ? "Alteration" : "Signature";
 }
 
 function signatureValue(card) {
