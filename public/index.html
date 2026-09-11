@@ -63,7 +63,7 @@
             <label>
               <span>Sort</span>
               <select id="sortSelect">
-                <option value="artist">Alter/sign artist</option>
+                <option value="artist">Artist</option>
                 <option value="year">Year</option>
                 <option value="type">Type</option>
               </select>
@@ -133,7 +133,7 @@
           <label>
             <span>Default sort</span>
             <select id="defaultSortSelect">
-              <option value="artist">Alter/sign artist</option>
+              <option value="artist">Artist</option>
               <option value="year">Year</option>
               <option value="type">Type</option>
             </select>
@@ -213,8 +213,16 @@
             <input id="frontPhoto" type="file" accept="image/*" />
           </label>
           <label>
+            <span>Pick front</span>
+            <select id="frontAssetSelect"></select>
+          </label>
+          <label>
             <span data-i18n="back_photo">Back photo</span>
             <input id="backPhoto" type="file" accept="image/*" />
+          </label>
+          <label>
+            <span>Pick back</span>
+            <select id="backAssetSelect"></select>
           </label>
           <label>
             <span id="artistLabel" data-i18n="artist">Artist</span>

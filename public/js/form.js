@@ -1,5 +1,6 @@
 import { CARD_KINDS, LANGUAGES } from "./constants.js";
 import { syncCustomSelect, syncFlagSelect } from "./custom-select.js";
+import { PHOTO_ASSETS } from "./photo-assets.js";
 import { searchScryfall } from "./scryfall.js";
 
 const $ = (id) => document.getElementById(id);
@@ -17,6 +18,8 @@ const cardName = $("cardName");
 const foilInput = $("foilInput");
 const frontPhoto = $("frontPhoto");
 const backPhoto = $("backPhoto");
+const frontAssetSelect = $("frontAssetSelect");
+const backAssetSelect = $("backAssetSelect");
 const collectorArtist = $("collectorArtist");
 const artistSocialInput = $("artistSocialInput");
 const artistSocialFavicon = $("artistSocialFavicon");
@@ -47,8 +50,12 @@ const closeEditButton = document.querySelector("[data-close-edit]");
 export function initForm({ onSave, onDelete }) {
   fillSelect(cardKind, CARD_KINDS.map((kind) => [kind, kind]));
   fillSelect(cardLanguage, LANGUAGES.map((language) => [language.value, language.label]));
+  fillPhotoAssetSelect(frontAssetSelect);
+  fillPhotoAssetSelect(backAssetSelect);
   syncCustomSelect(cardKind);
   syncFlagSelect(cardLanguage, LANGUAGES);
+  syncCustomSelect(frontAssetSelect);
+  syncCustomSelect(backAssetSelect);
 
   cardKind.addEventListener("change", () => {
     updateArtistLabel();
@@ -64,6 +71,10 @@ export function initForm({ onSave, onDelete }) {
   fetchDeckButton.addEventListener("click", fetchDeck);
   moxfieldInput.addEventListener("input", scheduleDeckFetch);
   moxfieldInput.addEventListener("paste", scheduleDeckFetch);
+  frontAssetSelect?.addEventListener("change", () => applyPhotoAsset(frontAssetSelect, frontPhoto, "frontImage"));
+  backAssetSelect?.addEventListener("change", () => applyPhotoAsset(backAssetSelect, backPhoto, "backImage"));
+  frontPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(frontAssetSelect, frontPhoto));
+  backPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(backAssetSelect, backPhoto));
   artistSocialInput.addEventListener("input", updateSocialFavicon);
   deckFormatInput.addEventListener("input", updateCommanderRoleField);
   setCodeInput.addEventListener("input", updateSetIcon);
@@ -124,6 +135,8 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
   cardForm.dataset.deckOwners = JSON.stringify(Array.isArray(data.deckOwners) ? data.deckOwners : []);
   renderDeckOwnersEditor();
+  syncPhotoAssetSelect(frontAssetSelect, cardForm.dataset.frontImage);
+  syncPhotoAssetSelect(backAssetSelect, cardForm.dataset.backImage);
   updateArtistLabel();
   syncCustomSelect(cardKind);
   syncFlagSelect(cardLanguage, LANGUAGES);
@@ -355,6 +368,39 @@ function isCommanderDeck() {
 
 function fillSelect(select, entries) {
   select.innerHTML = entries.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+}
+
+function fillPhotoAssetSelect(select) {
+  if (!select) return;
+  const options = PHOTO_ASSETS.map((path) => `<option value="${escapeHtml(path)}">${escapeHtml(photoAssetLabel(path))}</option>`);
+  select.innerHTML = [`<option value="">Current/uploaded image</option>`, ...options].join("");
+}
+
+function applyPhotoAsset(select, input, datasetKey) {
+  if (!select?.value) return;
+  cardForm.dataset[datasetKey] = select.value;
+  if (input) input.value = "";
+  syncCustomSelect(select);
+}
+
+function clearPhotoAssetWhenUploaded(select, input) {
+  if (!select || !input?.files?.length) return;
+  select.value = "";
+  syncCustomSelect(select);
+}
+
+function syncPhotoAssetSelect(select, image) {
+  if (!select) return;
+  select.value = PHOTO_ASSETS.includes(image) ? image : "";
+  syncCustomSelect(select);
+}
+
+function photoAssetLabel(path) {
+  return String(path || "")
+    .split("/")
+    .pop()
+    .replace(/\.[^.]+$/, "")
+    .replace(/[-_]+/g, " ");
 }
 
 function renderDeckOwnersEditor() {

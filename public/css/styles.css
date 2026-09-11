@@ -322,10 +322,11 @@ select:hover {
   position: relative;
   width: 100%;
   min-width: 0;
+  z-index: 10;
 }
 
 .platform-logo-select.is-open {
-  z-index: 5000;
+  z-index: 12000;
 }
 
 .platform-logo-button,
@@ -380,7 +381,7 @@ select:hover {
   position: absolute;
   left: 0;
   top: calc(100% + 6px);
-  z-index: 5001;
+  z-index: 12001;
   display: none;
   width: 100%;
   min-width: 160px;
@@ -805,6 +806,8 @@ body.has-modal-open {
 }
 
 .toolbar {
+  position: relative;
+  z-index: 80;
   display: grid;
   grid-template-columns: repeat(4, minmax(150px, 1fr)) auto auto;
   gap: 10px;
@@ -824,6 +827,20 @@ body.has-modal-open {
     inset 0 1px 0 rgba(255, 255, 255, 0.045),
     0 18px 42px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px);
+}
+
+.toolbar:has(.platform-logo-select.is-open),
+.settings-grid:has(.platform-logo-select.is-open),
+.form-grid:has(.platform-logo-select.is-open),
+.info-grid:has(.platform-logo-select.is-open) {
+  position: relative;
+  z-index: 11000;
+}
+
+label:has(> .platform-logo-select.is-open),
+.form-row-three:has(.platform-logo-select.is-open) {
+  position: relative;
+  z-index: 11001;
 }
 
 .check-filter {
@@ -873,6 +890,8 @@ body.has-modal-open {
 }
 
 .gallery-grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 12px;
@@ -1670,7 +1689,7 @@ body.has-modal-open {
 .deck-box {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(170px, 38%);
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 28%);
   gap: 14px;
   align-items: stretch;
   margin-top: 14px;
@@ -1703,30 +1722,27 @@ body.has-modal-open {
 }
 
 .deck-commander-art {
-  .deck-commander-art {
-    position: relative;
-    right: 105px;
-    width: 330px;
-    min-height: 100%;
-    border-radius: 7px;
-  }
+  position: relative;
+  min-height: 100%;
+  border-radius: 7px 0 0 7px;
+  overflow: hidden;
 }
 
 .deck-commander-art::before {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, rgba(16, 17, 20, 0.08), transparent 44%),
-    var(--deck-bg) center top / cover no-repeat;
-  opacity: 0.78;
+  background: var(--deck-bg) left center / cover no-repeat;
+  opacity: 0.92;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 34%, rgba(0, 0, 0, 0.62) 64%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 34%, rgba(0, 0, 0, 0.62) 64%, transparent 100%);
 }
 
 .deck-commander-art::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(16, 17, 20, 0.85) 0, transparent 52%);
+  background: linear-gradient(90deg, rgba(16, 17, 20, 0.1) 0%, rgba(16, 17, 20, 0.52) 100%);
 }
 
 .deck-copy {
