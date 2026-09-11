@@ -13,7 +13,6 @@ export function syncFlagSelect(select, languages) {
     .map((option) => ({
       value: option.value,
       label: option.textContent.trim(),
-      image: option.dataset.image || "",
       selected: option.selected,
     }));
   const selected = options.find((option) => option.selected) || options[0] || { value: "", label: "" };
@@ -132,6 +131,7 @@ export function syncCustomSelect(select) {
     .map((option) => ({
       value: option.value,
       label: option.textContent.trim(),
+      image: option.dataset.image || "",
       selected: option.selected,
     }));
   const selected = options.find((option) => option.selected) || options[0] || { value: "", label: "" };

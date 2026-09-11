@@ -44,7 +44,6 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
           ${line("Collection", collectionValue(card))}
           ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
           ${line("Original Card Artist", card.cardArtist ? escapeHtml(card.cardArtist) : "")}
-          ${scryfallLink(card)}
           ${descriptionBlock(card.description)}
         </div>
         ${deckBox(card)}
@@ -249,8 +248,8 @@ function signatureLabel(card) {
 }
 
 function signatureValue(card) {
-  const parts = [card.signaturePlace, card.signatureYear].filter(Boolean);
-  return parts.join(", ");
+  if (card.signaturePlace && card.signatureYear) return `${card.signaturePlace} (${card.signatureYear})`;
+  return card.signaturePlace || card.signatureYear || "";
 }
 
 function artistValue(card) {
@@ -268,9 +267,9 @@ function isArtistProof(card) {
   return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
 }
 
-function scryfallLink(card) {
+function cardLinkIcon(card) {
   if (!card.scryfallUrl) return "";
-  return `<div class="scryfall-logo-row"><a href="${escapeAttribute(card.scryfallUrl)}" target="_blank" rel="noreferrer" aria-label="Open card link"><img src="${escapeAttribute(faviconUrl(card.scryfallUrl))}" alt=""></a></div>`;
+  return `<a class="collection-card-link" href="${escapeAttribute(card.scryfallUrl)}" target="_blank" rel="noreferrer" aria-label="Open card link"><img src="${escapeAttribute(faviconUrl(card.scryfallUrl))}" alt=""></a>`;
 }
 
 function descriptionBlock(description) {
@@ -330,9 +329,13 @@ function setIcon(code) {
 }
 
 function collectionValue(card) {
-  const text = [card.setName, card.collectorNumber ? `#${card.collectorNumber}` : "", card.setYear].filter(Boolean).join(" ");
+  const text = [
+    card.setName,
+    card.collectorNumber ? `#${card.collectorNumber}` : "",
+    card.setYear ? `(${card.setYear})` : "",
+  ].filter(Boolean).join(" ");
   if (!text && !card.setCode) return "";
-  return `${setIcon(card)}<span>${escapeHtml(text)}</span>`;
+  return `${setIcon(card)}<span>${escapeHtml(text)}</span>${cardLinkIcon(card)}`;
 }
 
 function relatedCard(card) {
