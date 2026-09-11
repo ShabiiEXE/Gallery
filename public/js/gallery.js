@@ -36,26 +36,44 @@ export function bundleCards(cards, enabled) {
 
 export function renderGallery(groups, { onOpen }) {
   galleryGrid.innerHTML = groups.map(({ card, count }) => cardTile(card, count)).join("");
-  galleryGrid.querySelectorAll("[data-card-id]").forEach((button) => {
+  galleryGrid.querySelectorAll("[data-card-open]").forEach((button) => {
     button.addEventListener("click", () => onOpen(button.dataset.cardId));
+  });
+  galleryGrid.querySelectorAll("[data-original-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const tile = button.closest("[data-card-tile]");
+      const image = tile?.querySelector("[data-card-image]");
+      if (!tile || !image) return;
+      const original = tile.dataset.originalShowing !== "true";
+      tile.dataset.originalShowing = String(original);
+      image.src = original ? button.dataset.originalSrc : button.dataset.displaySrc;
+      button.textContent = original ? "Shown" : "Original";
+    });
   });
 }
 
 function cardTile(card, count) {
   const showImage = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
+  const hasOriginalToggle = showImage && card.frontImage && showImage !== card.frontImage;
+  const artist = card.artist || card.cardArtist || "";
   return `
-    <button class="card-tile ${card.foil ? "foil" : ""}" type="button" data-card-id="${card.id}">
+    <article class="card-tile ${card.foil ? "foil" : ""}" data-card-tile data-card-id="${card.id}">
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
-      <span class="card-image-wrap"><img src="${showImage}" alt=""></span>
+      <button class="card-open" type="button" data-card-open data-card-id="${card.id}">
+        <span class="card-image-wrap"><img data-card-image src="${showImage}" alt=""></span>
+      </button>
       <span class="tile-meta">
         <span class="tile-name">${escapeHtml(card.name)}</span>
-        <span class="tile-sub">${escapeHtml(card.artist || card.cardArtist || "")}</span>
+        <span class="tile-sub">
+          <span>${escapeHtml(artist)}</span>
+          ${hasOriginalToggle ? `<button class="mini-toggle" type="button" data-original-toggle data-display-src="${escapeHtml(showImage)}" data-original-src="${escapeHtml(card.frontImage)}">Original</button>` : ""}
+        </span>
         <span class="tile-foot">
-          <span class="set-icon">${escapeHtml(card.setCode || "?")}</span>
+          <span class="set-icon">${setIcon(card.setCode)}</span>
           <span>${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
       </span>
-    </button>
+    </article>
   `;
 }
 
@@ -65,6 +83,12 @@ function pickBundleCover(cards) {
 
 function isArtistProof(card) {
   return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
+}
+
+function setIcon(code) {
+  const normalized = String(code || "").trim().toLowerCase();
+  if (!normalized) return "?";
+  return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(normalized)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
 }
 
 function fillFilter(select, entries, value) {

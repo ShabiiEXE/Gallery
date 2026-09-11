@@ -21,7 +21,17 @@ export function loadCards() {
 }
 
 export function saveCards(cards) {
-  localStorage.setItem(CARD_KEY, JSON.stringify(cards));
+  try {
+    localStorage.setItem(CARD_KEY, JSON.stringify(cards));
+  } catch (error) {
+    if (error?.name !== "QuotaExceededError") throw error;
+    try {
+      localStorage.removeItem(CARD_KEY);
+      localStorage.setItem(CARD_KEY, JSON.stringify(cards.map(localStorageSafeCard)));
+    } catch {
+      // Remote sync still receives the full in-memory cards; avoid blocking the UI.
+    }
+  }
 }
 
 export function loadSettings() {
@@ -79,4 +89,19 @@ function readJson(key, fallback) {
   } catch {
     return fallback;
   }
+}
+
+function localStorageSafeCard(card) {
+  return {
+    ...card,
+    frontImage: safeImageValue(card.frontImage),
+    backImage: safeImageValue(card.backImage),
+    deckImage: safeImageValue(card.deckImage),
+    commanderImage: safeImageValue(card.commanderImage),
+    deckOwnerAvatar: safeImageValue(card.deckOwnerAvatar),
+  };
+}
+
+function safeImageValue(value) {
+  return /^data:image\//i.test(String(value || "")) ? "" : value;
 }

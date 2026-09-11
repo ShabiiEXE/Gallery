@@ -4,6 +4,7 @@ import { searchScryfall } from "./scryfall.js";
 const $ = (id) => document.getElementById(id);
 const cardKind = $("cardKind");
 const cardLanguage = $("cardLanguage");
+const cardLanguageFlag = $("cardLanguageFlag");
 const lookupInput = $("lookupInput");
 const lookupButton = $("lookupButton");
 const lookupResults = $("lookupResults");
@@ -17,6 +18,7 @@ const foilInput = $("foilInput");
 const frontPhoto = $("frontPhoto");
 const backPhoto = $("backPhoto");
 const collectorArtist = $("collectorArtist");
+const artistSocialInput = $("artistSocialInput");
 const artistLabel = $("artistLabel");
 const signatureYear = $("signatureYear");
 const signaturePlace = $("signaturePlace");
@@ -29,6 +31,7 @@ const deckBracketInput = $("deckBracketInput");
 const deckOwnerInput = $("deckOwnerInput");
 const setNameInput = $("setNameInput");
 const setCodeInput = $("setCodeInput");
+const setCodeIcon = $("setCodeIcon");
 const collectorNumberInput = $("collectorNumberInput");
 const setYearInput = $("setYearInput");
 const cardArtistInput = $("cardArtistInput");
@@ -41,8 +44,12 @@ export function initForm({ onSave, onDelete }) {
   fillSelect(cardLanguage, LANGUAGES.map((language) => [language.value, language.label]));
 
   cardKind.addEventListener("change", updateArtistLabel);
+  cardLanguage.addEventListener("change", updateLanguageFlag);
   lookupButton.addEventListener("click", runLookup);
   fetchDeckButton.addEventListener("click", fetchDeck);
+  moxfieldInput.addEventListener("input", scheduleDeckFetch);
+  moxfieldInput.addEventListener("paste", scheduleDeckFetch);
+  setCodeInput.addEventListener("input", updateSetIcon);
   saveCardButton.addEventListener("click", () => saveCurrent(onSave));
   deleteCardButton.addEventListener("click", () => onDelete(editingId.value));
   updateArtistLabel();
@@ -76,17 +83,22 @@ export function openCardForm(card = null) {
   setYearInput.value = data.setYear || "";
   cardArtistInput.value = data.cardArtist || "";
   scryfallInput.value = data.scryfallUrl || "";
+  artistSocialInput.value = data.artistSocialUrl || "";
   cardForm.dataset.frontImage = data.frontImage || "";
   cardForm.dataset.backImage = data.backImage || "";
   cardForm.dataset.commanderImage = data.commanderImage || "";
   cardForm.dataset.deckImage = data.deckImage || "";
+  cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
   updateArtistLabel();
+  updateLanguageFlag();
+  updateSetIcon();
   editDialog.showModal();
 }
 
 async function fetchDeck() {
   const deckUrl = moxfieldInput.value.trim();
   if (!deckUrl) return;
+  if (!isMoxfieldDeckUrl(deckUrl)) return;
   cardFormMessage.textContent = "Fetching Moxfield deck...";
   try {
     const response = await fetch(`/api/moxfield-deck?url=${encodeURIComponent(deckUrl)}`);
@@ -105,8 +117,26 @@ function applyDeck(deck) {
   if (deck.format) deckFormatInput.value = deck.format;
   if (deck.bracket) deckBracketInput.value = deck.bracket;
   if (deck.owner) deckOwnerInput.value = deck.owner;
+  if (deck.ownerAvatar) cardForm.dataset.deckOwnerAvatar = deck.ownerAvatar;
   if (deck.deckImage) cardForm.dataset.deckImage = deck.deckImage;
   if (deck.commanderImage) cardForm.dataset.commanderImage = deck.commanderImage;
+}
+
+let deckFetchTimer = 0;
+let lastAutoFetchedDeck = "";
+
+function scheduleDeckFetch() {
+  window.clearTimeout(deckFetchTimer);
+  deckFetchTimer = window.setTimeout(() => {
+    const deckUrl = moxfieldInput.value.trim();
+    if (!isMoxfieldDeckUrl(deckUrl) || deckUrl === lastAutoFetchedDeck) return;
+    lastAutoFetchedDeck = deckUrl;
+    fetchDeck();
+  }, 450);
+}
+
+function isMoxfieldDeckUrl(value) {
+  return /^https?:\/\/(?:www\.)?moxfield\.com\/decks\/[A-Za-z0-9_-]+/i.test(String(value || "").trim());
 }
 
 async function runLookup() {
@@ -160,6 +190,7 @@ function applyScryfall(card) {
   cardForm.dataset.frontImage ||= card.frontImage || "";
   cardForm.dataset.commanderImage ||= card.frontImage || "";
   lookupResults.innerHTML = "";
+  updateSetIcon();
 }
 
 async function saveCurrent(onSave) {
@@ -187,11 +218,13 @@ async function saveCurrent(onSave) {
     signatureYear: signatureYear.value.trim(),
     signaturePlace: signaturePlace.value.trim(),
     description: descriptionInput.value.trim(),
+    artistSocialUrl: artistSocialInput.value.trim(),
     moxfieldUrl: moxfieldInput.value.trim(),
     deckName: deckNameInput.value.trim(),
     deckFormat: deckFormatInput.value.trim(),
     deckBracket: deckBracketInput.value.trim(),
     deckOwner: deckOwnerInput.value.trim(),
+    deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
     deckImage: cardForm.dataset.deckImage || "",
     commanderImage: cardForm.dataset.commanderImage || frontImage,
     setName: setNameInput.value.trim(),
@@ -208,6 +241,20 @@ async function saveCurrent(onSave) {
 function updateArtistLabel() {
   const kind = cardKind.value;
   artistLabel.textContent = kind.includes("Proxy") ? "Proxy artist" : kind.includes("Alter") ? "Alter artist" : "Artist";
+}
+
+function updateLanguageFlag() {
+  const language = LANGUAGES.find((item) => item.value === cardLanguage.value) || LANGUAGES[0];
+  cardLanguageFlag.src = `assets/flags/${language.flag}.svg`;
+  cardLanguageFlag.alt = language.label;
+}
+
+function updateSetIcon() {
+  const code = setCodeInput.value.trim().toLowerCase();
+  setCodeIcon.hidden = !code;
+  if (!code) return;
+  setCodeIcon.src = `https://svgs.scryfall.io/sets/${encodeURIComponent(code)}.svg`;
+  setCodeIcon.alt = code;
 }
 
 function fillSelect(select, entries) {

@@ -15,7 +15,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     <div class="modal-head">
       <h2>Overview</h2>
       <div class="modal-head-actions">
-        ${canEdit ? `<button class="button ghost" type="button" data-edit-card>Edit</button>` : ""}
+        ${canEdit ? `<button class="icon-button" type="button" data-edit-card title="Edit" aria-label="Edit">${pencilIcon()}</button>` : ""}
         <button class="icon-button" type="button" data-close-detail aria-label="Close">×</button>
       </div>
     </div>
@@ -25,20 +25,22 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
           ${imageFace(shownFront || card.frontImage, "preview-front")}
           ${shownBack ? imageFace(shownBack, "preview-back") : back}
         </div>
+        <button class="ghost-button flip-card-button" type="button" data-flip-card>Flip</button>
       </div>
       <div class="detail-info">
         <div class="detail-title">
           <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}</h2>
           <span class="tag">${escapeHtml(card.kind)}</span>
+          ${card.artist ? `<span class="detail-title-artist">${escapeHtml(card.artist)}${socialLink(card.artistSocialUrl)}</span>` : ""}
         </div>
         <div class="detail-lines">
-          ${line("Artist", card.artist || card.cardArtist)}
+          ${line("Artist", artistValue(card))}
+          ${differentArtist(card) ? line("Card artist", card.cardArtist) : ""}
           ${line("Set", `${card.setName || ""} ${card.collectorNumber ? `#${card.collectorNumber}` : ""}`)}
           ${line("Language", `<img class="flag" src="assets/flags/${language.flag}.svg" alt=""> ${language.label}`)}
-          ${line("Signature year", card.signatureYear)}
-          ${line("Signature info", card.signaturePlace)}
-          ${line("Description", card.description)}
-          ${line("Scryfall", card.scryfallUrl ? `<a href="${card.scryfallUrl}" target="_blank" rel="noreferrer">Open card</a>` : "")}
+          ${line(signatureLabel(card), signatureValue(card))}
+          ${scryfallLink(card)}
+          ${descriptionBlock(card.description)}
         </div>
         ${deckBox(card)}
         ${related.length ? relatedList(related) : ""}
@@ -74,7 +76,7 @@ export function bindDetailInteractions(root, handlers) {
     preview.addEventListener("pointerleave", () => {
       preview.style.transform = preview.classList.contains("is-flipped") ? "rotateY(180deg)" : "";
     });
-    preview.addEventListener("click", () => {
+    root.querySelector("[data-flip-card]")?.addEventListener("click", () => {
       preview.classList.toggle("is-flipped");
       preview.style.transform = preview.classList.contains("is-flipped") ? "rotateY(180deg)" : "";
     });
@@ -90,14 +92,96 @@ function deckBox(card) {
   if (!card.deckName && !card.moxfieldUrl) return "";
   return `
     <a class="deck-box" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer">
-      <img src="${card.deckImage || card.commanderImage || card.frontImage}" alt="">
-      <span>
-        <b>${escapeHtml(card.deckName || "Moxfield deck")}</b><br>
-        ${escapeHtml(card.deckFormat || "")}
-        ${card.deckFormat?.toLowerCase() === "commander" && card.deckBracket ? `<span class="tag">Bracket ${escapeHtml(card.deckBracket)}</span>` : ""}
-        ${card.deckOwner ? `<br>${escapeHtml(card.deckOwner)}` : ""}
+      <span class="moxfield-mark" aria-hidden="true">M</span>
+      <span class="deck-commander-art" style="--deck-bg: url('${escapeAttribute(card.deckImage || card.commanderImage || card.frontImage)}')">
+        <img src="${escapeAttribute(card.commanderImage || card.deckImage || card.frontImage)}" alt="">
+      </span>
+      <span class="deck-copy">
+        <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
+        <span class="deck-meta-row">
+          ${card.deckFormat ? `<span>${escapeHtml(card.deckFormat)}</span>` : ""}
+          ${card.deckFormat?.toLowerCase() === "commander" && card.deckBracket ? `<span class="tag bracket-tag">Bracket ${escapeHtml(card.deckBracket)}</span>` : ""}
+        </span>
+        ${card.deckOwner ? `<span class="deck-owner">${ownerAvatar(card)}${escapeHtml(card.deckOwner)}</span>` : ""}
       </span>
     </a>
+  `;
+}
+
+function ownerAvatar(card) {
+  return card.deckOwnerAvatar ? `<img src="${escapeAttribute(card.deckOwnerAvatar)}" alt="">` : "";
+}
+
+function artistValue(card) {
+  return `${escapeHtml(card.artist || card.cardArtist || "")}${card.artistSocialUrl ? socialLink(card.artistSocialUrl) : ""}`;
+}
+
+function differentArtist(card) {
+  return card.artist && card.cardArtist && card.artist.trim().toLowerCase() !== card.cardArtist.trim().toLowerCase();
+}
+
+function signatureLabel(card) {
+  return card.kind?.toLowerCase().includes("alter") ? "Alter" : "Signature";
+}
+
+function signatureValue(card) {
+  const parts = [card.signaturePlace, card.signatureYear].filter(Boolean).map(escapeHtml);
+  return parts.join(", ");
+}
+
+function scryfallLink(card) {
+  if (!card.scryfallUrl) return "";
+  return `<div class="scryfall-logo-row"><a href="${escapeAttribute(card.scryfallUrl)}" target="_blank" rel="noreferrer" aria-label="Open on Scryfall">${scryfallLogo()}</a></div>`;
+}
+
+function descriptionBlock(description) {
+  return description ? `<div class="description-copy">${escapeHtml(description)}</div>` : "";
+}
+
+function socialLink(url) {
+  if (!url) return "";
+  const name = socialName(url);
+  return `<a class="social-link" href="${escapeAttribute(url)}" target="_blank" rel="noreferrer" title="${escapeAttribute(name)}" aria-label="${escapeAttribute(name)}"><img src="${escapeAttribute(faviconUrl(url))}" alt=""></a>`;
+}
+
+function socialName(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    if (host.includes("instagram")) return "Instagram";
+    if (host.includes("x.com") || host.includes("twitter")) return "X";
+    if (host.includes("artstation")) return "ArtStation";
+    if (host.includes("bluesky")) return "Bluesky";
+    return host;
+  } catch {
+    return "Artist link";
+  }
+}
+
+function faviconUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(parsed.hostname)}&sz=64`;
+  } catch {
+    return "";
+  }
+}
+
+function scryfallLogo() {
+  return `
+    <svg class="scryfall-logo" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="27"></circle>
+      <path d="M18 34c7-15 24-17 31-3-9-5-19-4-31 3Z"></path>
+      <path d="M20 40c10 7 23 6 32-5-5 17-25 20-32 5Z"></path>
+    </svg>
+  `;
+}
+
+function pencilIcon() {
+  return `
+    <svg class="pencil-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 20h4l11-11a2.8 2.8 0 0 0-4-4L4 16v4Z"></path>
+      <path d="M13.5 6.5l4 4"></path>
+    </svg>
   `;
 }
 
@@ -116,4 +200,8 @@ function isArtistProof(card) {
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, "&#96;");
 }

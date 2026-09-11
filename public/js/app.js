@@ -3,6 +3,7 @@ import { getAuthStatus, login, logout } from "./auth.js";
 import { bindDetailInteractions, renderCardDetail } from "./detail.js";
 import { applyTranslations, t } from "./i18n.js";
 import { initForm, openCardForm } from "./form.js";
+import { LANGUAGES } from "./constants.js";
 import {
   loadCards,
   loadDevice,
@@ -26,6 +27,7 @@ const settingsButton = $("settingsButton");
 const settingsDialog = $("settingsDialog");
 const saveSettingsButton = $("saveSettings");
 const languageSelect = $("languageSelect");
+const settingsLanguageFlag = $("settingsLanguageFlag");
 const moduleSettings = $("moduleSettings");
 const filterForm = $("filterForm");
 const searchInput = $("searchInput");
@@ -73,6 +75,10 @@ function bindEvents() {
   document.querySelectorAll("[data-open-add]").forEach((button) => button.addEventListener("click", openAddCard));
   settingsButton.addEventListener("click", openSettings);
   saveSettingsButton.addEventListener("click", commitSettings);
+  languageSelect.addEventListener("change", () => updateSettingsLanguageFlag());
+  [loginDialog, settingsDialog, editDialog, cardDialog].forEach((dialog) => {
+    dialog?.addEventListener("close", () => render());
+  });
   filterForm.addEventListener("input", () => {
     app.filters = {
       query: searchInput.value,
@@ -127,6 +133,7 @@ async function doLogout() {
 
 function openSettings() {
   languageSelect.value = app.settings.language;
+  updateSettingsLanguageFlag();
   moduleSettings.innerHTML = MODULES.map((module, index) => {
     const item = app.settings.modules.find((entry) => entry.id === module.id) || { order: index + 1, hidden: false };
     return `
@@ -203,6 +210,7 @@ function render() {
   document.documentElement.lang = app.settings.language;
   applyTranslations(app.settings);
   loginButton.textContent = app.authed ? t(app.settings, "logout") : t(app.settings, "login");
+  loginButton.title = loginButton.textContent;
   addCardButton.disabled = !app.authed;
   addCardButton.title = app.authed ? "" : "Log in to add cards";
   document.querySelectorAll("[data-open-add]").forEach((button) => {
@@ -246,4 +254,10 @@ async function syncRemote() {
   } catch {
     // Cloudflare KV sync is optional until the project has its namespace bound.
   }
+}
+
+function updateSettingsLanguageFlag() {
+  const language = LANGUAGES.find((item) => item.value === languageSelect.value) || LANGUAGES[0];
+  settingsLanguageFlag.src = `assets/flags/${language.flag}.svg`;
+  settingsLanguageFlag.alt = language.label;
 }

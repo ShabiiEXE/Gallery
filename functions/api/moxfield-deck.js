@@ -49,6 +49,10 @@ function normalizeDeck(deck, id) {
     format: formatName(deck.format || deck.formatName || deck.deckFormat),
     bracket: text(deck.bracket || deck.commanderBracket || deck.edhBracket || deck.powerLevel || deck.power_level),
     owner: text(owner.displayName || owner.userName || owner.username || owner.name || deck.createdBy || deck.authorName),
+    ownerAvatar: firstUrl([
+      pickDirectNamedUrl(owner, ["avatar", "profile", "image", "photo", "picture"]),
+      pickNamedUrl(owner, ["avatar", "profile", "image", "photo", "picture"]),
+    ]),
     deckImage,
     commanderImage,
   };
