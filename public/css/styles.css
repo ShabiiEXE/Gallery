@@ -387,11 +387,15 @@ select:hover {
   max-height: 380px;
   padding: 3px;
   overflow: auto;
-  background:
-    var(--grid-texture),
-    rgba(34, 33, 37, 0.96);
-  background-size: 18px 18px, 18px 18px, auto;
-  background-position: var(--grid-x) var(--grid-y), var(--grid-x) var(--grid-y), center;
+  background: var(--grid-texture), rgba(34, 33, 37, 0.96);
+  background-size:
+    18px 18px,
+    18px 18px,
+    auto;
+  background-position:
+    var(--grid-x) var(--grid-y),
+    var(--grid-x) var(--grid-y),
+    center;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
@@ -961,10 +965,30 @@ h2 {
   mix-blend-mode: screen;
   opacity: 0.48;
   background:
-    radial-gradient(circle at var(--shine-x, 36%) var(--shine-y, 28%), rgba(255, 255, 255, 0.82), rgba(255, 232, 140, 0.2) 14%, transparent 34%),
-    radial-gradient(circle at 78% 18%, rgba(121, 242, 206, 0.34), transparent 33%),
-    radial-gradient(circle at 22% 82%, rgba(255, 117, 218, 0.28), transparent 36%),
-    conic-gradient(from 160deg at 50% 50%, rgba(255, 216, 111, 0.08), rgba(121, 242, 206, 0.26), rgba(138, 153, 255, 0.22), rgba(255, 117, 218, 0.25), rgba(255, 216, 111, 0.08));
+    radial-gradient(
+      circle at var(--shine-x, 36%) var(--shine-y, 28%),
+      rgba(255, 255, 255, 0.82),
+      rgba(255, 232, 140, 0.2) 14%,
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 78% 18%,
+      rgba(121, 242, 206, 0.34),
+      transparent 33%
+    ),
+    radial-gradient(
+      circle at 22% 82%,
+      rgba(255, 117, 218, 0.28),
+      transparent 36%
+    ),
+    conic-gradient(
+      from 160deg at 50% 50%,
+      rgba(255, 216, 111, 0.08),
+      rgba(121, 242, 206, 0.26),
+      rgba(138, 153, 255, 0.22),
+      rgba(255, 117, 218, 0.25),
+      rgba(255, 216, 111, 0.08)
+    );
   animation: foilPrism 6.8s ease-in-out infinite;
 }
 
@@ -982,8 +1006,14 @@ h2 {
       rgba(255, 117, 218, 0.2) 52%,
       transparent 64% 100%
     ),
-    radial-gradient(ellipse at var(--shine-x, 50%) var(--shine-y, 42%), rgba(255, 255, 255, 0.46), transparent 42%);
-  background-size: 210% 210%, 100% 100%;
+    radial-gradient(
+      ellipse at var(--shine-x, 50%) var(--shine-y, 42%),
+      rgba(255, 255, 255, 0.46),
+      transparent 42%
+    );
+  background-size:
+    210% 210%,
+    100% 100%;
   animation: foilGlint 4.8s ease-in-out infinite;
 }
 
@@ -997,7 +1027,9 @@ h2 {
 @keyframes foilGlint {
   50% {
     opacity: 0.74;
-    background-position: 100% 0, 50% 50%;
+    background-position:
+      100% 0,
+      50% 50%;
   }
 }
 
@@ -1023,8 +1055,7 @@ h2 {
   margin-left: 3px;
   vertical-align: -1px;
   fill: #ffd86f;
-  filter:
-    drop-shadow(0 0 5px rgba(255, 216, 111, 0.5))
+  filter: drop-shadow(0 0 5px rgba(255, 216, 111, 0.5))
     drop-shadow(0 0 9px rgba(255, 117, 218, 0.24));
 }
 
@@ -1142,11 +1173,15 @@ h2 {
 }
 
 .modal::backdrop {
-  background:
-    var(--grid-texture),
-    rgba(0, 0, 0, 0.66);
-  background-size: 22px 22px, 22px 22px, auto;
-  background-position: var(--grid-x) var(--grid-y), var(--grid-x) var(--grid-y), center;
+  background: var(--grid-texture), rgba(0, 0, 0, 0.66);
+  background-size:
+    22px 22px,
+    22px 22px,
+    auto;
+  background-position:
+    var(--grid-x) var(--grid-y),
+    var(--grid-x) var(--grid-y),
+    center;
   backdrop-filter: blur(8px);
 }
 
@@ -1157,10 +1192,15 @@ h2 {
   border-radius: 8px;
   padding: 16px;
   background:
-    var(--grid-texture),
-    color-mix(in srgb, var(--panel-dark) 94%, #000);
-  background-size: 22px 22px, 22px 22px, auto;
-  background-position: var(--grid-x) var(--grid-y), var(--grid-x) var(--grid-y), center;
+    var(--grid-texture), color-mix(in srgb, var(--panel-dark) 94%, #000);
+  background-size:
+    22px 22px,
+    22px 22px,
+    auto;
+  background-position:
+    var(--grid-x) var(--grid-y),
+    var(--grid-x) var(--grid-y),
+    center;
   box-shadow: var(--shadow);
 }
 
@@ -1472,8 +1512,7 @@ h2 {
   margin-left: 5px;
   vertical-align: 1px;
   fill: #ffd86f;
-  filter:
-    drop-shadow(0 0 8px rgba(255, 216, 111, 0.56))
+  filter: drop-shadow(0 0 8px rgba(255, 216, 111, 0.56))
     drop-shadow(0 0 14px rgba(255, 117, 218, 0.28));
 }
 
@@ -1527,7 +1566,7 @@ h2 {
 }
 
 .detail-title-lines {
-  margin-top: 0;
+  margin-top: 20px;
 }
 
 .detail-line {
