@@ -1052,7 +1052,7 @@ h2 {
 .tile-foil-star {
   width: 12px;
   height: 12px;
-  margin-left: 3px;
+  margin-left: -3px;
   vertical-align: -1px;
   fill: #ffd86f;
   filter: drop-shadow(0 0 5px rgba(255, 216, 111, 0.5))
@@ -1507,9 +1507,9 @@ h2 {
 }
 
 .foil-title-star {
-  width: 18px;
-  height: 18px;
-  margin-left: 5px;
+  width: 25px;
+  height: 25px;
+  margin-left: -5px;
   vertical-align: 1px;
   fill: #ffd86f;
   filter: drop-shadow(0 0 8px rgba(255, 216, 111, 0.56))
@@ -1528,7 +1528,7 @@ h2 {
   min-height: 23px;
   padding: 3px 7px;
   border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
-  border-radius: 999px;
+  border-radius: 9px;
   color: #fff;
   background: rgba(255, 0, 57, 0.16);
   font-size: 10px;
@@ -1647,7 +1647,7 @@ h2 {
   align-items: stretch;
   margin-top: 14px;
   min-height: 210px;
-  padding: 14px;
+  padding-left: 20px;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
@@ -1675,10 +1675,13 @@ h2 {
 }
 
 .deck-commander-art {
-  position: relative;
-  min-height: 100%;
-  overflow: hidden;
-  border-radius: 7px;
+  .deck-commander-art {
+    position: relative;
+    right: 105px;
+    width: 330px;
+    min-height: 100%;
+    border-radius: 7px;
+  }
 }
 
 .deck-commander-art::before {
@@ -1795,7 +1798,7 @@ h2 {
   place-items: center;
   color: var(--muted);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.045);
   font-size: 9px;
   font-weight: 850;
@@ -1810,7 +1813,7 @@ h2 {
   gap: 6px;
   padding: 3px 7px 3px 4px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 9px;
   background: rgba(255, 255, 255, 0.045);
   font-size: 11px;
   font-weight: 800;

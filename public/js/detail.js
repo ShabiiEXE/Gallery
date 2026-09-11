@@ -163,8 +163,8 @@ function deckBox(card) {
       <a class="deck-box-link" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer" aria-label="${escapeAttribute(card.deckName || "Moxfield deck")}"></a>
       <span class="deck-copy">
         <span class="deck-title-row">
-          <img class="moxfield-mark" src="assets/moxfield-favicon.ico" alt="" aria-hidden="true">
           <b>${escapeHtml(card.deckName || "Moxfield deck")}</b>
+          <img class="moxfield-mark" src="assets/moxfield-favicon.ico" alt="" aria-hidden="true">
         </span>
         <span class="deck-meta-row">
           ${deckFormatPill(card)}
