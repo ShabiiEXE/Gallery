@@ -52,9 +52,63 @@ function normalizeDeck(deck, id) {
     owner: text(owners.map((item) => item.name).filter(Boolean).join(", ")),
     ownerAvatar: owners[0]?.avatar || "",
     owners,
+    colors: deckColors(deck, commanders),
     deckImage,
     commanderImage,
   };
+}
+
+function deckColors(deck, commanders = []) {
+  const values = [
+    deck.colors,
+    deck.colorIdentity,
+    deck.color_identity,
+    deck.identity,
+    deck.colorIdentities,
+    deck.commanderColorIdentity,
+    deck.commanderColorIdentities,
+    ...commanders.flatMap((item) => [
+      item.colors,
+      item.colorIdentity,
+      item.color_identity,
+      item.card?.colors,
+      item.card?.colorIdentity,
+      item.card?.color_identity,
+    ]),
+  ];
+  const colors = new Set();
+  values.forEach((value) => collectColors(value, colors));
+  return ["W", "U", "B", "R", "G"].filter((color) => colors.has(color));
+}
+
+function collectColors(value, colors) {
+  if (!value) return;
+  if (typeof value === "string") {
+    const normalized = value.trim().toUpperCase();
+    if (/^[WUBRG]+$/.test(normalized)) normalized.split("").forEach((color) => colors.add(color));
+    else normalized.split(/[^A-Z]+/).map(colorCode).filter(Boolean).forEach((color) => colors.add(color));
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectColors(item, colors));
+    return;
+  }
+  if (typeof value !== "object") return;
+  Object.entries(value).forEach(([key, item]) => {
+    const color = colorCode(key);
+    if (color && item) colors.add(color);
+    else collectColors(item, colors);
+  });
+}
+
+function colorCode(value) {
+  const normalized = String(value || "").trim().toUpperCase();
+  if (["W", "WHITE"].includes(normalized)) return "W";
+  if (["U", "BLUE"].includes(normalized)) return "U";
+  if (["B", "BLACK"].includes(normalized)) return "B";
+  if (["R", "RED"].includes(normalized)) return "R";
+  if (["G", "GREEN"].includes(normalized)) return "G";
+  return "";
 }
 
 function deckOwners(deck, primaryOwner) {

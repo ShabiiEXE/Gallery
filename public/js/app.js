@@ -280,6 +280,7 @@ function render() {
 
 function updateModalScrollLock() {
   const open = [loginDialog, settingsDialog, editDialog, cardDialog].some((dialog) => dialog?.open);
+  document.documentElement.classList.toggle("has-modal-open", open);
   document.body.classList.toggle("has-modal-open", open);
 }
 

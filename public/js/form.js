@@ -140,6 +140,7 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckImage = data.deckImage || "";
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
   cardForm.dataset.deckOwners = JSON.stringify(Array.isArray(data.deckOwners) ? data.deckOwners : []);
+  cardForm.dataset.deckColors = JSON.stringify(Array.isArray(data.deckColors) ? data.deckColors : []);
   renderDeckOwnersEditor();
   syncPhotoAssetSelect(frontAssetSelect, frontAssetPreview, cardForm.dataset.frontImage);
   syncPhotoAssetSelect(backAssetSelect, backAssetPreview, cardForm.dataset.backImage);
@@ -150,6 +151,7 @@ export function openCardForm(card = null) {
   updateSocialFavicon();
   updateCommanderRoleField();
   editDialog.showModal();
+  document.documentElement.classList.add("has-modal-open");
   document.body.classList.add("has-modal-open");
 }
 
@@ -177,6 +179,7 @@ function applyDeck(deck) {
   if (deck.owner) deckOwnerInput.value = deck.owner;
   if (deck.ownerAvatar) cardForm.dataset.deckOwnerAvatar = deck.ownerAvatar;
   if (Array.isArray(deck.owners)) cardForm.dataset.deckOwners = JSON.stringify(deck.owners);
+  if (Array.isArray(deck.colors)) cardForm.dataset.deckColors = JSON.stringify(deck.colors);
   if (deck.deckImage) cardForm.dataset.deckImage = deck.deckImage;
   if (deck.commanderImage) cardForm.dataset.commanderImage = deck.commanderImage;
   renderDeckOwnersEditor();
@@ -295,6 +298,7 @@ async function saveCurrent(onSave) {
       deckCommander: isCommanderDeck() ? deckCommanderInput.checked : false,
       deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
       deckOwners: safeJsonArray(cardForm.dataset.deckOwners),
+      deckColors: safeJsonArray(cardForm.dataset.deckColors),
       deckImage: cardForm.dataset.deckImage || "",
       commanderImage: cardForm.dataset.commanderImage || frontImage,
       setName: setNameInput.value.trim(),

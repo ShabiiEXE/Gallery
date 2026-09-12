@@ -30,7 +30,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
         ${canFlip || originalImage ? `
           <div class="card-stage-controls">
             ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(originalBackImage(card))}" data-custom-back="${escapeAttribute(shownBack)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(originalBackImage(card))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(shownBack)}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
           </div>
         ` : ""}
       </div>
@@ -142,16 +142,24 @@ export function bindDetailInteractions(root, handlers) {
       tilt.y = 0;
       applyRotation();
     });
-    root.querySelector("[data-card-art-toggle]")?.addEventListener("click", (event) => {
+    root.querySelector("[data-card-art-toggle]")?.addEventListener("click", async (event) => {
       const button = event.currentTarget;
       const front = root.querySelector("[data-preview-front-image]");
       const back = root.querySelector("[data-preview-back-image]");
       if (!front) return;
       const original = button.getAttribute("aria-pressed") !== "true";
+      if (original && back && button.dataset.originalBackNeedsFetch === "true") {
+        const scryfallBack = await fetchOriginalBackImage(button.dataset.scryfallUrl);
+        if (scryfallBack) {
+          button.dataset.originalBack = scryfallBack;
+          button.dataset.originalBackNeedsFetch = "false";
+        }
+      }
       front.src = original ? button.dataset.originalArt : button.dataset.customArt;
       if (back) back.src = original ? button.dataset.originalBack : button.dataset.customBack;
+      const facingBack = Math.abs(normalizeRotation(manual.y) - 180) < 90;
       manual.x = 0;
-      manual.y = 0;
+      manual.y = facingBack ? 180 : 0;
       tilt.x = 0;
       tilt.y = 0;
       applyRotation();
@@ -231,7 +239,8 @@ function deckOwners(card) {
     : card.deckOwner
       ? [{ name: card.deckOwner, avatar: card.deckOwnerAvatar }]
       : [];
-  if (!owners.length) return "";
+  const colors = deckColorPips(card.deckColors);
+  if (!owners.length && !colors) return "";
   return `
     <span class="deck-owner-list">
       ${owners.map((owner) => `
@@ -240,8 +249,29 @@ function deckOwners(card) {
           ${escapeHtml(owner.name || "")}
         </span>
       `).join("")}
+      ${colors}
     </span>
   `;
+}
+
+function deckColorPips(colors) {
+  const normalized = normalizeDeckColors(colors);
+  if (!normalized.length) return "";
+  return `
+    <span class="deck-color-pips" aria-label="Deck colors ${escapeAttribute(normalized.join(""))}">
+      ${normalized.map((color) => `<span class="mana-pip mana-${escapeAttribute(color.toLowerCase())}">${escapeHtml(color)}</span>`).join("")}
+    </span>
+  `;
+}
+
+function normalizeDeckColors(colors) {
+  const values = Array.isArray(colors) ? colors : String(colors || "").split("");
+  const seen = new Set();
+  values.forEach((value) => {
+    const color = String(value || "").trim().charAt(0).toUpperCase();
+    if ("WUBRG".includes(color)) seen.add(color);
+  });
+  return ["W", "U", "B", "R", "G"].filter((color) => seen.has(color));
 }
 
 function signatureLabel(card) {
@@ -268,6 +298,37 @@ function originalCardImage(card) {
 
 function originalBackImage(card) {
   return card.originalBackImage || DEFAULT_CARD_BACK;
+}
+
+function needsOriginalBackFetch(card) {
+  return Boolean(card.scryfallUrl && !card.originalBackImage && card.backImage);
+}
+
+async function fetchOriginalBackImage(url) {
+  const apiUrl = scryfallApiFromUrl(url);
+  if (!apiUrl) return "";
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) return "";
+    const card = await response.json();
+    const backImages = card.card_faces?.[1]?.image_uris || {};
+    return backImages.large || backImages.normal || backImages.small || backImages.png || "";
+  } catch {
+    return "";
+  }
+}
+
+function scryfallApiFromUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    if (parts[0] === "card" && parts[1] && parts[2]) {
+      return `https://api.scryfall.com/cards/${encodeURIComponent(parts[1])}/${encodeURIComponent(parts[2])}`;
+    }
+  } catch {
+    return "";
+  }
+  return "";
 }
 
 function isArtistProof(card) {

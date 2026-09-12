@@ -52,7 +52,7 @@ export function mapScryfallCard(card) {
   return {
     name: card.name,
     frontImage: images.normal || images.large || images.small || "",
-    backImage: backImages.normal || backImages.large || backImages.small || "",
+    backImage: backImages.large || backImages.normal || backImages.small || backImages.png || "",
     setName: card.set_name || "",
     setCode: card.set || "",
     collectorNumber: card.collector_number || "",
