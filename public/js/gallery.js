@@ -35,22 +35,24 @@ export function bundleCards(cards, enabled) {
 
 export function renderGallery(groups, { onOpen }) {
   galleryGrid.innerHTML = groups.map(({ card, count }) => cardTile(card, count)).join("");
+  markOverflowTitles();
   galleryGrid.querySelectorAll("[data-card-open]").forEach((button) => {
     button.addEventListener("click", () => onOpen(button.dataset.cardId));
   });
 }
 
 function cardTile(card, count) {
-  const showImage = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
+  const showingBack = isArtistProof(card) && card.backImage;
+  const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   return `
-    <article class="card-tile ${card.foil ? "foil" : ""}" data-card-tile data-card-id="${card.id}" data-full-name="${escapeAttribute(card.name)}">
+    <article class="card-tile ${card.foil ? "foil" : ""} ${showingBack ? "foil-back-face" : ""}" data-card-tile data-card-id="${card.id}">
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <button class="card-open" type="button" data-card-open data-card-id="${card.id}">
         <span class="card-image-wrap"><img data-card-image src="${showImage}" alt=""></span>
       </button>
       <span class="tile-meta">
-        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
+        <span class="tile-name" data-title="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
         <span class="tile-sub">
           <span>${escapeHtml(artist)}</span>
         </span>
@@ -62,6 +64,26 @@ function cardTile(card, count) {
       </span>
     </article>
   `;
+}
+
+function markOverflowTitles() {
+  galleryGrid.querySelectorAll(".card-tile").forEach((tile) => {
+    const title = tile.querySelector(".tile-name");
+    tile.querySelector("[data-title-tooltip]")?.remove();
+    if (!title) return;
+    tile.classList.remove("has-title-overflow");
+    tile.style.removeProperty("--title-tooltip-left");
+    tile.style.removeProperty("--title-tooltip-top");
+    if (title.scrollWidth <= title.clientWidth + 1) return;
+    const tooltip = document.createElement("span");
+    tooltip.className = "tile-title-tooltip";
+    tooltip.dataset.titleTooltip = "";
+    tooltip.textContent = title.dataset.title || title.textContent.trim();
+    tile.classList.add("has-title-overflow");
+    tile.style.setProperty("--title-tooltip-left", `${title.offsetLeft}px`);
+    tile.style.setProperty("--title-tooltip-top", `${title.offsetTop}px`);
+    tile.append(tooltip);
+  });
 }
 
 function pickBundleCover(cards) {

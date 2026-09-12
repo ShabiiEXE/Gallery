@@ -346,9 +346,10 @@ function collectionValue(card) {
 }
 
 function relatedCard(card) {
-  const image = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage || DEFAULT_CARD_BACK;
+  const showingBack = isArtistProof(card) && card.backImage;
+  const image = showingBack ? card.backImage : card.frontImage || DEFAULT_CARD_BACK;
   return `
-    <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
+    <button class="related-tile ${card.foil ? "foil" : ""} ${showingBack ? "foil-back-face" : ""}" type="button" data-switch-card="${card.id}">
       <span class="card-image-wrap"><img src="${escapeAttribute(image)}" alt="" draggable="false"></span>
       <span class="tile-meta">
         <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>

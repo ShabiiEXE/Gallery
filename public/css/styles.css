@@ -77,6 +77,7 @@
 }
 
 html {
+  overflow-x: hidden;
   overscroll-behavior-y: none;
   scroll-behavior: smooth;
 }
@@ -84,6 +85,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: clip;
   overscroll-behavior-y: none;
   color: var(--text);
   font:
@@ -830,11 +832,19 @@ body.has-modal-open {
   text-transform: uppercase;
 }
 
+.gallery-summary {
+  margin: 2px 0 12px;
+  color: #d5dae4;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .toolbar {
   position: relative;
   z-index: 80;
   display: grid;
-  grid-template-columns: repeat(4, minmax(140px, 1fr)) auto auto minmax(100px, 0.45fr);
+  grid-template-columns: repeat(4, minmax(132px, 1fr)) auto 46px minmax(140px, 0.6fr);
   gap: 10px;
   align-items: end;
   margin-bottom: 18px;
@@ -859,6 +869,15 @@ body.has-modal-open {
   grid-template-columns: 1fr;
   gap: 8px;
   min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 42%, var(--line));
+  border-radius: 7px;
+  background:
+    linear-gradient(135deg, rgba(255, 0, 57, 0.18), rgba(255, 255, 255, 0.035)),
+    rgba(20, 22, 28, 0.34);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.045),
+    0 0 22px color-mix(in srgb, var(--accent-2) 10%, transparent);
 }
 
 .gallery-scale-controls label {
@@ -866,8 +885,45 @@ body.has-modal-open {
 }
 
 .gallery-scale-controls input[type="range"] {
-  min-height: 42px;
+  appearance: none;
+  min-height: 18px;
   padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.gallery-scale-controls input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7b1025, var(--accent-2), #ff8aa2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.gallery-scale-controls input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--accent-2);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent-2) 56%, transparent);
+}
+
+.gallery-scale-controls input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7b1025, var(--accent-2), #ff8aa2);
+}
+
+.gallery-scale-controls input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--accent-2);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent-2) 56%, transparent);
 }
 
 .toolbar:has(.platform-logo-select.is-open),
@@ -923,6 +979,54 @@ label:has(> .platform-logo-select.is-open),
     var(--accent);
 }
 
+.bundle-icon-toggle {
+  display: grid;
+  place-items: end center;
+  min-width: 46px;
+}
+
+.bundle-icon-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bundle-icon-toggle > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  place-items: center;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.045);
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.bundle-icon-toggle svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.bundle-icon-toggle input:checked + span {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--accent-2) 58%, transparent);
+  background: color-mix(in srgb, var(--accent-2) 18%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent-2) 16%, transparent);
+}
+
 .stars-check input:checked {
   background:
     center / 16px 16px no-repeat
@@ -931,12 +1035,21 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .gallery-grid {
+  --gallery-gap: 12px;
+  --gallery-min-card-size: var(--gallery-card-size, 170px);
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--gallery-card-size, 170px), 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--gallery-min-card-size)), 1fr));
+  gap: var(--gallery-gap);
   align-items: start;
+}
+
+@media (min-width: 960px) {
+  .gallery-grid {
+    --gallery-seven-up-size: calc((100% - (var(--gallery-gap) * 6)) / 7);
+    --gallery-min-card-size: max(var(--gallery-card-size, 170px), var(--gallery-seven-up-size));
+  }
 }
 
 .card-tile {
@@ -993,15 +1106,19 @@ label:has(> .platform-logo-select.is-open),
     0 0 24px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-.card-tile:hover::after {
-  content: attr(data-full-name);
+.card-tile.has-title-overflow:hover {
+  z-index: 12;
+}
+
+.tile-title-tooltip {
   position: absolute;
-  left: 8px;
-  bottom: calc(100% + 8px);
-  z-index: 8;
+  left: var(--title-tooltip-left, 8px);
+  top: calc(var(--title-tooltip-top, 0px) - 34px);
+  z-index: 14;
   width: max-content;
   max-width: min(280px, 80vw);
   padding: 7px 9px;
+  opacity: 0;
   color: #fff;
   white-space: normal;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -1009,6 +1126,15 @@ label:has(> .platform-logo-select.is-open),
   background: var(--grid-texture), rgba(20, 21, 26, 0.96);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38);
   pointer-events: none;
+  transform: translateY(3px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.card-tile.has-title-overflow:has(.tile-name:hover) .tile-title-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .card-image-wrap {
@@ -1041,6 +1167,10 @@ label:has(> .platform-logo-select.is-open),
     inset 0 0 44px rgba(121, 242, 206, 0.16),
     0 0 22px color-mix(in srgb, #ffe69b 24%, transparent),
     0 0 42px color-mix(in srgb, var(--accent-3) 16%, transparent);
+}
+
+.foil.foil-back-face .card-image-wrap {
+  box-shadow: none;
 }
 
 .foil .card-image-wrap::before,
@@ -1110,6 +1240,11 @@ label:has(> .platform-logo-select.is-open),
     210% 210%,
     100% 100%;
   animation: foilGlint 4.8s ease-in-out infinite;
+}
+
+.foil.foil-back-face .card-image-wrap::before,
+.foil.foil-back-face .card-image-wrap::after {
+  content: none !important;
 }
 
 @keyframes foilPrism {
@@ -1745,6 +1880,9 @@ label:has(> .platform-logo-select.is-open),
 
 .detail-line b {
   color: var(--muted);
+  font-size: 11px;
+  font-weight: 740;
+  text-transform: uppercase;
 }
 
 .description-copy {

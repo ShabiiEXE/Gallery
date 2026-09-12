@@ -41,24 +41,18 @@
 
     <main class="page-shell">
         <section class="module" data-module="gallery">
-          <div class="module-head">
-            <div>
-            </div>
-            <div class="module-count" id="resultCount"></div>
-          </div>
-
           <form class="toolbar" id="filterForm">
             <label>
               <span data-i18n="type">Type</span>
               <select id="typeFilter"></select>
             </label>
             <label>
-              <span data-i18n="set">Set</span>
-              <select id="setFilter"></select>
-            </label>
-            <label>
               <span data-i18n="artist">Artist</span>
               <select id="artistFilter"></select>
+            </label>
+            <label>
+              <span data-i18n="set">Set</span>
+              <select id="setFilter"></select>
             </label>
             <label>
               <span>Sort</span>
@@ -76,9 +70,14 @@
                 <path d="M6.5 10.5 12 5l5.5 5.5"></path>
               </svg>
             </button>
-            <label class="check-filter">
+            <label class="bundle-icon-toggle" title="Bundle" aria-label="Bundle same name">
               <input id="bundleToggle" type="checkbox" />
-              <span data-i18n="bundle">Bundle</span>
+              <span aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="6.5" y="3.5" width="11" height="15" rx="2"></rect>
+                  <path d="M4.5 6.5v12a2 2 0 0 0 2 2h8"></path>
+                </svg>
+              </span>
             </label>
             <div class="gallery-scale-controls" aria-label="Gallery layout">
               <label>
@@ -88,6 +87,7 @@
             </div>
           </form>
 
+          <div class="gallery-summary" id="resultCount"></div>
           <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
         </section>
     </main>
