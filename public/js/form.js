@@ -330,7 +330,7 @@ async function saveCurrent(onSave) {
 function fillPartnerSelect(value = "") {
   const currentId = editingId.value;
   const partnerCards = getCards()
-    .filter((card) => card.id && card.id !== currentId && card.partnerId)
+    .filter((card) => card.id && card.id !== currentId)
     .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" }));
   partnerSelect.innerHTML = [`<option value="">Choose partner</option>`, ...partnerCards.map((card) => `<option value="${escapeHtml(card.id)}">${escapeHtml(card.name || "Untitled")}</option>`)].join("");
   partnerSelect.value = partnerCards.some((card) => card.id === value) ? value : "";

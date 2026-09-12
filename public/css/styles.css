@@ -510,6 +510,11 @@ select:hover {
   filter: invert(1);
 }
 
+img[src$="pimp-my-deck.png"],
+img[src$="mot.png"] {
+  filter: brightness(0) invert(1);
+}
+
 .basic-logo-select .platform-logo-choice {
   padding-left: 0;
 }
@@ -890,6 +895,7 @@ body.has-modal-open .modal-card {
 
 .gallery-scale-controls input[type="range"] {
   appearance: none;
+  direction: rtl;
   min-height: 18px;
   padding: 11px 0px;
   border: 0;

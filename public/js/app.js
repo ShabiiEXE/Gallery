@@ -55,6 +55,7 @@ const app = {
   filters: { type: "", set: "", artist: "", sort: "artist", direction: "asc" },
   remoteLoaded: false,
   authed: false,
+  version: null,
 };
 
 document.addEventListener("DOMContentLoaded", start);
@@ -62,6 +63,7 @@ document.addEventListener("DOMContentLoaded", start);
 async function start() {
   initForm({ onSave: upsertCard, onDelete: deleteCard, getCards: () => app.cards });
   bindEvents();
+  app.version = await loadVersion();
   app.authed = await getAuthStatus();
   try {
     app.cards = await loadRemoteCards();
@@ -223,13 +225,35 @@ async function upsertCard(card) {
   }
   const existing = app.cards.findIndex((item) => item.id === card.id);
   const nextCards = [...app.cards];
-  if (existing >= 0) nextCards.splice(existing, 1, { ...nextCards[existing], ...card });
-  else nextCards.unshift({ ...card, createdAt: new Date().toISOString() });
+  const previousPartnerId = existing >= 0 ? nextCards[existing].partnerId || "" : "";
+  const savedCard = existing >= 0 ? { ...nextCards[existing], ...card } : { ...card, createdAt: new Date().toISOString() };
+  if (existing >= 0) nextCards.splice(existing, 1, savedCard);
+  else nextCards.unshift(savedCard);
+  syncPartnerLinks(nextCards, savedCard, previousPartnerId);
   await saveRemoteCards(nextCards);
   app.cards = nextCards;
   editDialog.close();
   cardDialog.close();
   render();
+}
+
+function syncPartnerLinks(cards, savedCard, previousPartnerId) {
+  const currentPartnerId = savedCard.partnerId || "";
+  cards.forEach((card) => {
+    if (card.id === savedCard.id) return;
+    if (card.partnerId === savedCard.id && card.id !== currentPartnerId) {
+      card.partnerId = "";
+      card.updatedAt = new Date().toISOString();
+    }
+    if (previousPartnerId && card.id === previousPartnerId && card.id !== currentPartnerId && card.partnerId === savedCard.id) {
+      card.partnerId = "";
+      card.updatedAt = new Date().toISOString();
+    }
+    if (currentPartnerId && card.id === currentPartnerId) {
+      card.partnerId = savedCard.id;
+      card.updatedAt = new Date().toISOString();
+    }
+  });
 }
 
 async function deleteCard(id) {
@@ -313,10 +337,27 @@ function renderGalleryOnly() {
 }
 
 function renderFooter() {
+  if (app.version) clearCacheButton.textContent = formatVersion(app.version);
   const dates = app.cards.map((card) => Date.parse(card.updatedAt || card.createdAt || "")).filter(Number.isFinite);
   if (!dates.length) return;
   const latest = new Date(Math.max(...dates));
   lastEditText.textContent = `Last edit ${latest.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`;
+}
+
+async function loadVersion() {
+  try {
+    const response = await fetch("version.json", { headers: { Accept: "application/json" } });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+function formatVersion(version) {
+  const number = String(version.version || "").replace(/^v/i, "");
+  const date = String(version.date || "").replace(/^\./, "");
+  return number && date ? `v${number}.${date}` : "v50.09.12";
 }
 
 function applyModuleSettings() {
