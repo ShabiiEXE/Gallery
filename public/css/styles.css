@@ -890,7 +890,7 @@ body.has-modal-open .modal-card {
 .gallery-scale-controls input[type="range"] {
   appearance: none;
   min-height: 18px;
-  padding: 0;
+  padding: 11px 0px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -1450,7 +1450,7 @@ label:has(> .platform-logo-select.is-open),
   border: 1px solid var(--line);
   border-radius: 8px;
   clip-path: inset(0 round 8px);
-  padding: 16px;
+  padding: 30px;
   background:
     var(--grid-texture), color-mix(in srgb, var(--panel-dark) 94%, #000);
   background-size:
@@ -1704,6 +1704,7 @@ label:has(> .platform-logo-select.is-open),
   grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
   gap: clamp(24px, 4vw, 48px);
   align-items: start;
+  margin-top: 40px;
 }
 
 .card-stage {
@@ -2262,6 +2263,7 @@ label:has(> .platform-logo-select.is-open),
   .module-head,
   .detail-layout {
     grid-template-columns: 1fr;
+    margin-top: 0px;
   }
 
   .top-actions {
