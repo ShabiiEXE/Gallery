@@ -1308,7 +1308,7 @@ label:has(> .platform-logo-select.is-open),
   white-space: nowrap;
 }
 
-.card-tile.foil .tile-name,
+.card-tile.is-foil .tile-name,
 .related-tile.foil .tile-name {
   color: transparent;
   background: linear-gradient(90deg, #fff, #ffd86f, #79f2ce, #ff78d2, #fff);
