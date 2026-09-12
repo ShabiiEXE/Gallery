@@ -61,7 +61,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
   function relatedList(items) {
     return `
       <section class="related-list">
-        <h3>Other version in the collection</h3>
+        <h3>Other versions in the collection:</h3>
         <div class="related-grid">
           ${items.map((item) => relatedCard(item)).join("")}
         </div>
