@@ -1,6 +1,6 @@
 export const CARD_KINDS = [
   "Signed",
-  "Altered",
+  "Alter",
   "Signed + Altered",
   "Artist Proof",
   "Altered Artist Proof",

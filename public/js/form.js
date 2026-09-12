@@ -110,7 +110,7 @@ export function openCardForm(card = null) {
   const data = card || {};
   editingId.value = data.id || "";
   cardName.value = data.name || "";
-  cardKind.value = data.kind || "Signed";
+  cardKind.value = data.kind === "Altered" ? "Alter" : data.kind || "Signed";
   cardLanguage.value = data.language || "en";
   foilInput.checked = Boolean(data.foil);
   collectorArtist.value = data.artist || "";

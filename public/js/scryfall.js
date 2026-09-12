@@ -10,25 +10,6 @@ export async function searchScryfall(query, language = "en") {
   return (data.data || []).slice(0, 8).map(mapScryfallCard);
 }
 
-export async function fetchScryfallImagesForCard(card) {
-  const language = scryfallLanguageCode(card.language);
-  const languageQuery = language && language !== "en" ? ` lang:${language}` : "";
-  const name = String(card.name || "").split("//")[0].trim();
-  const queries = [
-    card.oracleId ? `oracleid:${card.oracleId}${languageQuery}` : "",
-    name ? `!"${name}"${languageQuery}` : "",
-    card.scryfallUrl || "",
-  ].filter(Boolean);
-
-  for (const query of queries) {
-    const result = query.startsWith("http")
-      ? await fetchScryfallCard(query).catch(() => null)
-      : await fetchFirstScryfallSearch(query).catch(() => null);
-    if (result?.frontImage) return result;
-  }
-  return { frontImage: "", backImage: "" };
-}
-
 function scryfallLanguageCode(language) {
   return {
     en: "en",
@@ -52,15 +33,6 @@ async function fetchScryfallCard(url) {
   const response = await fetch(apiUrl);
   if (!response.ok) throw new Error("Could not read Scryfall link");
   return mapScryfallCard(await response.json());
-}
-
-async function fetchFirstScryfallSearch(query) {
-  const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=prints&order=released`);
-  if (!response.ok) throw new Error("No Scryfall cards found");
-  const data = await response.json();
-  const card = data.data?.[0];
-  if (!card) throw new Error("No Scryfall cards found");
-  return mapScryfallCard(card);
 }
 
 function scryfallApiFromUrl(url) {

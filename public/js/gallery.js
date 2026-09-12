@@ -16,7 +16,7 @@ export function renderFilters(cards, filters) {
 export function filteredCards(cards, filters) {
   const direction = filters.direction === "desc" ? -1 : 1;
   return cards.filter((card) => {
-    return (!filters.type || card.kind === filters.type)
+    return (!filters.type || normalizedKind(card.kind) === normalizedKind(filters.type))
       && (!filters.set || card.setName === filters.set || card.setCode === filters.set)
       && (!filters.artist || card.artist === filters.artist || card.cardArtist === filters.artist);
   }).sort((a, b) => compareCards(a, b, filters.sort || "artist", direction));
@@ -50,7 +50,7 @@ function cardTile(card, count) {
         <span class="card-image-wrap"><img data-card-image src="${showImage}" alt=""></span>
       </button>
       <span class="tile-meta">
-        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${cardNameHtml(card.name)}${card.foil ? foilStar() : ""}</span>
+        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
         <span class="tile-sub">
           <span>${escapeHtml(artist)}</span>
         </span>
@@ -81,6 +81,10 @@ function shortKind(kind) {
     .replace("Signed + Altered", "Signed + Alt")
     .replace(/^Altered$/, "Alter")
     .replace("Artist Proof", "AP");
+}
+
+function normalizedKind(kind) {
+  return String(kind || "") === "Altered" ? "Alter" : String(kind || "");
 }
 
 function foilStar() {
@@ -145,8 +149,4 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value);
-}
-
-function cardNameHtml(name) {
-  return escapeHtml(name).replace(/\s*\/\/\s*/g, " // <br>");
 }

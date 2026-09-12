@@ -36,7 +36,6 @@ const artistFilter = $("artistFilter");
 const sortSelect = $("sortSelect");
 const sortDirectionButton = $("sortDirectionButton");
 const bundleToggle = $("bundleToggle");
-const maxCardsRange = $("maxCardsRange");
 const cardScaleRange = $("cardScaleRange");
 const defaultSortSelect = $("defaultSortSelect");
 const defaultSortDirectionSelect = $("defaultSortDirectionSelect");
@@ -107,7 +106,6 @@ function bindEvents() {
       direction: sortDirectionButton.dataset.direction || "asc",
     };
     app.device.bundleSameName = bundleToggle.checked;
-    app.device.galleryMaxCards = Number(maxCardsRange.value) || 6;
     app.device.galleryCardSize = Number(cardScaleRange.value) || 170;
     saveDevice(app.device);
     renderGalleryOnly();
@@ -267,7 +265,6 @@ function render() {
   addCardButton.disabled = !app.authed;
   addCardButton.title = app.authed ? "" : "Log in to add cards";
   bundleToggle.checked = app.device.bundleSameName;
-  maxCardsRange.value = app.device.galleryMaxCards || 6;
   cardScaleRange.value = app.device.galleryCardSize || 170;
   sortSelect.value = app.filters.sort || app.settings.defaultSort || "artist";
   sortDirectionButton.dataset.direction = app.filters.direction || app.settings.defaultSortDirection || "asc";
@@ -289,7 +286,6 @@ function updateModalScrollLock() {
 function renderGalleryOnly() {
   const visible = filteredCards(app.cards, app.filters);
   const groups = bundleCards(visible, app.device.bundleSameName);
-  galleryGrid?.style.setProperty("--gallery-max-cards", String(app.device.galleryMaxCards || 6));
   galleryGrid?.style.setProperty("--gallery-card-size", `${app.device.galleryCardSize || 170}px`);
   renderGallery(groups, { onOpen: openDetail });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;

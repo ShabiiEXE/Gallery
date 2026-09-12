@@ -1,6 +1,5 @@
 import { LANGUAGES } from "./constants.js";
 import { icon } from "./icons.js";
-import { fetchScryfallImagesForCard } from "./scryfall.js";
 import { scryfallSetIconCode } from "./set-icons.js";
 
 const DEFAULT_CARD_BACK = "https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg/revision/latest/scale-to-width-down/250?cb=20140813141013";
@@ -31,13 +30,13 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
         ${canFlip || originalImage ? `
           <div class="card-stage-controls">
             ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-card-name="${escapeAttribute(card.name)}" data-card-language="${escapeAttribute(card.language || "en")}" data-card-oracle-id="${escapeAttribute(card.oracleId || "")}" data-card-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(originalBackImage(card))}" data-custom-back="${escapeAttribute(shownBack)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(originalBackImage(card))}" data-custom-back="${escapeAttribute(shownBack)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
           </div>
         ` : ""}
       </div>
       <div class="detail-info">
         <div class="detail-title">
-          <h2 class="${card.foil ? "foil-title" : ""}">${cardNameHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
+          <h2 class="${card.foil ? "foil-title" : ""}">${detailCardNameHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
           <div class="detail-lines detail-title-lines">
             ${line(shortKind(card.kind), artistValue(card))}
             ${line(signatureLabel(card), escapeHtml(signatureValue(card)))}
@@ -58,7 +57,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
   function relatedList(items) {
     return `
       <section class="related-list">
-        <h3>Also in Collection</h3>
+        <h3>Other version in the collection</h3>
         <div class="related-grid">
           ${items.map((item) => relatedCard(item)).join("")}
         </div>
@@ -143,23 +142,12 @@ export function bindDetailInteractions(root, handlers) {
       tilt.y = 0;
       applyRotation();
     });
-    root.querySelector("[data-card-art-toggle]")?.addEventListener("click", async (event) => {
+    root.querySelector("[data-card-art-toggle]")?.addEventListener("click", (event) => {
       const button = event.currentTarget;
       const front = root.querySelector("[data-preview-front-image]");
       const back = root.querySelector("[data-preview-back-image]");
       if (!front) return;
       const original = button.getAttribute("aria-pressed") !== "true";
-      if (original && !button.dataset.originalLoaded && !button.dataset.originalArt.startsWith("assets/")) {
-        const images = await fetchScryfallImagesForCard({
-          name: button.dataset.cardName,
-          language: button.dataset.cardLanguage,
-          oracleId: button.dataset.cardOracleId,
-          scryfallUrl: button.dataset.cardScryfallUrl,
-        }).catch(() => null);
-        if (images?.frontImage) button.dataset.originalArt = images.frontImage;
-        if (images?.backImage) button.dataset.originalBack = images.backImage;
-        button.dataset.originalLoaded = "true";
-      }
       front.src = original ? button.dataset.originalArt : button.dataset.customArt;
       if (back) back.src = original ? button.dataset.originalBack : button.dataset.customBack;
       manual.x = 0;
@@ -358,12 +346,12 @@ function collectionValue(card) {
 }
 
 function relatedCard(card) {
-  const image = card.frontImage || DEFAULT_CARD_BACK;
+  const image = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage || DEFAULT_CARD_BACK;
   return `
     <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
       <span class="card-image-wrap"><img src="${escapeAttribute(image)}" alt="" draggable="false"></span>
       <span class="tile-meta">
-        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${cardNameHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
+        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
         <span class="tile-foot">
           ${isProxy(card) ? "" : `<span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>`}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
@@ -412,8 +400,10 @@ function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 }
 
-function cardNameHtml(name) {
-  return escapeHtml(name).replace(/\s*\/\/\s*/g, " // <br>");
+function detailCardNameHtml(name) {
+  const value = String(name || "");
+  if (/^sp\s*\/\/\s*dr$/i.test(value.trim())) return escapeHtml(value);
+  return escapeHtml(value).replace(/\s*\/\/\s*/g, " // <br>");
 }
 
 function escapeAttribute(value) {
