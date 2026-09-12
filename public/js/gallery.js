@@ -61,7 +61,10 @@ function cardTile(card, count) {
         </span>
         <span class="tile-foot">
           ${shouldShowSetIcon(card) ? `<span class="set-icon">${setIcon(card.setCode || card.setName)}</span>` : ""}
-          <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
+          <span class="tag tile-kind">
+            <span class="kind-default">${escapeHtml(shortKind(card.kind))}</span>
+            <span class="kind-mobile-three">${escapeHtml(mobileThreeKind(card.kind))}</span>
+          </span>
           <span class="tile-year">${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
       </span>
@@ -107,12 +110,17 @@ function shouldShowSetIcon(card) {
 }
 
 function shortKind(kind) {
-  const value = String(kind || "").trim();
+  return String(kind || "")
+    .replace("Signed + Altered", "Signed + Alt")
+    .replace(/^Altered$/, "Alter")
+    .replace("Artist Proof", "AP");
+}
+
+function mobileThreeKind(kind) {
+  const value = shortKind(kind);
   if (value === "Custom Proxy") return "Proxy";
-  if (value === "Altered Artist Proof" || value === "Altered AP") return "Alt AP";
-  if (value === "Signed + Altered" || value === "Signed + Alt") return "Sign + Alt";
-  if (value === "Artist Proof") return "AP";
-  if (value === "Altered") return "Alter";
+  if (value === "Altered AP") return "Alt AP";
+  if (value === "Signed + Alt") return "Sign + Alt";
   return value;
 }
 

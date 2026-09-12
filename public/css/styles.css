@@ -852,10 +852,9 @@ body.has-modal-open .modal-card {
   top: 10px;
   z-index: 80;
   display: grid;
-  grid-template-columns: repeat(3, minmax(132px, 1fr)) minmax(
-      240px,
-      1.15fr
-    ) minmax(140px, 0.6fr);
+  grid-template-columns:
+    repeat(3, minmax(132px, 1fr)) minmax(240px, 1.15fr)
+    minmax(140px, 0.6fr);
   gap: 10px;
   align-items: end;
   margin-bottom: 18px;
@@ -1349,6 +1348,10 @@ label:has(> .platform-logo-select.is-open),
   white-space: nowrap;
 }
 
+.kind-mobile-three {
+  display: none;
+}
+
 .set-icon {
   display: inline-grid;
   place-items: center;
@@ -1431,7 +1434,6 @@ label:has(> .platform-logo-select.is-open),
   align-items: center;
   gap: 5px;
   padding: 0;
-  color: #d5dae4;
   border: 0;
   background: transparent;
   font-size: 11px;
@@ -1938,8 +1940,9 @@ label:has(> .platform-logo-select.is-open),
 
 .description-copy {
   margin-top: 12px;
-  color: var(--text);
+  color: var(--muted);
   line-height: 1.55;
+  font-size: 12px;
 }
 
 .collection-card-link,
@@ -2196,7 +2199,7 @@ label:has(> .platform-logo-select.is-open),
 .deck-color-pips {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 6px;
   padding-left: 2px;
 }
 
@@ -2337,6 +2340,14 @@ label:has(> .platform-logo-select.is-open),
   .gallery-grid[data-mobile-columns="3"] .tile-foot,
   .gallery-grid[data-mobile-columns="4"] .tile-foot {
     gap: 0;
+  }
+
+  .gallery-grid[data-mobile-columns="3"] .kind-default {
+    display: none;
+  }
+
+  .gallery-grid[data-mobile-columns="3"] .kind-mobile-three {
+    display: inline;
   }
 
   .module {

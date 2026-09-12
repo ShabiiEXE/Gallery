@@ -7,7 +7,6 @@ import { LANGUAGES } from "./constants.js";
 import { closeFlagSelects, syncCustomSelect, syncFlagSelect, syncSetSelect } from "./custom-select.js";
 import { icon } from "./icons.js";
 import {
-  loadCards,
   loadDevice,
   loadRemoteCards,
   loadRemoteSettings,
@@ -51,7 +50,7 @@ const clearCacheButton = $("clearCacheButton");
 const lastEditText = $("lastEditText");
 
 const app = {
-  cards: loadCards(),
+  cards: [],
   settings: loadSettings(),
   device: loadDevice(),
   filters: { type: "", set: "", artist: "", sort: "artist", direction: "asc" },

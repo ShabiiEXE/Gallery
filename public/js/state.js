@@ -1,6 +1,5 @@
 import { MODULES } from "./constants.js";
 
-const LEGACY_CARD_KEY = "magic-gallery.cards";
 const SETTINGS_KEY = "magic-gallery.settings";
 const DEVICE_KEY = "magic-gallery.device";
 
@@ -15,15 +14,6 @@ export const defaultDevice = {
   bundleSameName: true,
   galleryColumns: 7,
 };
-
-export function loadCards() {
-  try {
-    localStorage.removeItem(LEGACY_CARD_KEY);
-  } catch {
-    // Card data is Cloudflare-only; ignore browsers that block localStorage.
-  }
-  return [];
-}
 
 export function loadSettings() {
   return mergeSettings(readJson(SETTINGS_KEY, {}));
