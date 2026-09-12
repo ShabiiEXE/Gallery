@@ -33,6 +33,28 @@ export function saveSettings(settings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(mergeSettings(settings)));
 }
 
+export async function loadRemoteSettings() {
+  const response = await fetch("/api/settings", { headers: { Accept: "application/json" } });
+  if (!response.ok) throw new Error("Remote settings unavailable");
+  const data = await response.json();
+  return mergeSettings(data.settings || {});
+}
+
+export async function saveRemoteSettings(settings) {
+  const merged = mergeSettings(settings);
+  const response = await fetch("/api/settings", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ settings: merged }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || "Cloudflare settings save unavailable");
+  }
+  saveSettings(merged);
+  return merged;
+}
+
 export function loadDevice() {
   return { ...defaultDevice, ...readJson(DEVICE_KEY, {}) };
 }

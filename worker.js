@@ -1,11 +1,13 @@
 import * as auth from "./functions/api/auth.js";
 import * as cards from "./functions/api/cards.js";
 import * as moxfieldDeck from "./functions/api/moxfield-deck.js";
+import * as settings from "./functions/api/settings.js";
 
 const routes = {
   "/api/auth": auth,
   "/api/cards": cards,
   "/api/moxfield-deck": moxfieldDeck,
+  "/api/settings": settings,
 };
 
 const CACHEABLE_ASSET = /^\/assets\/.+\.(?:avif|gif|ico|jpe?g|png|svg|webp|woff2)$/i;

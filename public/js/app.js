@@ -10,9 +10,11 @@ import {
   loadCards,
   loadDevice,
   loadRemoteCards,
+  loadRemoteSettings,
   loadSettings,
   saveDevice,
   saveRemoteCards,
+  saveRemoteSettings,
   saveSettings,
 } from "./state.js";
 import { bundleCards, filteredCards, renderFilters, renderGallery } from "./gallery.js";
@@ -64,6 +66,12 @@ async function start() {
   initForm({ onSave: upsertCard, onDelete: deleteCard, getCards: () => app.cards });
   bindEvents();
   app.version = await loadVersion();
+  try {
+    app.settings = await loadRemoteSettings();
+    saveSettings(app.settings);
+  } catch {
+    app.settings = loadSettings();
+  }
   app.authed = await getAuthStatus();
   try {
     app.cards = await loadRemoteCards();
@@ -183,7 +191,7 @@ function openSettings() {
   updateModalScrollLock();
 }
 
-function commitSettings() {
+async function commitSettings() {
   app.settings.language = languageSelect.value;
   app.settings.defaultSort = defaultSortSelect.value || "artist";
   app.settings.defaultSortDirection = defaultSortDirectionSelect.value || "asc";
@@ -193,6 +201,12 @@ function commitSettings() {
     hidden: row.querySelector("[data-module-hidden]").checked,
   }));
   saveSettings(app.settings);
+  try {
+    app.settings = await saveRemoteSettings(app.settings);
+  } catch (error) {
+    alert(error.message || "Cloudflare settings save unavailable");
+    return;
+  }
   app.filters.sort = app.settings.defaultSort;
   app.filters.direction = app.settings.defaultSortDirection;
   settingsDialog.close();
