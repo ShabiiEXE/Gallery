@@ -13,6 +13,9 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
   const shownBack = isArtistProof(card) && card.backImage ? card.frontImage : card.backImage || DEFAULT_CARD_BACK;
   const canFlip = Boolean(card.backImage || card.originalBackImage || String(card.name || "").includes("//"));
   const originalImage = originalCardImage(card);
+  const originalFront = originalFrontImage(card, shownFront);
+  const originalBack = originalBackImage(card);
+  const foilBothFaces = card.foil && card.backImage && !isArtistProof(card);
 
   return `
     <div class="modal-head">
@@ -24,14 +27,14 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     </div>
     <div class="detail-layout">
       <div class="card-stage" data-card-stage>
-        <div class="preview-card ${card.foil ? "foil-sheen" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
+        <div class="preview-card ${card.foil ? "foil-sheen" : ""} ${foilBothFaces ? "foil-both-faces" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
           ${imageFace(shownFront || card.frontImage, "preview-front", "data-preview-front-image")}
           ${imageFace(shownBack, "preview-back", "data-preview-back-image")}
         </div>
         ${canFlip || originalImage ? `
           <div class="card-stage-controls">
             ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(cacheImage(originalImage))}" data-custom-art="${escapeAttribute(cacheImage(shownFront || card.frontImage))}" data-original-back="${escapeAttribute(cacheImage(originalBackImage(card)))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(cacheImage(shownBack))}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(cacheImage(originalFront))}" data-custom-art="${escapeAttribute(cacheImage(shownFront || card.frontImage))}" data-original-back="${escapeAttribute(cacheImage(originalBack))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(cacheImage(shownBack))}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
           </div>
         ` : ""}
       </div>
@@ -297,7 +300,13 @@ function originalCardImage(card) {
   return candidates.find((image) => image !== card.frontImage) || "";
 }
 
+function originalFrontImage(card, shownFront) {
+  if (isArtistProof(card) && card.backImage) return card.originalBackImage || DEFAULT_CARD_BACK;
+  return originalCardImage(card) || shownFront || "";
+}
+
 function originalBackImage(card) {
+  if (isArtistProof(card) && card.backImage) return card.originalImage || card.frontImage || DEFAULT_CARD_BACK;
   return card.originalBackImage || DEFAULT_CARD_BACK;
 }
 
