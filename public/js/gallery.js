@@ -46,7 +46,7 @@ function cardTile(card, count) {
   const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   return `
-    <article class="card-tile ${card.foil ? "foil" : ""} ${showingBack ? "foil-back-face" : ""}" data-card-tile data-card-id="${card.id}">
+    <article class="card-tile ${card.foil ? "foil" : ""}" data-card-tile data-card-id="${card.id}">
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <button class="card-open" type="button" data-card-open data-card-id="${card.id}">
         <span class="card-image-wrap"><img data-card-image src="${showImage}" alt=""></span>

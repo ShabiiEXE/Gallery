@@ -4,6 +4,8 @@ import { PHOTO_ASSETS } from "./photo-assets.js";
 import { searchScryfall } from "./scryfall.js";
 import { scryfallSetIconCode } from "./set-icons.js";
 
+const CLEAR_IMAGE_VALUE = "__clear_image__";
+
 const $ = (id) => document.getElementById(id);
 const cardKind = $("cardKind");
 const cardLanguage = $("cardLanguage");
@@ -379,11 +381,19 @@ function fillSelect(select, entries) {
 function fillPhotoAssetSelect(select) {
   if (!select) return;
   const options = PHOTO_ASSETS.map((path) => `<option value="${escapeHtml(path)}" data-image="${escapeHtml(path)}">${escapeHtml(photoAssetLabel(path))}</option>`);
-  select.innerHTML = [`<option value="">Current/uploaded image</option>`, ...options].join("");
+  select.innerHTML = [`<option value="">Current/uploaded image</option>`, `<option value="${CLEAR_IMAGE_VALUE}">Clear image</option>`, ...options].join("");
 }
 
 function applyPhotoAsset(select, input, preview, datasetKey) {
-  if (!select?.value) return;
+  if (!select) return;
+  if (select.value === CLEAR_IMAGE_VALUE) {
+    cardForm.dataset[datasetKey] = "";
+    if (input) input.value = "";
+    updatePhotoAssetPreview(preview, "");
+    syncCustomSelect(select);
+    return;
+  }
+  if (!select.value) return;
   cardForm.dataset[datasetKey] = select.value;
   if (input) input.value = "";
   updatePhotoAssetPreview(preview, select.value);
