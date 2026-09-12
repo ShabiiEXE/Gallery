@@ -2,7 +2,7 @@ import { CARD_KINDS, LANGUAGES } from "./constants.js";
 import { syncCustomSelect, syncFlagSelect } from "./custom-select.js";
 import { PHOTO_ASSETS } from "./photo-assets.js";
 import { searchScryfall } from "./scryfall.js";
-import { scryfallSetIconCode } from "./set-icons.js";
+import { setIconUrl } from "./set-icons.js";
 
 const CLEAR_IMAGE_VALUE = "__clear_image__";
 
@@ -18,6 +18,9 @@ const editDialog = $("editDialog");
 const editTitle = $("editTitle");
 const editingId = $("editingId");
 const cardName = $("cardName");
+const partnerInput = $("partnerInput");
+const partnerSelect = $("partnerSelect");
+const partnerSelectField = $("partnerSelectField");
 const foilInput = $("foilInput");
 const frontPhoto = $("frontPhoto");
 const backPhoto = $("backPhoto");
@@ -51,8 +54,10 @@ const scryfallInput = $("scryfallInput");
 const saveCardButton = $("saveCardButton");
 const deleteCardButton = $("deleteCardButton");
 const closeEditButton = document.querySelector("[data-close-edit]");
+let getCards = () => [];
 
-export function initForm({ onSave, onDelete }) {
+export function initForm({ onSave, onDelete, getCards: getCardsCallback }) {
+  getCards = typeof getCardsCallback === "function" ? getCardsCallback : getCards;
   fillSelect(cardKind, CARD_KINDS.map((kind) => [kind, kind]));
   fillSelect(cardLanguage, LANGUAGES.map((language) => [language.value, language.label]));
   fillPhotoAssetSelect(frontAssetSelect);
@@ -83,6 +88,7 @@ export function initForm({ onSave, onDelete }) {
   artistSocialInput.addEventListener("input", updateSocialFavicon);
   deckFormatInput.addEventListener("input", updateCommanderRoleField);
   setCodeInput.addEventListener("input", updateSetIcon);
+  partnerInput.addEventListener("change", () => updatePartnerField());
   cardForm.addEventListener("keydown", preventAccidentalSubmit);
   document.querySelectorAll("[data-save-card]").forEach((button) => {
     button.addEventListener("click", () => saveCurrent(onSave));
@@ -114,6 +120,7 @@ export function openCardForm(card = null) {
   cardName.value = data.name || "";
   cardKind.value = data.kind === "Altered" ? "Alter" : data.kind || "Signed";
   cardLanguage.value = data.language || "en";
+  partnerInput.checked = Boolean(data.partnerId);
   foilInput.checked = Boolean(data.foil);
   collectorArtist.value = data.artist || "";
   signatureYear.value = data.signatureYear || "";
@@ -141,6 +148,7 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
   cardForm.dataset.deckOwners = JSON.stringify(Array.isArray(data.deckOwners) ? data.deckOwners : []);
   cardForm.dataset.deckColors = JSON.stringify(Array.isArray(data.deckColors) ? data.deckColors : []);
+  fillPartnerSelect(data.partnerId || "");
   renderDeckOwnersEditor();
   syncPhotoAssetSelect(frontAssetSelect, frontAssetPreview, cardForm.dataset.frontImage);
   syncPhotoAssetSelect(backAssetSelect, backAssetPreview, cardForm.dataset.backImage);
@@ -150,6 +158,7 @@ export function openCardForm(card = null) {
   updateSetIcon();
   updateSocialFavicon();
   updateCommanderRoleField();
+  updatePartnerField();
   editDialog.showModal();
   document.documentElement.classList.add("has-modal-open");
   document.body.classList.add("has-modal-open");
@@ -307,6 +316,7 @@ async function saveCurrent(onSave) {
       setYear: setYearInput.value.trim(),
       cardArtist: cardArtistInput.value.trim(),
       scryfallUrl: scryfallInput.value.trim(),
+      partnerId: partnerInput.checked ? partnerSelect.value : "",
       updatedAt: new Date().toISOString(),
     });
     editDialog.close();
@@ -315,6 +325,22 @@ async function saveCurrent(onSave) {
   } finally {
     setSaveDisabled(false);
   }
+}
+
+function fillPartnerSelect(value = "") {
+  const currentId = editingId.value;
+  const partnerCards = getCards()
+    .filter((card) => card.id && card.id !== currentId && card.partnerId)
+    .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" }));
+  partnerSelect.innerHTML = [`<option value="">Choose partner</option>`, ...partnerCards.map((card) => `<option value="${escapeHtml(card.id)}">${escapeHtml(card.name || "Untitled")}</option>`)].join("");
+  partnerSelect.value = partnerCards.some((card) => card.id === value) ? value : "";
+  syncCustomSelect(partnerSelect);
+}
+
+function updatePartnerField() {
+  partnerSelectField.hidden = !partnerInput.checked;
+  if (!partnerInput.checked) partnerSelect.value = "";
+  syncCustomSelect(partnerSelect);
 }
 
 function setSaveDisabled(disabled) {
@@ -334,8 +360,7 @@ function updateSetIcon() {
   const code = setCodeInput.value.trim().toLowerCase();
   setCodeIcon.hidden = !code;
   if (!code) return;
-  const iconCode = scryfallSetIconCode(code);
-  setCodeIcon.src = `https://svgs.scryfall.io/sets/${encodeURIComponent(iconCode)}.svg`;
+  setCodeIcon.src = setIconUrl(code);
   setCodeIcon.alt = code;
 }
 

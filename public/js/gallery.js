@@ -1,5 +1,5 @@
 import { CARD_KINDS } from "./constants.js";
-import { scryfallSetIconCode } from "./set-icons.js";
+import { setIconUrl } from "./set-icons.js";
 
 const LOCAL_CARD_ASSET_VERSION = "20260912-vivi-sign";
 
@@ -28,7 +28,7 @@ export function bundleCards(cards, enabled) {
   if (!enabled) return cards.map((card) => ({ card, count: 1 }));
   const groups = new Map();
   cards.forEach((card) => {
-    const key = card.name.toLowerCase();
+    const key = card.partnerId ? `partner:${card.id}` : card.name.toLowerCase();
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(card);
   });
@@ -59,7 +59,7 @@ function cardTile(card, count) {
           <span>${escapeHtml(artist)}</span>
         </span>
         <span class="tile-foot">
-          ${isProxy(card) ? "" : `<span class="set-icon">${setIcon(card.setCode || card.setName)}</span>`}
+          ${shouldShowSetIcon(card) ? `<span class="set-icon">${setIcon(card.setCode || card.setName)}</span>` : ""}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
           <span>${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
@@ -100,6 +100,11 @@ function isProxy(card) {
   return String(card.kind || "").toLowerCase().includes("proxy");
 }
 
+function shouldShowSetIcon(card) {
+  const code = String(card.setCode || card.setName || "").trim().toLowerCase();
+  return !isProxy(card) || code === "xpip" || code === "xmot";
+}
+
 function shortKind(kind) {
   return String(kind || "")
     .replace("Signed + Altered", "Signed + Alt")
@@ -122,8 +127,8 @@ function foilStar() {
 function setIcon(code) {
   const normalized = String(code || "").trim().toLowerCase();
   if (!normalized) return "?";
-  const iconCode = scryfallSetIconCode(normalized);
-  return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
+  const url = setIconUrl(normalized);
+  return url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(normalized)}" loading="lazy">` : "?";
 }
 
 function cacheImage(src) {
@@ -152,8 +157,15 @@ function compareCards(a, b, sort, direction = 1) {
   if (sort === "deck") return compareDecks(a, b, direction);
   if (sort === "name") return compareText(a.name, b.name) * direction;
   if (sort === "year") return (compareText(a.signatureYear, b.signatureYear) || compareText(a.name, b.name)) * direction;
-  if (sort === "type") return (compareText(a.kind, b.kind) || compareText(a.name, b.name)) * direction;
+  if (sort === "type") return (compareType(a.kind, b.kind) || compareText(a.name, b.name)) * direction;
   return (compareText(a.artist || a.cardArtist, b.artist || b.cardArtist) || compareText(a.name, b.name)) * direction;
+}
+
+function compareType(a, b) {
+  const order = ["Altered Artist Proof", "Artist Proof", "Signed + Altered", "Alter", "Custom Proxy", "Signed"];
+  const aIndex = order.indexOf(normalizedKind(a));
+  const bIndex = order.indexOf(normalizedKind(b));
+  return (aIndex === -1 ? order.length : aIndex) - (bIndex === -1 ? order.length : bIndex);
 }
 
 function compareDecks(a, b, direction) {

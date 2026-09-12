@@ -192,6 +192,8 @@ function firstUrl(values) {
 }
 
 function moxfieldCardImage(card) {
+  const scryfallId = card?.card?.scryfall_id || card?.card?.scryfallId || card?.scryfall_id || card?.scryfallId || card?.scryfallOracleId || "";
+  if (/^[0-9a-f-]{36}$/i.test(scryfallId)) return `https://cards.scryfall.io/art_crop/front/${scryfallId[0]}/${scryfallId[1]}/${scryfallId}.jpg`;
   const id = card?.card?.id || card?.id || card?.cardId || "";
   return id ? `https://assets.moxfield.net/cards/card-${id}-art_crop.webp` : "";
 }

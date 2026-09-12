@@ -46,6 +46,7 @@ const resultCount = $("resultCount");
 const emptyState = $("emptyState");
 const galleryGrid = $("galleryGrid");
 const clearCacheButton = $("clearCacheButton");
+const lastEditText = $("lastEditText");
 
 const app = {
   cards: loadCards(),
@@ -59,7 +60,7 @@ const app = {
 document.addEventListener("DOMContentLoaded", start);
 
 async function start() {
-  initForm({ onSave: upsertCard, onDelete: deleteCard });
+  initForm({ onSave: upsertCard, onDelete: deleteCard, getCards: () => app.cards });
   bindEvents();
   app.authed = await getAuthStatus();
   try {
@@ -90,6 +91,7 @@ function bindEvents() {
   clearCacheButton.addEventListener("click", clearBrowserCache);
   languageSelect.addEventListener("change", () => syncFlagSelect(languageSelect, LANGUAGES));
   document.addEventListener("click", () => closeFlagSelects());
+  window.addEventListener("resize", syncDisplayRange);
   [loginDialog, settingsDialog, editDialog, cardDialog].forEach((dialog) => {
     dialog?.addEventListener("close", () => {
       updateModalScrollLock();
@@ -106,7 +108,7 @@ function bindEvents() {
       direction: sortDirectionButton.dataset.direction || "asc",
     };
     app.device.bundleSameName = bundleToggle.checked;
-    app.device.galleryCardSize = Number(cardScaleRange.value) || 170;
+    app.device.galleryColumns = Number(cardScaleRange.value) || 7;
     saveDevice(app.device);
     renderGalleryOnly();
   });
@@ -225,6 +227,8 @@ async function upsertCard(card) {
   else nextCards.unshift({ ...card, createdAt: new Date().toISOString() });
   await saveRemoteCards(nextCards);
   app.cards = nextCards;
+  editDialog.close();
+  cardDialog.close();
   render();
 }
 
@@ -264,8 +268,9 @@ function render() {
   addCardButton.hidden = !app.authed;
   addCardButton.disabled = !app.authed;
   addCardButton.title = app.authed ? "" : "Log in to add cards";
+  syncDisplayRange();
   bundleToggle.checked = app.device.bundleSameName;
-  cardScaleRange.value = app.device.galleryCardSize || 170;
+  cardScaleRange.value = app.device.galleryColumns || 7;
   sortSelect.value = app.filters.sort || app.settings.defaultSort || "artist";
   sortDirectionButton.dataset.direction = app.filters.direction || app.settings.defaultSortDirection || "asc";
   sortDirectionButton.classList.toggle("is-desc", sortDirectionButton.dataset.direction === "desc");
@@ -278,6 +283,16 @@ function render() {
   renderGalleryOnly();
 }
 
+function syncDisplayRange() {
+  const mobile = window.matchMedia("(max-width: 820px)").matches;
+  cardScaleRange.min = mobile ? "1" : "2";
+  cardScaleRange.max = mobile ? "4" : "7";
+  const value = Number(app.device.galleryColumns) || (mobile ? 4 : 7);
+  const clamped = Math.max(Number(cardScaleRange.min), Math.min(Number(cardScaleRange.max), value));
+  app.device.galleryColumns = clamped;
+  cardScaleRange.value = clamped;
+}
+
 function updateModalScrollLock() {
   const open = [loginDialog, settingsDialog, editDialog, cardDialog].some((dialog) => dialog?.open);
   document.documentElement.classList.toggle("has-modal-open", open);
@@ -287,11 +302,21 @@ function updateModalScrollLock() {
 function renderGalleryOnly() {
   const visible = filteredCards(app.cards, app.filters);
   const groups = bundleCards(visible, app.device.bundleSameName);
-  galleryGrid?.style.setProperty("--gallery-card-size", `${app.device.galleryCardSize || 170}px`);
+  const columns = app.device.galleryColumns || 7;
+  galleryGrid?.style.setProperty("--gallery-columns", `${columns}`);
+  galleryGrid?.style.setProperty("--gallery-mobile-columns", `${Math.max(1, Math.min(4, columns))}`);
   renderGallery(groups, { onOpen: openDetail });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
+  renderFooter();
   if (emptyState) emptyState.hidden = app.cards.length > 0;
   if (galleryGrid) galleryGrid.hidden = app.cards.length === 0;
+}
+
+function renderFooter() {
+  const dates = app.cards.map((card) => Date.parse(card.updatedAt || card.createdAt || "")).filter(Number.isFinite);
+  if (!dates.length) return;
+  const latest = new Date(Math.max(...dates));
+  lastEditText.textContent = `Last edit ${latest.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`;
 }
 
 function applyModuleSettings() {

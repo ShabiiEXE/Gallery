@@ -1,13 +1,13 @@
 import { LANGUAGES } from "./constants.js";
 import { icon } from "./icons.js";
-import { scryfallSetIconCode } from "./set-icons.js";
+import { setIconUrl } from "./set-icons.js";
 
 const DEFAULT_CARD_BACK = "https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg/revision/latest/scale-to-width-down/250?cb=20140813141013";
 const BLACK_MAGE_ORIGINAL = "assets/cards/blackmage_og.jpg";
 const LOCAL_CARD_ASSET_VERSION = "20260912-vivi-sign";
 
 export function renderCardDetail({ card, cards, canEdit = false }) {
-  const related = cards.filter((item) => item.name === card.name && item.id !== card.id);
+  const related = relatedCards(card, cards);
   const language = LANGUAGES.find((item) => item.value === card.language) || LANGUAGES[0];
   const shownFront = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
   const shownBack = isArtistProof(card) && card.backImage ? card.frontImage : card.backImage || DEFAULT_CARD_BACK;
@@ -34,7 +34,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
         ${canFlip || originalImage ? `
           <div class="card-stage-controls">
             ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(cacheImage(originalFront))}" data-custom-art="${escapeAttribute(cacheImage(shownFront || card.frontImage))}" data-original-back="${escapeAttribute(cacheImage(originalBack))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(cacheImage(shownBack))}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(cacheImage(originalFront))}" data-custom-art="${escapeAttribute(cacheImage(shownFront || card.frontImage))}" data-original-back="${escapeAttribute(cacheImage(originalBack))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-is-ap="${isArtistProof(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(cacheImage(shownBack))}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
           </div>
         ` : ""}
       </div>
@@ -68,6 +68,11 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       </section>
     `;
   }
+}
+
+function relatedCards(card, cards) {
+  const linkedIds = new Set([card.partnerId, ...cards.filter((item) => item.partnerId === card.id).map((item) => item.id)].filter(Boolean));
+  return cards.filter((item) => item.id !== card.id && (item.name === card.name || linkedIds.has(item.id)));
 }
 
 export function bindDetailInteractions(root, handlers) {
@@ -155,7 +160,8 @@ export function bindDetailInteractions(root, handlers) {
       if (original && back && button.dataset.originalBackNeedsFetch === "true") {
         const scryfallBack = await fetchOriginalBackImage(button.dataset.scryfallUrl);
         if (scryfallBack) {
-          button.dataset.originalBack = scryfallBack;
+          if (button.dataset.isAp === "true") button.dataset.originalArt = scryfallBack;
+          else button.dataset.originalBack = scryfallBack;
           button.dataset.originalBackNeedsFetch = "false";
         }
       }
@@ -195,6 +201,7 @@ function deckBox(card) {
         ${deckOwners(card)}
       </span>
       <span class="deck-commander-art"></span>
+      <img class="moxfield-corner-mark" src="assets/moxfield-favicon.ico" alt="">
     </section>
   `;
 }
@@ -399,11 +406,11 @@ function line(label, value) {
 }
 
 function setIcon(code) {
-  if (isProxy(code)) return "";
   const normalized = String(code.setCode || code.setName || code || "").trim().toLowerCase();
+  if (isProxy(code) && normalized !== "xpip" && normalized !== "xmot") return "";
   if (!normalized) return "";
-  const iconCode = scryfallSetIconCode(normalized);
-  return `<span class="detail-set-icon"><img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}"></span>`;
+  const url = setIconUrl(normalized);
+  return url ? `<span class="detail-set-icon"><img src="${escapeHtml(url)}" alt="${escapeHtml(normalized)}"></span>` : "";
 }
 
 function collectionValue(card) {
@@ -425,7 +432,7 @@ function relatedCard(card) {
       <span class="tile-meta">
         <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
         <span class="tile-foot">
-          ${isProxy(card) ? "" : `<span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>`}
+          ${shouldShowSetIcon(card) ? `<span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>` : ""}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
         </span>
       </span>
@@ -436,8 +443,13 @@ function relatedCard(card) {
 function setIconImage(code) {
   const normalized = String(code || "").trim().toLowerCase();
   if (!normalized) return "?";
-  const iconCode = scryfallSetIconCode(normalized);
-  return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
+  const url = setIconUrl(normalized);
+  return url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(normalized)}" loading="lazy">` : "?";
+}
+
+function shouldShowSetIcon(card) {
+  const code = String(card.setCode || card.setName || "").trim().toLowerCase();
+  return !isProxy(card) || code === "xpip" || code === "xmot";
 }
 
 function cacheImage(src) {

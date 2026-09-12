@@ -80,8 +80,8 @@
             </label>
             <div class="gallery-scale-controls" aria-label="Gallery layout">
               <label>
-                <span>Size</span>
-                <input id="cardScaleRange" type="range" min="130" max="240" step="5" />
+                <span>Display</span>
+                <input id="cardScaleRange" type="range" min="2" max="7" step="1" />
               </label>
             </div>
           </form>
@@ -92,7 +92,11 @@
     </main>
 
     <footer class="site-footer">
-      <button id="clearCacheButton" type="button" title="Clear cache and reload">Version 0.1.2</button>
+      <span id="lastEditText">Last edit 11 September</span>
+      <span aria-hidden="true">·</span>
+      <button id="clearCacheButton" type="button" title="Clear cache and reload">v50.09.12</button>
+      <span aria-hidden="true">·</span>
+      <a href="https://x.com/Shabii_exe" target="_blank" rel="noreferrer"><b>Gallery by Shabii</b><img src="assets/shabii_logo.png" alt=""></a>
     </footer>
 
     <dialog class="modal" id="loginDialog">
@@ -202,6 +206,14 @@
           <label>
             <span data-i18n="card_name">Card name</span>
             <input id="cardName" required />
+          </label>
+          <label class="check-filter partner-check">
+            <input id="partnerInput" type="checkbox" />
+            <span>Partner</span>
+          </label>
+          <label id="partnerSelectField" hidden>
+            <span>Partner card</span>
+            <select id="partnerSelect"></select>
           </label>
           <div class="form-row-three wide">
             <label>

@@ -1,4 +1,4 @@
-import { scryfallSetIconCode } from "./set-icons.js";
+import { setIconUrl as setAssetIconUrl } from "./set-icons.js";
 
 export function syncFlagSelect(select, languages) {
   if (!select) return;
@@ -222,9 +222,7 @@ function bindCustomControl(select, control, sync) {
 }
 
 function setIconUrl(code) {
-  const iconCode = scryfallSetIconCode(code);
-  if (!iconCode) return "";
-  return `https://svgs.scryfall.io/sets/${encodeURIComponent(iconCode)}.svg`;
+  return setAssetIconUrl(code);
 }
 
 function escapeHtml(value) {

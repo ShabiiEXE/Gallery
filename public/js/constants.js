@@ -1,10 +1,10 @@
 export const CARD_KINDS = [
-  "Signed",
-  "Alter",
-  "Signed + Altered",
-  "Artist Proof",
   "Altered Artist Proof",
+  "Artist Proof",
+  "Signed + Altered",
+  "Alter",
   "Custom Proxy",
+  "Signed",
 ];
 
 export const LANGUAGES = [
