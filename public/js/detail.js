@@ -271,9 +271,13 @@ function deckColorPips(colors) {
   if (!normalized.length) return "";
   return `
     <span class="deck-color-pips" aria-label="Deck colors ${escapeAttribute(normalized.join(""))}">
-      ${normalized.map((color) => `<span class="mana-pip mana-${escapeAttribute(color.toLowerCase())}">${escapeHtml(color)}</span>`).join("")}
+      ${normalized.map((color) => `<img class="mana-pip" src="${manaSymbolUrl(color)}" alt="${escapeAttribute(color)}">`).join("")}
     </span>
   `;
+}
+
+function manaSymbolUrl(color) {
+  return `https://svgs.scryfall.io/card-symbols/${encodeURIComponent(color)}.svg`;
 }
 
 function normalizeDeckColors(colors) {
@@ -350,7 +354,7 @@ function scryfallApiFromUrl(url) {
 }
 
 function isArtistProof(card) {
-  return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
+  return ["artist proof", "ap", "altered artist proof", "altered ap"].includes(String(card.kind || "").trim().toLowerCase());
 }
 
 function cardLinkIcon(card) {

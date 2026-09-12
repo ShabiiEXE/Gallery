@@ -25,12 +25,13 @@ export async function onRequestGet({ request }) {
 function normalizeDeck(deck, id) {
   const commanders = zoneCards(deck.commanders || deck.commander || deck.boards?.commanders);
   const primaryCommander = commanders[0] || {};
+  const commanderFace = deck.mainCardIdIsBackFace ? "back" : "front";
   const owner = deck.createdByUser || deck.owner || deck.author || deck.user || {};
   const owners = deckOwners(deck, owner);
   const commanderImage = firstUrl([
+    moxfieldCardImage(primaryCommander.card || primaryCommander, commanderFace),
     pickNamedUrl(primaryCommander, ["art_crop", "image", "normal", "thumbnail"]),
     pickNamedUrl(commanders, ["art_crop", "image", "normal", "thumbnail"]),
-    moxfieldCardImage(primaryCommander.card || primaryCommander),
   ]);
   const mainImage = firstUrl([
     pickNamedUrl(deck.main, ["art_crop", "image", "normal", "thumbnail"]),
@@ -170,6 +171,8 @@ function zoneCards(zone) {
   if (!zone) return [];
   if (Array.isArray(zone)) return zone;
   if (Array.isArray(zone.cards)) return zone.cards;
+  if (zone.cards && typeof zone.cards === "object") return Object.values(zone.cards).filter(Boolean);
+  if (zone.card) return [zone];
   return Object.values(zone).filter(Boolean);
 }
 
@@ -191,11 +194,20 @@ function firstUrl(values) {
   return values.find((value) => /^https?:\/\//i.test(value || "")) || "";
 }
 
-function moxfieldCardImage(card) {
+function moxfieldCardImage(card, face = "front") {
+  const faceId = moxfieldFaceId(card, face);
+  if (faceId) return `https://assets.moxfield.net/cards/card-face-${faceId}-art_crop.webp`;
   const scryfallId = card?.card?.scryfall_id || card?.card?.scryfallId || card?.scryfall_id || card?.scryfallId || card?.scryfallOracleId || "";
   if (/^[0-9a-f-]{36}$/i.test(scryfallId)) return `https://cards.scryfall.io/art_crop/front/${scryfallId[0]}/${scryfallId[1]}/${scryfallId}.jpg`;
   const id = card?.card?.id || card?.id || card?.cardId || "";
   return id ? `https://assets.moxfield.net/cards/card-${id}-art_crop.webp` : "";
+}
+
+function moxfieldFaceId(card, face) {
+  const faces = card?.card?.card_faces || card?.card_faces || card?.card?.faces || card?.faces || [];
+  const faceIndex = face === "back" ? 1 : 0;
+  const selected = Array.isArray(faces) ? faces[faceIndex] : null;
+  return selected?.id || selected?.cardFaceId || "";
 }
 
 function pickDirectNamedUrl(value, hints) {

@@ -510,11 +510,6 @@ select:hover {
   filter: invert(1);
 }
 
-img[src$="pimp-my-deck.png"],
-img[src$="mot.png"] {
-  filter: brightness(0) invert(1);
-}
-
 .basic-logo-select .platform-logo-choice {
   padding-left: 0;
 }
@@ -946,11 +941,14 @@ body.has-modal-open .modal-card {
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
 }
 
-.toolbar:has(.platform-logo-select.is-open),
 .settings-grid:has(.platform-logo-select.is-open),
 .form-grid:has(.platform-logo-select.is-open),
 .info-grid:has(.platform-logo-select.is-open) {
   position: relative;
+  z-index: 11000;
+}
+
+.toolbar:has(.platform-logo-select.is-open) {
   z-index: 11000;
 }
 
@@ -1334,6 +1332,7 @@ label:has(> .platform-logo-select.is-open),
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
+  min-width: 0;
   color: var(--dim);
   font-size: 11px;
   line-height: 1.2;
@@ -1602,7 +1601,12 @@ label:has(> .platform-logo-select.is-open),
 .lookup-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
   margin-bottom: 10px;
+}
+
+.lookup-panel > .icon-only-button {
+  margin-top: 27px;
 }
 
 .moxfield-field > span {
@@ -2197,40 +2201,12 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .mana-pip {
-  display: inline-grid;
-  width: 17px;
-  height: 17px;
-  place-items: center;
-  color: #171717;
-  border: 1px solid rgba(0, 0, 0, 0.34);
+  display: block;
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
-  font-size: 9px;
-  font-weight: 950;
-  line-height: 1;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 1px 5px rgba(0, 0, 0, 0.28);
-}
-
-.mana-w {
-  background: #f4e7bd;
-}
-
-.mana-u {
-  background: #81c7e8;
-}
-
-.mana-b {
-  color: #f2edf0;
-  background: #2a2528;
-}
-
-.mana-r {
-  background: #e18463;
-}
-
-.mana-g {
-  background: #8fbd78;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.32));
 }
 
 .bracket-tag {
@@ -2348,8 +2324,14 @@ label:has(> .platform-logo-select.is-open),
 
   .gallery-grid[data-mobile-columns="3"] .tile-meta,
   .gallery-grid[data-mobile-columns="4"] .tile-meta {
+    min-width: 0;
     gap: 4px;
     padding-top: 6px;
+  }
+
+  .gallery-grid[data-mobile-columns="3"] .tile-sub,
+  .gallery-grid[data-mobile-columns="4"] .tile-sub {
+    overflow: hidden;
   }
 
   .gallery-grid[data-mobile-columns="3"] .tile-foot,
@@ -2447,4 +2429,12 @@ label:has(> .platform-logo-select.is-open),
       minmax(0, 1fr)
     );
   }
+}
+
+img[src*="/pimp-my-deck.png"],
+img[src*="/mot.png"],
+img[src$="pimp-my-deck.png"],
+img[src$="mot.png"] {
+  filter: brightness(0) invert(1) !important;
+  opacity: 1;
 }

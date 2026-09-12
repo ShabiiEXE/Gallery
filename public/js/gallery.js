@@ -17,11 +17,12 @@ export function renderFilters(cards, filters) {
 
 export function filteredCards(cards, filters) {
   const direction = filters.direction === "desc" ? -1 : 1;
-  return cards.filter((card) => {
+  const sorted = cards.filter((card) => {
     return (!filters.type || normalizedKind(card.kind) === normalizedKind(filters.type))
       && (!filters.set || card.setName === filters.set || card.setCode === filters.set)
       && (!filters.artist || card.artist === filters.artist || card.cardArtist === filters.artist);
   }).sort((a, b) => compareCards(a, b, filters.sort || "artist", direction));
+  return keepPartnersTogether(sorted);
 }
 
 export function bundleCards(cards, enabled) {
@@ -93,7 +94,7 @@ function pickBundleCover(cards) {
 }
 
 function isArtistProof(card) {
-  return card.kind === "Artist Proof" || card.kind === "Altered Artist Proof";
+  return ["artist proof", "ap", "altered artist proof", "altered ap"].includes(String(card.kind || "").trim().toLowerCase());
 }
 
 function isProxy(card) {
@@ -106,10 +107,13 @@ function shouldShowSetIcon(card) {
 }
 
 function shortKind(kind) {
-  return String(kind || "")
-    .replace("Signed + Altered", "Signed + Alt")
-    .replace(/^Altered$/, "Alter")
-    .replace("Artist Proof", "AP");
+  const value = String(kind || "").trim();
+  if (value === "Custom Proxy") return "Proxy";
+  if (value === "Altered Artist Proof" || value === "Altered AP") return "Alt AP";
+  if (value === "Signed + Altered" || value === "Signed + Alt") return "Sign + Alt";
+  if (value === "Artist Proof") return "AP";
+  if (value === "Altered") return "Alter";
+  return value;
 }
 
 function normalizedKind(kind) {
@@ -179,6 +183,27 @@ function compareDecks(a, b, direction) {
 
 function compareText(a, b) {
   return String(a || "").localeCompare(String(b || ""), undefined, { numeric: true, sensitivity: "base" });
+}
+
+function keepPartnersTogether(cards) {
+  const byId = new Map(cards.map((card) => [card.id, card]));
+  const pointedBy = new Map();
+  cards.forEach((card) => {
+    if (card.partnerId && !pointedBy.has(card.partnerId)) pointedBy.set(card.partnerId, card.id);
+  });
+  const seen = new Set();
+  const ordered = [];
+  cards.forEach((card) => {
+    if (seen.has(card.id)) return;
+    const partner = byId.get(card.partnerId) || byId.get(pointedBy.get(card.id));
+    ordered.push(card);
+    seen.add(card.id);
+    if (partner && !seen.has(partner.id)) {
+      ordered.push(partner);
+      seen.add(partner.id);
+    }
+  });
+  return ordered;
 }
 
 function unique(values) {
