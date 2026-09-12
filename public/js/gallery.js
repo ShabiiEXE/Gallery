@@ -61,7 +61,7 @@ function cardTile(card, count) {
         <span class="tile-foot">
           ${shouldShowSetIcon(card) ? `<span class="set-icon">${setIcon(card.setCode || card.setName)}</span>` : ""}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
-          <span>${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
+          <span class="tile-year">${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
       </span>
     </article>

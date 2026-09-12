@@ -53,31 +53,33 @@
               <span data-i18n="set">Set</span>
               <select id="setFilter"></select>
             </label>
-            <label>
-              <span>Sort</span>
-              <select id="sortSelect">
-                <option value="artist">Artist</option>
-                <option value="deck">Deck</option>
-                <option value="name">Name</option>
-                <option value="year">Year</option>
-                <option value="type">Type</option>
-              </select>
-            </label>
-            <button class="ghost-button icon-only-button sort-direction-button" id="sortDirectionButton" type="button" title="Sort direction" aria-label="Sort direction" data-direction="asc">
-              <svg class="sort-direction-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 5v14"></path>
-                <path d="M6.5 10.5 12 5l5.5 5.5"></path>
-              </svg>
-            </button>
-            <label class="bundle-icon-toggle" title="Bundle" aria-label="Bundle same name">
-              <input id="bundleToggle" type="checkbox" />
-              <span aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <rect x="6.5" y="3.5" width="11" height="15" rx="2"></rect>
-                  <path d="M4.5 6.5v12a2 2 0 0 0 2 2h8"></path>
+            <div class="sort-action-row">
+              <label>
+                <span>Sort</span>
+                <select id="sortSelect">
+                  <option value="artist">Artist</option>
+                  <option value="deck">Deck</option>
+                  <option value="name">Name</option>
+                  <option value="year">Year</option>
+                  <option value="type">Type</option>
+                </select>
+              </label>
+              <button class="ghost-button icon-only-button sort-direction-button" id="sortDirectionButton" type="button" title="Sort direction" aria-label="Sort direction" data-direction="asc">
+                <svg class="sort-direction-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M6.5 10.5 12 5l5.5 5.5"></path>
                 </svg>
-              </span>
-            </label>
+              </button>
+              <label class="bundle-icon-toggle" title="Bundle" aria-label="Bundle same name">
+                <input id="bundleToggle" type="checkbox" />
+                <span aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="6.5" y="3.5" width="11" height="15" rx="2"></rect>
+                    <path d="M4.5 6.5v12a2 2 0 0 0 2 2h8"></path>
+                  </svg>
+                </span>
+              </label>
+            </div>
             <div class="gallery-scale-controls" aria-label="Gallery layout">
               <label>
                 <span>Display</span>

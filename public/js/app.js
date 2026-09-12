@@ -327,8 +327,10 @@ function renderGalleryOnly() {
   const visible = filteredCards(app.cards, app.filters);
   const groups = bundleCards(visible, app.device.bundleSameName);
   const columns = app.device.galleryColumns || 7;
+  const mobileColumns = Math.max(1, Math.min(4, columns));
   galleryGrid?.style.setProperty("--gallery-columns", `${columns}`);
-  galleryGrid?.style.setProperty("--gallery-mobile-columns", `${Math.max(1, Math.min(4, columns))}`);
+  galleryGrid?.style.setProperty("--gallery-mobile-columns", `${mobileColumns}`);
+  if (galleryGrid) galleryGrid.dataset.mobileColumns = String(mobileColumns);
   renderGallery(groups, { onOpen: openDetail });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
   renderFooter();

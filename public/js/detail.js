@@ -16,6 +16,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
   const originalFront = originalFrontImage(card, shownFront);
   const originalBack = originalBackImage(card);
   const foilBothFaces = card.foil && card.backImage && !isArtistProof(card);
+  const foilBackOnly = card.foil && card.backImage && isArtistProof(card);
 
   return `
     <div class="modal-head">
@@ -27,7 +28,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     </div>
     <div class="detail-layout">
       <div class="card-stage" data-card-stage>
-        <div class="preview-card ${card.foil ? "foil-sheen" : ""} ${foilBothFaces ? "foil-both-faces" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
+        <div class="preview-card ${card.foil ? "foil-sheen" : ""} ${foilBothFaces ? "foil-both-faces" : ""} ${foilBackOnly ? "foil-back-only" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
           ${imageFace(shownFront || card.frontImage, "preview-front", "data-preview-front-image")}
           ${imageFace(shownBack, "preview-back", "data-preview-back-image")}
         </div>
