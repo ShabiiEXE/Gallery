@@ -905,10 +905,10 @@ body.has-modal-open .modal-card {
 .gallery-scale-controls input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 18px;
-  height: 18px;
+  height: 30px;
   margin-top: -6px;
   border: 2px solid color-mix(in srgb, var(--text) 88%, transparent);
-  border-radius: 999px;
+  border-radius: 0px;
   background: var(--accent);
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
 }
