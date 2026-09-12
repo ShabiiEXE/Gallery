@@ -899,7 +899,7 @@ body.has-modal-open .modal-card {
 .gallery-scale-controls input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 72%, rgba(255, 255, 255, 0.16));
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .gallery-scale-controls input[type="range"]::-webkit-slider-thumb {
@@ -915,7 +915,7 @@ body.has-modal-open .modal-card {
 .gallery-scale-controls input[type="range"]::-moz-range-track {
   height: 6px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 72%, rgba(255, 255, 255, 0.16));
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .gallery-scale-controls input[type="range"]::-moz-range-thumb {
@@ -1017,7 +1017,7 @@ label:has(> .platform-logo-select.is-open),
   width: 19px;
   height: 19px;
   fill: none;
-  stroke: currentColor;
+  stroke: white;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
