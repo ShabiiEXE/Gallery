@@ -1440,6 +1440,7 @@ label:has(> .platform-logo-select.is-open),
   font-weight: 850;
   text-transform: uppercase;
   text-decoration: none;
+  color: #6f7789 !important;
 }
 
 .site-footer img {
@@ -1768,7 +1769,7 @@ label:has(> .platform-logo-select.is-open),
   overflow: hidden;
   backface-visibility: hidden;
   border-radius: 14px;
-  background: #eee;
+  background: black;
   box-shadow: 0 24px 54px rgba(0, 0, 0, 0.42);
 }
 
