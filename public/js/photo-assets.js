@@ -63,5 +63,7 @@ export const PHOTO_ASSETS = [
   "assets/cards/vivi sign.png",
   "assets/cards/Vivi_1.jpg",
   "assets/cards/vivi.png",
-  "assets/cards/yenna.png"
+  "assets/cards/yenna.png",
+  "assets/cards/PakoHaldan_03.png",
+  "assets/cards/PakoHaldan_01.png"
 ];
