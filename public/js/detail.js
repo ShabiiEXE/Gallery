@@ -4,6 +4,7 @@ import { scryfallSetIconCode } from "./set-icons.js";
 
 const DEFAULT_CARD_BACK = "https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg/revision/latest/scale-to-width-down/250?cb=20140813141013";
 const BLACK_MAGE_ORIGINAL = "assets/cards/blackmage_og.jpg";
+const LOCAL_CARD_ASSET_VERSION = "20260912-vivi-sign";
 
 export function renderCardDetail({ card, cards, canEdit = false }) {
   const related = cards.filter((item) => item.name === card.name && item.id !== card.id);
@@ -30,7 +31,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
         ${canFlip || originalImage ? `
           <div class="card-stage-controls">
             ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(originalBackImage(card))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(shownBack)}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(cacheImage(originalImage))}" data-custom-art="${escapeAttribute(cacheImage(shownFront || card.frontImage))}" data-original-back="${escapeAttribute(cacheImage(originalBackImage(card)))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(cacheImage(shownBack))}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
           </div>
         ` : ""}
       </div>
@@ -178,7 +179,7 @@ function deckBox(card) {
   if (!card.deckName && !card.moxfieldUrl) return "";
   const originalArt = artCropImage(card.deckImage || card.commanderImage || card.frontImage);
   return `
-    <section class="deck-box" data-deck-box style="--deck-bg: url('${escapeAttribute(originalArt)}')">
+    <section class="deck-box" data-deck-box style="--deck-bg: url('${escapeAttribute(cacheImage(originalArt))}')">
       <a class="deck-box-link" href="${card.moxfieldUrl || "#"}" target="_blank" rel="noreferrer" aria-label="${escapeAttribute(card.deckName || "Moxfield deck")}"></a>
       <span class="deck-copy">
         <span class="deck-title-row">
@@ -376,7 +377,7 @@ function faviconUrl(url) {
 }
 
 function imageFace(src, className, attributes = "") {
-  return `<div class="preview-face ${className}"><img src="${escapeAttribute(src)}" alt="" draggable="false" ${attributes}></div>`;
+  return `<div class="preview-face ${className}"><img src="${escapeAttribute(cacheImage(src))}" alt="" draggable="false" ${attributes}></div>`;
 }
 
 function normalizeRotation(value) {
@@ -411,7 +412,7 @@ function relatedCard(card) {
   const image = showingBack ? card.backImage : card.frontImage || DEFAULT_CARD_BACK;
   return `
     <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
-      <span class="card-image-wrap"><img src="${escapeAttribute(image)}" alt="" draggable="false"></span>
+      <span class="card-image-wrap"><img src="${escapeAttribute(cacheImage(image))}" alt="" draggable="false"></span>
       <span class="tile-meta">
         <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
         <span class="tile-foot">
@@ -428,6 +429,12 @@ function setIconImage(code) {
   if (!normalized) return "?";
   const iconCode = scryfallSetIconCode(normalized);
   return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
+}
+
+function cacheImage(src) {
+  const value = String(src || "");
+  if (!value.startsWith("assets/cards/")) return value;
+  return `${value}${value.includes("?") ? "&" : "?"}v=${LOCAL_CARD_ASSET_VERSION}`;
 }
 
 function shortKind(kind) {

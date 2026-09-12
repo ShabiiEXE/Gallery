@@ -1,6 +1,8 @@
 import { CARD_KINDS } from "./constants.js";
 import { scryfallSetIconCode } from "./set-icons.js";
 
+const LOCAL_CARD_ASSET_VERSION = "20260912-vivi-sign";
+
 const $ = (id) => document.getElementById(id);
 const typeFilter = $("typeFilter");
 const setFilter = $("setFilter");
@@ -49,7 +51,7 @@ function cardTile(card, count) {
     <article class="card-tile ${card.foil ? "foil" : ""}" data-card-tile data-card-id="${card.id}">
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <button class="card-open" type="button" data-card-open data-card-id="${card.id}">
-        <span class="card-image-wrap"><img data-card-image src="${showImage}" alt=""></span>
+        <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt=""></span>
       </button>
       <span class="tile-meta">
         <span class="tile-name" data-title="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
@@ -122,6 +124,12 @@ function setIcon(code) {
   if (!normalized) return "?";
   const iconCode = scryfallSetIconCode(normalized);
   return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
+}
+
+function cacheImage(src) {
+  const value = String(src || "");
+  if (!value.startsWith("assets/cards/")) return value;
+  return `${value}${value.includes("?") ? "&" : "?"}v=${LOCAL_CARD_ASSET_VERSION}`;
 }
 
 function fillFilter(select, entries, value) {
