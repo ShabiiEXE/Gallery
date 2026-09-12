@@ -1,0 +1,18 @@
+{
+  "name": "Shabii's Gallery",
+  "short_name": "Gallery",
+  "description": "A personal Magic: The Gathering gallery for signed cards, artist proofs, alters, proxies, and deck memories.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#161619",
+  "theme_color": "#161619",
+  "icons": [
+    {
+      "src": "assets/app-Icon-bw.png",
+      "sizes": "400x400",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 <h1>
-  <img src="public/assets/Icon.png" alt="Gallery logo" width="42" align="center">
+  <img src="public/assets/icon.png" alt="Gallery logo" width="42" align="center">
   <span style="color: #e92841;">Shabii's Gallery</span>
 </h1>
 
 Shabii's Gallery is a personal Magic: The Gathering collection gallery for signed cards, artist proofs, alters, custom proxies, deck memories, and card variants. It runs as a self-hosted static frontend served by a Cloudflare Worker, with saved cards and settings stored in Cloudflare KV.
 
 The app has one main page:
-- <img src="public/assets/Icon.png" alt="Gallery" width="18" align="center"> `/` for the card gallery, filters, card detail views, editing, Scryfall lookup, Moxfield deck info, and collection metadata.
+- <img src="public/assets/icon.png" alt="Gallery" width="18" align="center"> `/` for the card gallery, filters, card detail views, editing, Scryfall lookup, Moxfield deck info, and collection metadata.
 
 Made and designed by <img src="public/assets/shabii_logo.png" alt="Shabii" width="18" align="center"> [Shabii](https://x.com/Shabii_exe) with the help of ChatGPT Codex.
 
@@ -30,7 +30,7 @@ Made and designed by <img src="public/assets/shabii_logo.png" alt="Shabii" width
 ---
 
 <h1>
-  <img src="public/assets/Icon.png" alt="Gallery logo" width="42" align="center">
+  <img src="public/assets/icon.png" alt="Gallery logo" width="42" align="center">
   <span style="color: #e92841;">How To Setup Your Own Gallery</span>
 </h1>
 
@@ -143,7 +143,7 @@ main.yml
 
 ---
 
-## <img src="public/assets/Icon.png" alt="Gallery" width="22" align="center"> First run
+## <img src="public/assets/icon.png" alt="Gallery" width="22" align="center"> First run
 
 1. Deploy the website.
 2. Open it.
@@ -154,7 +154,7 @@ main.yml
 
 Those settings are stored in the Worker KV namespace and also cached locally for faster loading.
 
-## <img src="public/assets/Icon.png" alt="Gallery" width="22" align="center"> Common tasks
+## <img src="public/assets/icon.png" alt="Gallery" width="22" align="center"> Common tasks
 
 ### Add a card to the gallery
 

@@ -17,6 +17,7 @@ import {
   saveSettings,
 } from "./state.js";
 import { bundleCards, filteredCards, renderFilters, renderGallery } from "./gallery.js";
+import { PHOTO_ASSETS } from "./photo-assets.js";
 
 const $ = (id) => document.getElementById(id);
 const loginButton = $("loginButton");
@@ -62,6 +63,7 @@ const app = {
 document.addEventListener("DOMContentLoaded", start);
 
 async function start() {
+  registerServiceWorker();
   initForm({ onSave: upsertCard, onDelete: deleteCard, getCards: () => app.cards });
   bindEvents();
   app.version = await loadVersion();
@@ -81,6 +83,7 @@ async function start() {
   app.filters.sort = app.settings.defaultSort;
   app.filters.direction = app.settings.defaultSortDirection;
   render();
+  warmOfflineCache();
 }
 
 function bindEvents() {
@@ -248,6 +251,7 @@ async function upsertCard(card) {
   editDialog.close();
   cardDialog.close();
   render();
+  warmOfflineCache();
 }
 
 function syncPartnerLinks(cards, savedCard, previousPartnerId) {
@@ -384,6 +388,39 @@ function applyModuleSettings() {
       element.style.order = index;
       element.hidden = item.hidden;
     });
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("/sw.js").then(() => warmOfflineCache()).catch(() => {});
+}
+
+function warmOfflineCache() {
+  if (!("serviceWorker" in navigator)) return;
+  const urls = [
+    ...PHOTO_ASSETS,
+    ...cardCacheUrls(app.cards),
+  ];
+  navigator.serviceWorker.ready.then((registration) => {
+    registration.active?.postMessage({ type: "CACHE_URLS", urls });
+  }).catch(() => {});
+}
+
+function cardCacheUrls(cards) {
+  const urls = new Set();
+  cards.forEach((card) => {
+    [
+      card.frontImage,
+      card.backImage,
+      card.originalImage,
+      card.originalBackImage,
+      card.deckImage,
+      card.commanderImage,
+      card.deckOwnerAvatar,
+      ...(Array.isArray(card.deckOwners) ? card.deckOwners.map((owner) => owner.avatar) : []),
+    ].filter(Boolean).forEach((url) => urls.add(url));
+  });
+  return [...urls];
 }
 
 async function clearBrowserCache() {
