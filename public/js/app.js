@@ -16,7 +16,7 @@ import {
   saveRemoteSettings,
   saveSettings,
 } from "./state.js";
-import { bundleCards, filteredCards, renderFilters, renderGallery } from "./gallery.js";
+import { bundleCards, filteredCards, renderCardTile, renderFilters, renderGallery } from "./gallery.js";
 import { PHOTO_ASSETS } from "./photo-assets.js";
 
 const $ = (id) => document.getElementById(id);
@@ -32,7 +32,9 @@ const saveSettingsButton = $("saveSettings");
 const languageSelect = $("languageSelect");
 const moduleSettings = $("moduleSettings");
 const filterForm = $("filterForm");
+const filterToggleButton = $("filterToggleButton");
 const typeFilter = $("typeFilter");
+const foilFilter = $("foilFilter");
 const setFilter = $("setFilter");
 const artistFilter = $("artistFilter");
 const sortSelect = $("sortSelect");
@@ -49,12 +51,13 @@ const emptyState = $("emptyState");
 const galleryGrid = $("galleryGrid");
 const clearCacheButton = $("clearCacheButton");
 const lastEditText = $("lastEditText");
+const latestAdditions = $("latestAdditions");
 
 const app = {
   cards: [],
   settings: loadSettings(),
   device: loadDevice(),
-  filters: { type: "", set: "", artist: "", sort: "artist", direction: "asc" },
+  filters: { type: "", foil: false, set: "", artist: "", sort: "artist", direction: "asc" },
   remoteLoaded: false,
   authed: false,
   version: null,
@@ -101,6 +104,7 @@ function bindEvents() {
   settingsButton.addEventListener("click", openSettings);
   saveSettingsButton.addEventListener("click", commitSettings);
   clearCacheButton.addEventListener("click", clearBrowserCache);
+  filterToggleButton?.addEventListener("click", toggleMobileFilters);
   languageSelect.addEventListener("change", () => syncFlagSelect(languageSelect, LANGUAGES));
   document.addEventListener("click", () => closeFlagSelects());
   window.addEventListener("resize", syncDisplayRange);
@@ -114,13 +118,13 @@ function bindEvents() {
   filterForm.addEventListener("input", () => {
     app.filters = {
       type: typeFilter.value,
+      foil: foilFilter.checked,
       set: setFilter.value,
       artist: artistFilter.value,
       sort: sortSelect.value,
       direction: sortDirectionButton.dataset.direction || "asc",
     };
-    app.device.bundleSameName = bundleToggle.checked;
-    app.device.galleryColumns = Number(cardScaleRange.value) || 7;
+    persistDeviceControls();
     saveDevice(app.device);
     renderGalleryOnly();
   });
@@ -163,6 +167,7 @@ async function doLogin() {
   loginDialog.close();
   passwordInput.value = "";
   app.cards = await loadRemoteCards();
+  warmOfflineCache();
   render();
 }
 
@@ -317,6 +322,8 @@ function render() {
   sortDirectionButton.classList.toggle("is-desc", sortDirectionButton.dataset.direction === "desc");
   applyModuleSettings();
   renderFilters(app.cards, app.filters);
+  typeFilter.value = app.filters.type || "";
+  foilFilter.checked = Boolean(app.filters.foil);
   syncCustomSelect(typeFilter);
   syncSetSelect(setFilter);
   syncCustomSelect(artistFilter);
@@ -328,10 +335,17 @@ function syncDisplayRange() {
   const mobile = window.matchMedia("(max-width: 820px)").matches;
   cardScaleRange.min = mobile ? "1" : "2";
   cardScaleRange.max = mobile ? "4" : "7";
-  const value = Number(app.device.galleryColumns) || (mobile ? 4 : 7);
+  const key = mobile ? "mobileGalleryColumns" : "desktopGalleryColumns";
+  const bundleKey = mobile ? "mobileBundleSameName" : "desktopBundleSameName";
+  const value = Number(app.device[key] ?? app.device.galleryColumns) || (mobile ? 4 : 7);
   const clamped = Math.max(Number(cardScaleRange.min), Math.min(Number(cardScaleRange.max), value));
+  app.device[key] = clamped;
   app.device.galleryColumns = clamped;
+  app.device.bundleSameName = app.device[bundleKey] ?? app.device.bundleSameName;
   cardScaleRange.value = clamped;
+  bundleToggle.checked = app.device.bundleSameName;
+  document.body.classList.toggle("filters-open", Boolean(app.device.mobileFiltersOpen));
+  filterToggleButton?.setAttribute("aria-expanded", app.device.mobileFiltersOpen ? "true" : "false");
 }
 
 function updateModalScrollLock() {
@@ -351,8 +365,20 @@ function renderGalleryOnly() {
   renderGallery(groups, { onOpen: openDetail });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
   renderFooter();
+  renderLatestAdditions();
   if (emptyState) emptyState.hidden = app.cards.length > 0;
   if (galleryGrid) galleryGrid.hidden = app.cards.length === 0;
+}
+
+function renderLatestAdditions() {
+  if (!latestAdditions) return;
+  const latest = [...app.cards]
+    .sort((a, b) => Date.parse(b.createdAt || b.updatedAt || "") - Date.parse(a.createdAt || a.updatedAt || ""))
+    .slice(0, 5);
+  latestAdditions.innerHTML = latest.map((card) => renderCardTile(card)).join("");
+  latestAdditions.querySelectorAll("[data-card-open]").forEach((button) => {
+    button.addEventListener("click", () => openDetail(button.dataset.cardId));
+  });
 }
 
 function renderFooter() {
@@ -388,6 +414,27 @@ function applyModuleSettings() {
       element.style.order = index;
       element.hidden = item.hidden;
     });
+}
+
+function persistDeviceControls() {
+  const mobile = window.matchMedia("(max-width: 820px)").matches;
+  const columns = Number(cardScaleRange.value) || (mobile ? 4 : 7);
+  if (mobile) {
+    app.device.mobileGalleryColumns = columns;
+    app.device.mobileBundleSameName = bundleToggle.checked;
+  } else {
+    app.device.desktopGalleryColumns = columns;
+    app.device.desktopBundleSameName = bundleToggle.checked;
+  }
+  app.device.galleryColumns = columns;
+  app.device.bundleSameName = bundleToggle.checked;
+}
+
+function toggleMobileFilters() {
+  app.device.mobileFiltersOpen = !app.device.mobileFiltersOpen;
+  saveDevice(app.device);
+  document.body.classList.toggle("filters-open", app.device.mobileFiltersOpen);
+  filterToggleButton?.setAttribute("aria-expanded", app.device.mobileFiltersOpen ? "true" : "false");
 }
 
 function registerServiceWorker() {

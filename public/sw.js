@@ -96,7 +96,8 @@ async function cacheUrls(urls) {
   const cache = await caches.open(RUNTIME_CACHE);
   const unique = [...new Set(urls.map((url) => String(url || "").trim()).filter(Boolean))];
   await Promise.allSettled(unique.map(async (url) => {
-    const request = new Request(url, { mode: isSameOrigin(url) ? "same-origin" : "no-cors" });
+    const absoluteUrl = new URL(url, self.location.origin).href;
+    const request = new Request(absoluteUrl, { mode: isSameOrigin(absoluteUrl) ? "same-origin" : "no-cors" });
     const response = await fetch(request);
     if (response.ok || response.type === "opaque") await cache.put(request, response);
   }));

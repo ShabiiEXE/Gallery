@@ -41,12 +41,31 @@
     </header>
 
     <main class="page-shell">
+        <section class="module latest-module" data-module="latest">
+          <div class="latest-strip" id="latestAdditions" aria-label="Last additions"></div>
+        </section>
         <section class="module" data-module="gallery">
+          <button class="filter-toggle-button" id="filterToggleButton" type="button" aria-expanded="false" aria-controls="filterForm">
+            <span>Search & Filter</span>
+            <svg class="filter-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </button>
           <form class="toolbar" id="filterForm">
-            <label>
-              <span data-i18n="type">Type</span>
-              <select id="typeFilter"></select>
-            </label>
+            <div class="type-filter-row">
+              <label>
+                <span data-i18n="type">Type</span>
+                <select id="typeFilter"></select>
+              </label>
+              <label class="foil-filter-toggle" title="Foil only" aria-label="Foil only">
+                <input id="foilFilter" type="checkbox" />
+                <span aria-hidden="true">
+                  <svg viewBox="0 0 18 18">
+                    <path d="m9 1.7 1.35 4.08 4.3-1.2-2.28 3.62 3.68 2.45-4.38.38.47 4.45L9 12.45l-3.14 3.03.47-4.45-4.38-.38L5.63 8.2 3.35 4.58l4.3 1.2L9 1.7Z"></path>
+                  </svg>
+                </span>
+              </label>
+            </div>
             <label>
               <span data-i18n="artist">Artist</span>
               <select id="artistFilter"></select>
@@ -96,11 +115,13 @@
     </main>
 
     <footer class="site-footer">
-      <span id="lastEditText">Last edit 11 September</span>
-      <span aria-hidden="true">·</span>
-      <button id="clearCacheButton" type="button" title="Clear cache and reload">v50.09.12</button>
-      <span aria-hidden="true">·</span>
-      <a href="https://x.com/Shabii_exe" target="_blank" rel="noreferrer"><b>Gallery by Shabii</b><img src="assets/shabii_logo.png" alt=""></a>
+      <span class="footer-meta-line">
+        <span id="lastEditText">Last edit 11 September</span>
+        <span aria-hidden="true">·</span>
+        <button id="clearCacheButton" type="button" title="Clear cache and reload">v50.09.12</button>
+      </span>
+      <span class="footer-separator" aria-hidden="true">·</span>
+      <a class="footer-credit" href="https://x.com/Shabii_exe" target="_blank" rel="noreferrer"><b>Gallery by Shabii</b><img src="assets/shabii_logo.png" alt=""></a>
     </footer>
 
     <dialog class="modal" id="loginDialog">

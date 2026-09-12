@@ -82,10 +82,14 @@ export function bindDetailInteractions(root, handlers) {
     const canFlip = preview.dataset.canFlip === "true";
     const manual = { x: 0, y: 0 };
     const tilt = { x: 0, y: 0 };
+    const gyro = { x: 0, y: 0 };
     let drag = null;
+    let gyroPermissionAsked = false;
+    const controller = new AbortController();
     const applyRotation = () => {
-      const x = Math.max(-58, Math.min(58, manual.x + tilt.x));
-      const y = canFlip ? manual.y + tilt.y : Math.max(-48, Math.min(48, manual.y + tilt.y));
+      const x = Math.max(-58, Math.min(58, manual.x + tilt.x + gyro.x));
+      const yRaw = manual.y + tilt.y + gyro.y;
+      const y = canFlip ? yRaw : Math.max(-48, Math.min(48, yRaw));
       preview.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
     };
     const updateShine = (event) => {
@@ -115,8 +119,18 @@ export function bindDetailInteractions(root, handlers) {
       tilt.x = y * -28;
       applyRotation();
     });
+    window.addEventListener("deviceorientation", (event) => {
+      if (drag) return;
+      const beta = Number(event.beta) || 0;
+      const gamma = Number(event.gamma) || 0;
+      gyro.x = Math.max(-16, Math.min(16, (beta - 48) * -0.32));
+      gyro.y = Math.max(-18, Math.min(18, gamma * 0.42));
+      applyRotation();
+    }, { signal: controller.signal });
+    root.closest("dialog")?.addEventListener("close", () => controller.abort(), { once: true });
     preview.addEventListener("pointerdown", (event) => {
       event.preventDefault();
+      requestGyroPermission();
       preview.setPointerCapture(event.pointerId);
       tilt.x = 0;
       tilt.y = 0;
@@ -177,6 +191,12 @@ export function bindDetailInteractions(root, handlers) {
       button.setAttribute("aria-pressed", original ? "true" : "false");
       button.title = original ? "Show custom card graphic" : "Show original card graphic";
     });
+    function requestGyroPermission() {
+      if (gyroPermissionAsked || typeof DeviceOrientationEvent === "undefined") return;
+      gyroPermissionAsked = true;
+      if (typeof DeviceOrientationEvent.requestPermission !== "function") return;
+      DeviceOrientationEvent.requestPermission().catch(() => {});
+    }
   }
   root.querySelector("[data-edit-card]")?.addEventListener("click", handlers.onEdit);
   root.querySelector("[data-close-detail]")?.addEventListener("click", handlers.onClose);

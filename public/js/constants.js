@@ -17,5 +17,6 @@ export const LANGUAGES = [
 ];
 
 export const MODULES = [
+  { id: "latest", label: "Last additions" },
   { id: "gallery", label: "Gallery" },
 ];

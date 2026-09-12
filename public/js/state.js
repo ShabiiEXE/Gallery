@@ -12,7 +12,12 @@ export const defaultSettings = {
 
 export const defaultDevice = {
   bundleSameName: true,
+  desktopBundleSameName: true,
+  mobileBundleSameName: true,
   galleryColumns: 7,
+  desktopGalleryColumns: 7,
+  mobileGalleryColumns: 4,
+  mobileFiltersOpen: false,
 };
 
 export function loadSettings() {

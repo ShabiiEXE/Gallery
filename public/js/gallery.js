@@ -19,6 +19,7 @@ export function filteredCards(cards, filters) {
   const direction = filters.direction === "desc" ? -1 : 1;
   const sorted = cards.filter((card) => {
     return (!filters.type || normalizedKind(card.kind) === normalizedKind(filters.type))
+      && (!filters.foil || card.foil)
       && (!filters.set || card.setName === filters.set || card.setCode === filters.set)
       && (!filters.artist || card.artist === filters.artist || card.cardArtist === filters.artist);
   }).sort((a, b) => compareCards(a, b, filters.sort || "artist", direction));
@@ -42,6 +43,10 @@ export function renderGallery(groups, { onOpen }) {
   galleryGrid.querySelectorAll("[data-card-open]").forEach((button) => {
     button.addEventListener("click", () => onOpen(button.dataset.cardId));
   });
+}
+
+export function renderCardTile(card, count = 1) {
+  return cardTile(card, count);
 }
 
 function cardTile(card, count) {
