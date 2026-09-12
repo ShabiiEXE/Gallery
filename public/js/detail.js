@@ -1,14 +1,17 @@
 import { LANGUAGES } from "./constants.js";
 import { icon } from "./icons.js";
+import { fetchScryfallImagesForCard } from "./scryfall.js";
+import { scryfallSetIconCode } from "./set-icons.js";
 
 const DEFAULT_CARD_BACK = "https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg/revision/latest/scale-to-width-down/250?cb=20140813141013";
+const BLACK_MAGE_ORIGINAL = "assets/cards/blackmage_og.jpg";
 
 export function renderCardDetail({ card, cards, canEdit = false }) {
   const related = cards.filter((item) => item.name === card.name && item.id !== card.id);
   const language = LANGUAGES.find((item) => item.value === card.language) || LANGUAGES[0];
   const shownFront = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
   const shownBack = isArtistProof(card) && card.backImage ? card.frontImage : card.backImage || DEFAULT_CARD_BACK;
-  const canFlip = Boolean(card.backImage);
+  const canFlip = Boolean(card.backImage || card.originalBackImage || String(card.name || "").includes("//"));
   const originalImage = originalCardImage(card);
 
   return `
@@ -28,13 +31,13 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
         ${canFlip || originalImage ? `
           <div class="card-stage-controls">
             ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(DEFAULT_CARD_BACK)}" data-custom-back="${escapeAttribute(shownBack)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-card-name="${escapeAttribute(card.name)}" data-card-language="${escapeAttribute(card.language || "en")}" data-card-oracle-id="${escapeAttribute(card.oracleId || "")}" data-card-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-original-art="${escapeAttribute(originalImage)}" data-custom-art="${escapeAttribute(shownFront || card.frontImage)}" data-original-back="${escapeAttribute(originalBackImage(card))}" data-custom-back="${escapeAttribute(shownBack)}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
           </div>
         ` : ""}
       </div>
       <div class="detail-info">
         <div class="detail-title">
-          <h2 class="${card.foil ? "foil-title" : ""}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
+          <h2 class="${card.foil ? "foil-title" : ""}">${cardNameHtml(card.name)}${card.foil ? foilStar() : ""}</h2>
           <div class="detail-lines detail-title-lines">
             ${line(shortKind(card.kind), artistValue(card))}
             ${line(signatureLabel(card), escapeHtml(signatureValue(card)))}
@@ -140,12 +143,23 @@ export function bindDetailInteractions(root, handlers) {
       tilt.y = 0;
       applyRotation();
     });
-    root.querySelector("[data-card-art-toggle]")?.addEventListener("click", (event) => {
+    root.querySelector("[data-card-art-toggle]")?.addEventListener("click", async (event) => {
       const button = event.currentTarget;
       const front = root.querySelector("[data-preview-front-image]");
       const back = root.querySelector("[data-preview-back-image]");
       if (!front) return;
       const original = button.getAttribute("aria-pressed") !== "true";
+      if (original && !button.dataset.originalLoaded && !button.dataset.originalArt.startsWith("assets/")) {
+        const images = await fetchScryfallImagesForCard({
+          name: button.dataset.cardName,
+          language: button.dataset.cardLanguage,
+          oracleId: button.dataset.cardOracleId,
+          scryfallUrl: button.dataset.cardScryfallUrl,
+        }).catch(() => null);
+        if (images?.frontImage) button.dataset.originalArt = images.frontImage;
+        if (images?.backImage) button.dataset.originalBack = images.backImage;
+        button.dataset.originalLoaded = "true";
+      }
       front.src = original ? button.dataset.originalArt : button.dataset.customArt;
       if (back) back.src = original ? button.dataset.originalBack : button.dataset.customBack;
       manual.x = 0;
@@ -243,6 +257,7 @@ function deckOwners(card) {
 }
 
 function signatureLabel(card) {
+  if (card.kind?.toLowerCase().includes("proxy")) return "Created";
   return card.kind?.toLowerCase().includes("alter") ? "Alteration" : "Signature";
 }
 
@@ -257,9 +272,14 @@ function artistValue(card) {
 }
 
 function originalCardImage(card) {
+  if (/blank hero token/i.test(card.name || "")) return BLACK_MAGE_ORIGINAL;
   if (isArtistProof(card) && card.backImage) return card.originalImage || card.frontImage || "";
   const candidates = [card.originalImage, card.commanderImage].filter(Boolean);
   return candidates.find((image) => image !== card.frontImage) || "";
+}
+
+function originalBackImage(card) {
+  return card.originalBackImage || DEFAULT_CARD_BACK;
 }
 
 function isArtistProof(card) {
@@ -323,7 +343,7 @@ function setIcon(code) {
   if (isProxy(code)) return "";
   const normalized = String(code.setCode || code.setName || code || "").trim().toLowerCase();
   if (!normalized) return "";
-  const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
+  const iconCode = scryfallSetIconCode(normalized);
   return `<span class="detail-set-icon"><img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}"></span>`;
 }
 
@@ -343,7 +363,7 @@ function relatedCard(card) {
     <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
       <span class="card-image-wrap"><img src="${escapeAttribute(image)}" alt="" draggable="false"></span>
       <span class="tile-meta">
-        <span class="tile-name">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
+        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${cardNameHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
         <span class="tile-foot">
           ${isProxy(card) ? "" : `<span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>`}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>
@@ -356,13 +376,14 @@ function relatedCard(card) {
 function setIconImage(code) {
   const normalized = String(code || "").trim().toLowerCase();
   if (!normalized) return "?";
-  const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
+  const iconCode = scryfallSetIconCode(normalized);
   return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
 }
 
 function shortKind(kind) {
   return String(kind || "")
     .replace("Signed + Altered", "Signed + Alt")
+    .replace(/^Altered$/, "Alter")
     .replace("Artist Proof", "Artist Proof")
     .replace("Altered Artist Proof", "Altered AP");
 }
@@ -389,6 +410,10 @@ function foilStar() {
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+function cardNameHtml(name) {
+  return escapeHtml(name).replace(/\s*\/\/\s*/g, " // <br>");
 }
 
 function escapeAttribute(value) {

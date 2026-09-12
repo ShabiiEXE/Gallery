@@ -10,6 +10,25 @@ export async function searchScryfall(query, language = "en") {
   return (data.data || []).slice(0, 8).map(mapScryfallCard);
 }
 
+export async function fetchScryfallImagesForCard(card) {
+  const language = scryfallLanguageCode(card.language);
+  const languageQuery = language && language !== "en" ? ` lang:${language}` : "";
+  const name = String(card.name || "").split("//")[0].trim();
+  const queries = [
+    card.oracleId ? `oracleid:${card.oracleId}${languageQuery}` : "",
+    name ? `!"${name}"${languageQuery}` : "",
+    card.scryfallUrl || "",
+  ].filter(Boolean);
+
+  for (const query of queries) {
+    const result = query.startsWith("http")
+      ? await fetchScryfallCard(query).catch(() => null)
+      : await fetchFirstScryfallSearch(query).catch(() => null);
+    if (result?.frontImage) return result;
+  }
+  return { frontImage: "", backImage: "" };
+}
+
 function scryfallLanguageCode(language) {
   return {
     en: "en",
@@ -35,6 +54,15 @@ async function fetchScryfallCard(url) {
   return mapScryfallCard(await response.json());
 }
 
+async function fetchFirstScryfallSearch(query) {
+  const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=prints&order=released`);
+  if (!response.ok) throw new Error("No Scryfall cards found");
+  const data = await response.json();
+  const card = data.data?.[0];
+  if (!card) throw new Error("No Scryfall cards found");
+  return mapScryfallCard(card);
+}
+
 function scryfallApiFromUrl(url) {
   const parsed = new URL(url);
   const parts = parsed.pathname.split("/").filter(Boolean);
@@ -46,10 +74,13 @@ function scryfallApiFromUrl(url) {
 
 export function mapScryfallCard(card) {
   const face = card.card_faces?.[0] || card;
+  const backFace = card.card_faces?.[1];
   const images = face.image_uris || card.image_uris || {};
+  const backImages = backFace?.image_uris || {};
   return {
     name: card.name,
     frontImage: images.normal || images.large || images.small || "",
+    backImage: backImages.normal || backImages.large || backImages.small || "",
     setName: card.set_name || "",
     setCode: card.set || "",
     collectorNumber: card.collector_number || "",

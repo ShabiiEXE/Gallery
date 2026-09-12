@@ -2,6 +2,6 @@ export function scryfallSetIconCode(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (!normalized) return "";
   if (normalized === "sld" || normalized.includes("secret lair")) return "star";
-  if (normalized === "afin" || normalized.includes("final fantasy art series")) return "fin";
+  if (normalized === "afin" || normalized === "pfin" || normalized.includes("final fantasy art series")) return "fin";
   return normalized;
 }

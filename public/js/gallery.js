@@ -1,4 +1,5 @@
 import { CARD_KINDS } from "./constants.js";
+import { scryfallSetIconCode } from "./set-icons.js";
 
 const $ = (id) => document.getElementById(id);
 const typeFilter = $("typeFilter");
@@ -18,7 +19,7 @@ export function filteredCards(cards, filters) {
     return (!filters.type || card.kind === filters.type)
       && (!filters.set || card.setName === filters.set || card.setCode === filters.set)
       && (!filters.artist || card.artist === filters.artist || card.cardArtist === filters.artist);
-  }).sort((a, b) => compareCards(a, b, filters.sort || "artist") * direction);
+  }).sort((a, b) => compareCards(a, b, filters.sort || "artist", direction));
 }
 
 export function bundleCards(cards, enabled) {
@@ -43,13 +44,13 @@ function cardTile(card, count) {
   const showImage = isArtistProof(card) && card.backImage ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   return `
-    <article class="card-tile ${card.foil ? "foil" : ""}" data-card-tile data-card-id="${card.id}">
+    <article class="card-tile ${card.foil ? "foil" : ""}" data-card-tile data-card-id="${card.id}" data-full-name="${escapeAttribute(card.name)}">
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <button class="card-open" type="button" data-card-open data-card-id="${card.id}">
         <span class="card-image-wrap"><img data-card-image src="${showImage}" alt=""></span>
       </button>
       <span class="tile-meta">
-        <span class="tile-name">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
+        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${cardNameHtml(card.name)}${card.foil ? foilStar() : ""}</span>
         <span class="tile-sub">
           <span>${escapeHtml(artist)}</span>
         </span>
@@ -78,6 +79,7 @@ function isProxy(card) {
 function shortKind(kind) {
   return String(kind || "")
     .replace("Signed + Altered", "Signed + Alt")
+    .replace(/^Altered$/, "Alter")
     .replace("Artist Proof", "AP");
 }
 
@@ -92,7 +94,7 @@ function foilStar() {
 function setIcon(code) {
   const normalized = String(code || "").trim().toLowerCase();
   if (!normalized) return "?";
-  const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
+  const iconCode = scryfallSetIconCode(normalized);
   return `<img src="https://svgs.scryfall.io/sets/${escapeHtml(iconCode)}.svg" alt="${escapeHtml(normalized)}" loading="lazy">`;
 }
 
@@ -112,10 +114,21 @@ function uniqueSets(cards) {
   return [...sets.values()].sort((a, b) => a[1].localeCompare(b[1]));
 }
 
-function compareCards(a, b, sort) {
-  if (sort === "year") return compareText(a.signatureYear, b.signatureYear) || compareText(a.name, b.name);
-  if (sort === "type") return compareText(a.kind, b.kind) || compareText(a.name, b.name);
-  return compareText(a.artist || a.cardArtist, b.artist || b.cardArtist) || compareText(a.name, b.name);
+function compareCards(a, b, sort, direction = 1) {
+  if (sort === "deck") return compareDecks(a, b, direction);
+  if (sort === "name") return compareText(a.name, b.name) * direction;
+  if (sort === "year") return (compareText(a.signatureYear, b.signatureYear) || compareText(a.name, b.name)) * direction;
+  if (sort === "type") return (compareText(a.kind, b.kind) || compareText(a.name, b.name)) * direction;
+  return (compareText(a.artist || a.cardArtist, b.artist || b.cardArtist) || compareText(a.name, b.name)) * direction;
+}
+
+function compareDecks(a, b, direction) {
+  const aDeck = String(a.deckName || "").trim();
+  const bDeck = String(b.deckName || "").trim();
+  if (aDeck && !bDeck) return -1;
+  if (!aDeck && bDeck) return 1;
+  if (aDeck || bDeck) return (compareText(aDeck, bDeck) || compareText(a.name, b.name)) * direction;
+  return compareText(a.name, b.name);
 }
 
 function compareText(a, b) {
@@ -128,4 +141,12 @@ function unique(values) {
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value);
+}
+
+function cardNameHtml(name) {
+  return escapeHtml(name).replace(/\s*\/\/\s*/g, " // <br>");
 }

@@ -64,6 +64,8 @@
               <span>Sort</span>
               <select id="sortSelect">
                 <option value="artist">Artist</option>
+                <option value="deck">Deck</option>
+                <option value="name">Name</option>
                 <option value="year">Year</option>
                 <option value="type">Type</option>
               </select>
@@ -76,8 +78,18 @@
             </button>
             <label class="check-filter">
               <input id="bundleToggle" type="checkbox" />
-              <span data-i18n="bundle">Bundle same name</span>
+              <span data-i18n="bundle">Bundle</span>
             </label>
+            <div class="gallery-scale-controls" aria-label="Gallery layout">
+              <label>
+                <span>Line</span>
+                <input id="maxCardsRange" type="range" min="2" max="8" step="1" />
+              </label>
+              <label>
+                <span>Size</span>
+                <input id="cardScaleRange" type="range" min="130" max="240" step="5" />
+              </label>
+            </div>
           </form>
 
           <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
@@ -134,6 +146,8 @@
             <span>Default sort</span>
             <select id="defaultSortSelect">
               <option value="artist">Artist</option>
+              <option value="deck">Deck</option>
+              <option value="name">Name</option>
               <option value="year">Year</option>
               <option value="type">Type</option>
             </select>

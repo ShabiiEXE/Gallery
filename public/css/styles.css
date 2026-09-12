@@ -834,7 +834,7 @@ body.has-modal-open {
   position: relative;
   z-index: 80;
   display: grid;
-  grid-template-columns: repeat(4, minmax(150px, 1fr)) auto auto;
+  grid-template-columns: repeat(4, minmax(140px, 1fr)) auto auto minmax(180px, 0.9fr);
   gap: 10px;
   align-items: end;
   margin-bottom: 18px;
@@ -852,6 +852,22 @@ body.has-modal-open {
     inset 0 1px 0 rgba(255, 255, 255, 0.045),
     0 18px 42px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px);
+}
+
+.gallery-scale-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gallery-scale-controls label {
+  min-width: 0;
+}
+
+.gallery-scale-controls input[type="range"] {
+  min-height: 42px;
+  padding: 0;
 }
 
 .toolbar:has(.platform-logo-select.is-open),
@@ -918,9 +934,10 @@ label:has(> .platform-logo-select.is-open),
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--gallery-card-size, 170px), 1fr));
   gap: 12px;
   align-items: start;
+  max-width: calc(var(--gallery-max-cards, 6) * (var(--gallery-card-size, 170px) + 12px));
 }
 
 .card-tile {
@@ -977,6 +994,24 @@ label:has(> .platform-logo-select.is-open),
     0 0 24px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
+.card-tile:hover::after {
+  content: attr(data-full-name);
+  position: absolute;
+  left: 8px;
+  bottom: calc(100% + 8px);
+  z-index: 8;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  padding: 7px 9px;
+  color: #fff;
+  white-space: normal;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  background: var(--grid-texture), rgba(20, 21, 26, 0.96);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38);
+  pointer-events: none;
+}
+
 .card-image-wrap {
   position: relative;
   display: block;
@@ -1001,7 +1036,7 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .foil .card-image-wrap,
-.foil-sheen .preview-face {
+.foil-sheen .preview-front {
   box-shadow:
     inset 0 0 20px rgba(255, 255, 255, 0.18),
     inset 0 0 44px rgba(121, 242, 206, 0.16),
@@ -1010,9 +1045,9 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .foil .card-image-wrap::before,
-.foil-sheen .preview-face::before,
+.foil-sheen .preview-front::before,
 .foil .card-image-wrap::after,
-.foil-sheen .preview-face::after {
+.foil-sheen .preview-front::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -1021,7 +1056,7 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .foil .card-image-wrap::before,
-.foil-sheen .preview-face::before {
+.foil-sheen .preview-front::before {
   z-index: 1;
   mix-blend-mode: screen;
   opacity: 0.48;
@@ -1054,7 +1089,7 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .foil .card-image-wrap::after,
-.foil-sheen .preview-face::after {
+.foil-sheen .preview-front::after {
   z-index: 2;
   mix-blend-mode: screen;
   opacity: 0.46;
@@ -1101,6 +1136,7 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .tile-name {
+  position: relative;
   overflow: hidden;
   color: var(--text);
   font-size: 14px;
@@ -1258,6 +1294,7 @@ label:has(> .platform-logo-select.is-open),
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
+  clip-path: inset(0 round 8px);
   padding: 16px;
   background:
     var(--grid-texture), color-mix(in srgb, var(--panel-dark) 94%, #000);

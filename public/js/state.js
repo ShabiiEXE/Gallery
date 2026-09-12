@@ -13,6 +13,8 @@ export const defaultSettings = {
 
 export const defaultDevice = {
   bundleSameName: true,
+  galleryMaxCards: 6,
+  galleryCardSize: 170,
 };
 
 export function loadCards() {

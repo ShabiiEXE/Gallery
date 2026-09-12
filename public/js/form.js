@@ -2,6 +2,7 @@ import { CARD_KINDS, LANGUAGES } from "./constants.js";
 import { syncCustomSelect, syncFlagSelect } from "./custom-select.js";
 import { PHOTO_ASSETS } from "./photo-assets.js";
 import { searchScryfall } from "./scryfall.js";
+import { scryfallSetIconCode } from "./set-icons.js";
 
 const $ = (id) => document.getElementById(id);
 const cardKind = $("cardKind");
@@ -132,6 +133,7 @@ export function openCardForm(card = null) {
   cardForm.dataset.frontImage = data.frontImage || "";
   cardForm.dataset.backImage = data.backImage || "";
   cardForm.dataset.originalImage = data.originalImage || "";
+  cardForm.dataset.originalBackImage = data.originalBackImage || "";
   cardForm.dataset.commanderImage = data.commanderImage || "";
   cardForm.dataset.deckImage = data.deckImage || "";
   cardForm.dataset.deckOwnerAvatar = data.deckOwnerAvatar || "";
@@ -245,6 +247,7 @@ function applyScryfall(card) {
   collectorArtist.value ||= card.cardArtist || "";
   scryfallInput.value = card.scryfallUrl || "";
   cardForm.dataset.originalImage = card.frontImage || cardForm.dataset.originalImage || "";
+  cardForm.dataset.originalBackImage = card.backImage || cardForm.dataset.originalBackImage || "";
   cardForm.dataset.frontImage ||= card.frontImage || "";
   cardForm.dataset.commanderImage ||= card.frontImage || "";
   lookupResults.innerHTML = "";
@@ -276,6 +279,7 @@ async function saveCurrent(onSave) {
       frontImage,
       backImage,
       originalImage: cardForm.dataset.originalImage || "",
+      originalBackImage: cardForm.dataset.originalBackImage || "",
       artist: collectorArtist.value.trim(),
       signatureYear: signatureYear.value.trim(),
       signaturePlace: signaturePlace.value.trim(),
@@ -324,7 +328,7 @@ function updateSetIcon() {
   const code = setCodeInput.value.trim().toLowerCase();
   setCodeIcon.hidden = !code;
   if (!code) return;
-  const iconCode = code === "sld" || code.includes("secret lair") ? "star" : code;
+  const iconCode = scryfallSetIconCode(code);
   setCodeIcon.src = `https://svgs.scryfall.io/sets/${encodeURIComponent(iconCode)}.svg`;
   setCodeIcon.alt = code;
 }

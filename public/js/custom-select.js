@@ -1,3 +1,5 @@
+import { scryfallSetIconCode } from "./set-icons.js";
+
 export function syncFlagSelect(select, languages) {
   if (!select) return;
   select.classList.add("native-flag-select");
@@ -220,9 +222,8 @@ function bindCustomControl(select, control, sync) {
 }
 
 function setIconUrl(code) {
-  const normalized = String(code || "").trim().toLowerCase();
-  if (!normalized) return "";
-  const iconCode = normalized === "sld" || normalized.includes("secret lair") ? "star" : normalized;
+  const iconCode = scryfallSetIconCode(code);
+  if (!iconCode) return "";
   return `https://svgs.scryfall.io/sets/${encodeURIComponent(iconCode)}.svg`;
 }
 
