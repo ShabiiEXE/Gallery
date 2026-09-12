@@ -921,7 +921,7 @@ body.has-modal-open .modal-card {
 
 .gallery-scale-controls input[type="range"]::-moz-range-thumb {
   width: 16px;
-  height: 16px;
+  height: 30px;
   border: 2px solid color-mix(in srgb, var(--text) 88%, transparent);
   border-radius: 999px;
   background: var(--accent);
