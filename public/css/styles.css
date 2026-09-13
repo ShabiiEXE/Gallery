@@ -2539,7 +2539,7 @@ label:has(> .platform-logo-select.is-open),
     justify-content: space-between;
     width: 100%;
     min-height: 44px;
-    margin-bottom: 8px;
+    margin-bottom: 14px;
     padding: 0 12px;
     color: var(--text);
     border: 1px solid var(--line);
@@ -2552,6 +2552,13 @@ label:has(> .platform-logo-select.is-open),
     font-size: 11px;
     font-weight: 740;
     text-transform: uppercase;
+  }
+
+  body.filters-open .filter-toggle-button {
+    margin-bottom: 0;
+    border-bottom-color: transparent;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
   }
 
   .filter-toggle-icon {
@@ -2574,8 +2581,17 @@ label:has(> .platform-logo-select.is-open),
     top: auto;
     z-index: 120;
     grid-template-columns: 1fr;
-    padding: 10px;
+    margin-bottom: 28px;
+    padding: 12px 10px 14px;
     overflow: visible;
+  }
+
+  body.filters-open .toolbar {
+    border-top-color: transparent;
+    border-radius: 0 0 8px 8px;
+    box-shadow:
+      var(--shadow),
+      0 16px 30px rgba(0, 0, 0, 0.22);
   }
 
   body:not(.filters-open) .toolbar {
