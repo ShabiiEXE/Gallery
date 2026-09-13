@@ -154,7 +154,7 @@ function shortKind(kind) {
 
 function desktopKind(kind) {
   return String(kind || "")
-    .replace("Altered Artist Proof", "Altered Artist Proof")
+    .replace("Altered Artist Proof", "Altered AP")
     .replace("Artist Proof", "Artist Proof")
     .replace("Signed + Altered", "Signed + Alt")
     .replace(/^Altered$/, "Alter");
