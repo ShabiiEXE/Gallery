@@ -85,6 +85,7 @@ export function bindDetailInteractions(root, handlers) {
     let drag = null;
     let gyroPermissionAsked = false;
     const controller = new AbortController();
+    const mobileMotion = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     const applyRotation = () => {
       const x = Math.max(-58, Math.min(58, manual.x + tilt.x + gyro.x));
       const yRaw = manual.y + tilt.y + gyro.y;
@@ -98,7 +99,7 @@ export function bindDetailInteractions(root, handlers) {
       preview.style.setProperty("--shine-x", `${Math.max(0, Math.min(100, x * 100)).toFixed(1)}%`);
       preview.style.setProperty("--shine-y", `${Math.max(0, Math.min(100, y * 100)).toFixed(1)}%`);
     };
-    preview.addEventListener("pointermove", (event) => {
+    root.addEventListener("pointermove", (event) => {
       updateShine(event);
       if (drag) {
         event.preventDefault();
@@ -111,8 +112,16 @@ export function bindDetailInteractions(root, handlers) {
         applyRotation();
         return;
       }
+      if (!mobileMotion) return;
+      const rect = root.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) - 0.5;
+      const y = ((event.clientY - rect.top) / rect.height) - 0.5;
+      tilt.y = x * 34;
+      tilt.x = y * -28;
+      applyRotation();
     });
     const handleOrientation = (event) => {
+      if (!mobileMotion) return;
       if (drag) return;
       const beta = Number(event.beta) || 0;
       const gamma = Number(event.gamma) || 0;
@@ -121,7 +130,6 @@ export function bindDetailInteractions(root, handlers) {
       applyRotation();
     };
     window.addEventListener("deviceorientation", handleOrientation, { signal: controller.signal });
-    window.addEventListener("deviceorientationabsolute", handleOrientation, { signal: controller.signal });
     root.closest("dialog")?.addEventListener("close", () => controller.abort(), { once: true });
     preview.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -147,7 +155,7 @@ export function bindDetailInteractions(root, handlers) {
       tilt.y = 0;
       applyRotation();
     });
-    preview.addEventListener("pointerleave", () => {
+    root.addEventListener("pointerleave", () => {
       if (drag) return;
       tilt.x = 0;
       tilt.y = 0;

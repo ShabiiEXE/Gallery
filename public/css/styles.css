@@ -2100,7 +2100,7 @@ label:has(> .platform-logo-select.is-open),
   display: inline-block;
   width: 20px;
   height: 20px;
-  margin-left: -2px;
+  margin-left: 10px;
   vertical-align: 2px;
   object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(255, 216, 111, 0.56))
@@ -2644,6 +2644,7 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .toolbar {
+    --toolbar-control-height: 48px;
     position: relative;
     top: auto;
     z-index: 120;
@@ -2657,6 +2658,10 @@ label:has(> .platform-logo-select.is-open),
   .toolbar select,
   .platform-logo-button {
     font-size: 16px;
+  }
+
+  .toolbar .platform-logo-select {
+    --dropdown-control-height: var(--toolbar-control-height);
   }
 
   body.filters-open .toolbar {
@@ -2676,7 +2681,20 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .sort-action-row {
-    grid-template-columns: minmax(0, 1fr) 42px 42px;
+    grid-template-columns:
+      minmax(0, 1fr) var(--toolbar-control-height)
+      var(--toolbar-control-height);
+  }
+
+  .toolbar .icon-only-button,
+  .foil-filter-toggle,
+  .foil-filter-toggle > span,
+  .bundle-icon-toggle,
+  .bundle-icon-toggle > span {
+    width: var(--toolbar-control-height);
+    min-width: var(--toolbar-control-height);
+    height: var(--toolbar-control-height);
+    min-height: var(--toolbar-control-height);
   }
 
   .platform-logo-select.is-open .platform-logo-menu {
@@ -2941,16 +2959,9 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .sort-action-row {
-    grid-template-columns: minmax(0, 1fr) 38px 38px;
-  }
-
-  .foil-filter-toggle,
-  .foil-filter-toggle > span,
-  .bundle-icon-toggle,
-  .bundle-icon-toggle > span {
-    width: 38px;
-    min-width: 38px;
-    height: 38px;
+    grid-template-columns:
+      minmax(0, 1fr) var(--toolbar-control-height)
+      var(--toolbar-control-height);
   }
 
   .detail-layout {
