@@ -65,7 +65,7 @@ function cardTile(card, count, href = "#") {
         <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt=""></span>
       </span>
       <span class="tile-meta">
-        <span class="tile-name" data-title="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
+        <span class="tile-name" data-title="${escapeAttribute(card.name)}"><span class="tile-name-text">${escapeHtml(card.name)}</span>${card.foil ? foilStar() : ""}</span>
         <span class="tile-sub">
           <span>${escapeHtml(artist)}</span>
         </span>

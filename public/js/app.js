@@ -71,18 +71,21 @@ async function start() {
   registerServiceWorker();
   initForm({ onSave: upsertCard, onDelete: deleteCard, getCards: () => app.cards });
   bindEvents();
-  app.version = await loadVersion();
-  try {
-    app.settings = await loadRemoteSettings();
+  const versionPromise = loadVersion();
+  const settingsPromise = loadRemoteSettings();
+  const authPromise = getAuthStatus();
+  const cardsPromise = loadRemoteCards();
+  const [settingsResult, cardsResult] = await Promise.allSettled([settingsPromise, cardsPromise]);
+  if (settingsResult.status === "fulfilled") {
+    app.settings = settingsResult.value;
     saveSettings(app.settings);
-  } catch {
+  } else {
     app.settings = loadSettings();
   }
-  app.authed = await getAuthStatus();
-  try {
-    app.cards = await loadRemoteCards();
+  if (cardsResult.status === "fulfilled") {
+    app.cards = cardsResult.value;
     app.remoteLoaded = true;
-  } catch {
+  } else {
     app.remoteLoaded = false;
   }
   app.filters.sort = app.settings.defaultSort;
@@ -90,6 +93,15 @@ async function start() {
   render();
   openDetailFromHash();
   warmOfflineCache();
+  versionPromise.then((version) => {
+    app.version = version;
+    renderFooter();
+  }).catch(() => {});
+  authPromise.then((authed) => {
+    app.authed = authed;
+    render();
+    if (cardDialog.open && app.activeCardId) openDetail(app.activeCardId, { updateHash: false });
+  }).catch(() => {});
 }
 
 function bindEvents() {

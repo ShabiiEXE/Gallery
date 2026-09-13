@@ -23,7 +23,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
       <span></span>
       <div class="modal-head-actions">
         ${canEdit ? `<button class="icon-button" type="button" data-edit-card title="Edit" aria-label="Edit">${icon("pencil")}</button>` : ""}
-        <button class="icon-button" type="button" data-close-detail aria-label="Close">×</button>
+        <button class="icon-button" type="button" data-close-detail title="Close" aria-label="Close">${icon("close")}</button>
       </div>
     </div>
     <div class="detail-layout">
@@ -98,7 +98,8 @@ export function bindDetailInteractions(root, handlers) {
       preview.style.setProperty("--shine-x", `${Math.max(0, Math.min(100, x * 100)).toFixed(1)}%`);
       preview.style.setProperty("--shine-y", `${Math.max(0, Math.min(100, y * 100)).toFixed(1)}%`);
     };
-    root.addEventListener("pointermove", (event) => {
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    preview.addEventListener("pointermove", (event) => {
       updateShine(event);
       if (drag) {
         event.preventDefault();
@@ -111,21 +112,24 @@ export function bindDetailInteractions(root, handlers) {
         applyRotation();
         return;
       }
-      const rect = root.getBoundingClientRect();
+      if (!finePointer) return;
+      const rect = preview.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) - 0.5;
       const y = ((event.clientY - rect.top) / rect.height) - 0.5;
-      tilt.y = x * 34;
-      tilt.x = y * -28;
+      tilt.y = x * 24;
+      tilt.x = y * -18;
       applyRotation();
     });
-    window.addEventListener("deviceorientation", (event) => {
+    const handleOrientation = (event) => {
       if (drag) return;
       const beta = Number(event.beta) || 0;
       const gamma = Number(event.gamma) || 0;
-      gyro.x = Math.max(-24, Math.min(24, (beta - 48) * -0.48));
-      gyro.y = Math.max(-28, Math.min(28, gamma * 0.68));
+      gyro.x = Math.max(-18, Math.min(18, (beta - 45) * -0.36));
+      gyro.y = Math.max(-22, Math.min(22, gamma * 0.48));
       applyRotation();
-    }, { signal: controller.signal });
+    };
+    window.addEventListener("deviceorientation", handleOrientation, { signal: controller.signal });
+    window.addEventListener("deviceorientationabsolute", handleOrientation, { signal: controller.signal });
     root.closest("dialog")?.addEventListener("close", () => controller.abort(), { once: true });
     preview.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -151,7 +155,7 @@ export function bindDetailInteractions(root, handlers) {
       tilt.y = 0;
       applyRotation();
     });
-    root.addEventListener("pointerleave", () => {
+    preview.addEventListener("pointerleave", () => {
       if (drag) return;
       tilt.x = 0;
       tilt.y = 0;
@@ -469,7 +473,7 @@ function relatedCard(card) {
     <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
       <span class="card-image-wrap"><img src="${escapeAttribute(cacheImage(image))}" alt="" draggable="false"></span>
       <span class="tile-meta">
-        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? tileFoilStar() : ""}</span>
+        <span class="tile-name" data-full-name="${escapeAttribute(card.name)}"><span class="tile-name-text">${escapeHtml(card.name)}</span>${card.foil ? tileFoilStar() : ""}</span>
         <span class="tile-foot">
           ${shouldShowSetIcon(card) ? `<span class="set-icon">${setIconImage(card.setCode || card.setName)}</span>` : ""}
           <span class="tag tile-kind">${escapeHtml(shortKind(card.kind))}</span>

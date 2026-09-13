@@ -76,6 +76,10 @@
   background-clip: padding-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html {
   overflow-x: hidden;
   overscroll-behavior-y: none;
@@ -894,21 +898,16 @@ body.has-modal-open .modal-card {
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: none;
+  transition: transform 160ms ease;
 }
 
 body.latest-closed .latest-toggle-icon {
-  transform: none;
+  transform: rotate(180deg);
 }
 
 body.latest-closed .latest-toggle {
-  justify-content: flex-end;
   min-height: 32px;
   margin-bottom: 0;
-}
-
-body.latest-closed .latest-toggle span {
-  display: none;
 }
 
 .latest-strip {
@@ -1543,6 +1542,12 @@ label:has(> .platform-logo-select.is-open),
   white-space: nowrap;
 }
 
+.tile-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .card-tile.is-foil .tile-name,
 .related-tile.foil .tile-name {
   color: transparent;
@@ -1551,10 +1556,10 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .tile-foil-star {
-  width: 12px;
-  height: 12px;
-  margin-left: -3px;
-  vertical-align: -1px;
+  width: 16px;
+  height: 16px;
+  margin-left: 1px;
+  vertical-align: -2px;
   fill: #ffd86f;
   filter: drop-shadow(0 0 5px rgba(255, 216, 111, 0.5))
     drop-shadow(0 0 9px rgba(255, 117, 218, 0.24));
@@ -2089,10 +2094,10 @@ label:has(> .platform-logo-select.is-open),
 }
 
 .foil-title-star {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   margin-left: -2px;
-  vertical-align: 1px;
+  vertical-align: 2px;
   fill: #ffd86f;
   filter: drop-shadow(0 0 8px rgba(255, 216, 111, 0.56))
     drop-shadow(0 0 14px rgba(255, 117, 218, 0.28));
@@ -2682,12 +2687,12 @@ label:has(> .platform-logo-select.is-open),
     gap: 10px;
   }
 
-  .gallery-grid[data-mobile-columns="3"] .tile-name,
+  .gallery-grid[data-mobile-columns="3"] .tile-name-text,
   .gallery-grid[data-mobile-columns="3"] .tile-year,
-  .gallery-grid[data-mobile-columns="4"] .tile-name,
+  .gallery-grid[data-mobile-columns="4"] .tile-name-text,
   .gallery-grid[data-mobile-columns="4"] .set-icon,
   .gallery-grid[data-mobile-columns="4"] .tile-year,
-  .latest-strip .tile-name,
+  .latest-strip .tile-name-text,
   .latest-strip .tile-year {
     display: none;
   }
@@ -2874,6 +2879,7 @@ label:has(> .platform-logo-select.is-open),
   .latest-toggle {
     min-height: 40px;
     margin-bottom: 8px;
+    padding-inline: 2px;
   }
 
   .latest-toggle span {
@@ -2882,8 +2888,8 @@ label:has(> .platform-logo-select.is-open),
 
   .latest-strip {
     gap: 8px;
-    margin-inline: -10px;
-    padding-inline: 10px;
+    margin-inline: -4px;
+    padding: 2px 4px 8px;
   }
 
   .latest-strip .card-tile {
@@ -2891,8 +2897,8 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .gallery-summary {
-    margin-top: -4px;
-    text-align: left;
+    margin-top: 12px;
+    text-align: right;
   }
 
   .gallery-grid {
