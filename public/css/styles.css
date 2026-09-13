@@ -897,7 +897,7 @@ body.has-modal-open .modal-card {
 }
 
 body.latest-closed .latest-toggle-icon {
-  transform: rotate(-90deg);
+  transform: rotate(180deg);
 }
 
 body.latest-closed .latest-toggle {
@@ -1036,7 +1036,7 @@ body.latest-closed .latest-strip {
     box-shadow 160ms ease;
 }
 
-.foil-filter-toggle > span::before {
+.foil-filter-toggle input:checked + span::before {
   content: "";
   position: absolute;
   inset: -35%;
