@@ -1705,6 +1705,7 @@ label:has(> .platform-logo-select.is-open),
   z-index: 2;
   padding: 8px 10px;
   border-radius: 4px;
+  border: 1px solid var(--line);
   color: #d5dae4;
   background: rgba(16, 17, 20, 0.4);
   font-size: 14px;
