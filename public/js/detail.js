@@ -128,7 +128,20 @@ export function bindDetailInteractions(root, handlers) {
       gyro.y = Math.max(-18, Math.min(18, gamma * 0.42));
       applyRotation();
     };
+    const handleMotion = (event) => {
+      if (drag) return;
+      if (event.rotationRate?.beta || event.rotationRate?.gamma) return;
+      const gravity = event.accelerationIncludingGravity;
+      if (!gravity) return;
+      const x = Number(gravity.y) || 0;
+      const y = Number(gravity.x) || 0;
+      gyro.x = Math.max(-16, Math.min(16, x * -2.2));
+      gyro.y = Math.max(-18, Math.min(18, y * -2.4));
+      applyRotation();
+    };
     window.addEventListener("deviceorientation", handleOrientation, { signal: controller.signal });
+    window.addEventListener("deviceorientationabsolute", handleOrientation, { signal: controller.signal });
+    window.addEventListener("devicemotion", handleMotion, { signal: controller.signal });
     root.closest("dialog")?.addEventListener("close", () => controller.abort(), { once: true });
     preview.addEventListener("pointerdown", (event) => {
       event.preventDefault();
