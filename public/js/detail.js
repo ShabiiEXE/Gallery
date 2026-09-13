@@ -252,9 +252,9 @@ function flipIcon() {
   return `
     <svg class="flip-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M7.2 7.6A7.2 7.2 0 0 1 19 12.8"></path>
-      <path d="M19 7.4v5.4h-5.4"></path>
+      <path d="m16.4 8.8 2.6 4 3.2-3.5"></path>
       <path d="M16.8 16.4A7.2 7.2 0 0 1 5 11.2"></path>
-      <path d="M5 16.6v-5.4h5.4"></path>
+      <path d="m7.6 15.2-2.6-4-3.2 3.5"></path>
     </svg>
   `;
 }
