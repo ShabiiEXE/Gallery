@@ -910,7 +910,7 @@ body.latest-closed .latest-toggle {
   gap: 10px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  padding: 4px 2px 8px;
+  padding: 4px 2px 15px;
   -webkit-mask-image: linear-gradient(
     90deg,
     #000 0,
@@ -2929,7 +2929,7 @@ label:has(> .platform-logo-select.is-open),
     --latest-strip-fade: 42px;
     gap: 8px;
     margin-inline: -2px;
-    padding: 5px 6px 15px;
+    padding: 5px 6px 8px;
   }
 
   .latest-strip .card-tile {
