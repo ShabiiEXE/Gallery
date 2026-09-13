@@ -169,7 +169,8 @@ function bindEvents() {
   });
 }
 
-function updateFiltersFromForm() {
+function updateFiltersFromForm(event) {
+  syncExclusiveViewToggles(event?.target);
   app.filters = {
     type: typeFilter.value,
     foil: foilFilter.checked,
@@ -181,6 +182,15 @@ function updateFiltersFromForm() {
   persistDeviceControls();
   saveDevice(app.device);
   renderGalleryOnly();
+}
+
+function syncExclusiveViewToggles(changedControl) {
+  if (changedControl === separatorToggle && separatorToggle.checked) {
+    bundleToggle.checked = false;
+  }
+  if (changedControl === bundleToggle && bundleToggle.checked) {
+    separatorToggle.checked = false;
+  }
 }
 
 function bindBackdrop() {
@@ -507,6 +517,10 @@ function syncDisplayRange() {
   app.device.galleryColumns = clamped;
   app.device.bundleSameName = app.device[bundleKey] ?? app.device.bundleSameName;
   app.device.showSortSeparators = app.device[separatorKey] ?? app.device.showSortSeparators;
+  if (app.device.showSortSeparators) {
+    app.device.bundleSameName = false;
+    app.device[bundleKey] = false;
+  }
   cardScaleRange.value = clamped;
   bundleToggle.checked = app.device.bundleSameName;
   separatorToggle.checked = Boolean(app.device.showSortSeparators);

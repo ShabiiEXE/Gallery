@@ -89,7 +89,7 @@ function withSeparators(groups, sort) {
   let previous = "";
   return groups.map((group, index) => {
     const label = separatorLabel(group.card, sort);
-    const show = index > 0 && label && label !== previous;
+    const show = label && (index === 0 || label !== previous);
     previous = label;
     return show ? { ...group, separatorLabel: label } : group;
   });
