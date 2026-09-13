@@ -862,9 +862,8 @@ body.has-modal-open .modal-card {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 48px;
-  margin: 0 0 12px;
-  padding: 0;
+  margin: 0 0 8px;
+  padding: 0 10px;
   color: var(--text);
   text-align: left;
   border: 0;
@@ -1158,7 +1157,7 @@ body.latest-closed .latest-strip {
   width: 18px;
   height: 30px;
   margin-top: -15px;
-  border-radius: 20px;
+  border-radius: 5px;
   background: var(--accent);
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
 }
@@ -1173,7 +1172,7 @@ body.latest-closed .latest-strip {
   width: 16px;
   height: 30px;
   margin-top: -15px;
-  border-radius: 20px;
+  border-radius: 5px;
   background: var(--accent);
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
 }
