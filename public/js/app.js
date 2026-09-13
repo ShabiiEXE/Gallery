@@ -40,6 +40,7 @@ const setFilter = $("setFilter");
 const artistFilter = $("artistFilter");
 const sortSelect = $("sortSelect");
 const sortDirectionButton = $("sortDirectionButton");
+const separatorToggle = $("separatorToggle");
 const bundleToggle = $("bundleToggle");
 const cardScaleRange = $("cardScaleRange");
 const defaultSortSelect = $("defaultSortSelect");
@@ -499,13 +500,16 @@ function syncDisplayRange() {
   cardScaleRange.max = mobile ? String(mobileMaxColumns) : "7";
   const key = mobile ? "mobileGalleryColumns" : "desktopGalleryColumns";
   const bundleKey = mobile ? "mobileBundleSameName" : "desktopBundleSameName";
+  const separatorKey = mobile ? "mobileShowSortSeparators" : "desktopShowSortSeparators";
   const value = Number(app.device[key] ?? app.device.galleryColumns) || fallback || (mobile ? mobileMaxColumns : 7);
   const clamped = Math.max(Number(cardScaleRange.min), Math.min(Number(cardScaleRange.max), value));
   app.device[key] = clamped;
   app.device.galleryColumns = clamped;
   app.device.bundleSameName = app.device[bundleKey] ?? app.device.bundleSameName;
+  app.device.showSortSeparators = app.device[separatorKey] ?? app.device.showSortSeparators;
   cardScaleRange.value = clamped;
   bundleToggle.checked = app.device.bundleSameName;
+  separatorToggle.checked = Boolean(app.device.showSortSeparators);
   document.body.classList.toggle("filters-open", Boolean(app.device.mobileFiltersOpen));
   filterToggleButton?.setAttribute("aria-expanded", app.device.mobileFiltersOpen ? "true" : "false");
 }
@@ -524,7 +528,12 @@ function renderGalleryOnly() {
   galleryGrid?.style.setProperty("--gallery-columns", `${columns}`);
   galleryGrid?.style.setProperty("--gallery-mobile-columns", `${mobileColumns}`);
   if (galleryGrid) galleryGrid.dataset.mobileColumns = String(mobileColumns);
-  renderGallery(groups, { onOpen: openDetail, getHref: cardHashHref });
+  renderGallery(groups, {
+    onOpen: openDetail,
+    getHref: cardHashHref,
+    separators: app.device.showSortSeparators,
+    sort: app.filters.sort || app.settings.defaultSort || "artist",
+  });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
   renderFooter();
   renderLatestAdditions();
@@ -609,12 +618,15 @@ function persistDeviceControls() {
   if (mobile) {
     app.device.mobileGalleryColumns = columns;
     app.device.mobileBundleSameName = bundleToggle.checked;
+    app.device.mobileShowSortSeparators = separatorToggle.checked;
   } else {
     app.device.desktopGalleryColumns = columns;
     app.device.desktopBundleSameName = bundleToggle.checked;
+    app.device.desktopShowSortSeparators = separatorToggle.checked;
   }
   app.device.galleryColumns = columns;
   app.device.bundleSameName = bundleToggle.checked;
+  app.device.showSortSeparators = separatorToggle.checked;
 }
 
 function toggleMobileFilters() {

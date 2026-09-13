@@ -37,8 +37,9 @@ export function bundleCards(cards, enabled) {
   return [...groups.values()].map((items) => ({ card: pickBundleCover(items), count: items.length, items }));
 }
 
-export function renderGallery(groups, { onOpen, getHref }) {
-  galleryGrid.innerHTML = groups.map(({ card, count }) => cardTile(card, count, getHref?.(card))).join("");
+export function renderGallery(groups, { onOpen, getHref, separators = false, sort = "artist" }) {
+  const decoratedGroups = separators ? withSeparators(groups, sort) : groups;
+  galleryGrid.innerHTML = decoratedGroups.map(({ card, count, separatorLabel }) => cardTile(card, count, getHref?.(card), separatorLabel)).join("");
   markOverflowTitles();
   galleryGrid.querySelectorAll("[data-card-open]").forEach((link) => {
     link.addEventListener("click", (event) => {
@@ -53,14 +54,15 @@ export function renderCardTile(card, count = 1, options = {}) {
   return cardTile(card, count, options.href);
 }
 
-function cardTile(card, count, href = "#") {
+function cardTile(card, count, href = "#", separatorLabel = "") {
   const showingBack = isArtistProof(card) && card.backImage;
   const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   const foilImage = card.foil && !isArtistProof(card);
   const saturationBoost = !isProxy(card);
   return `
-    <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""} ${saturationBoost ? "saturation-boost" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
+    <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""} ${saturationBoost ? "saturation-boost" : ""} ${separatorLabel ? "has-sort-separator" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
+      ${separatorLabel ? `<span class="sort-separator-label">${escapeHtml(separatorLabel)}</span>` : ""}
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <span class="card-open">
         <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt=""></span>
@@ -81,6 +83,24 @@ function cardTile(card, count, href = "#") {
       </span>
     </a>
   `;
+}
+
+function withSeparators(groups, sort) {
+  let previous = "";
+  return groups.map((group, index) => {
+    const label = separatorLabel(group.card, sort);
+    const show = index > 0 && label && label !== previous;
+    previous = label;
+    return show ? { ...group, separatorLabel: label } : group;
+  });
+}
+
+function separatorLabel(card, sort) {
+  if (sort === "deck") return card.deckName || "No deck";
+  if (sort === "name") return String(card.name || "?").trim().charAt(0).toUpperCase() || "?";
+  if (sort === "year") return card.signatureYear || "No year";
+  if (sort === "type") return shortKind(card.kind) || "Other";
+  return card.artist || card.cardArtist || "No artist";
 }
 
 function markOverflowTitles() {
