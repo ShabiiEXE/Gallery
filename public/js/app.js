@@ -134,7 +134,6 @@ function bindEvents() {
         if (activeId && findCardByHash()?.id === activeId) clearCardHash();
       }
       updateModalScrollLock();
-      render();
     });
     dialog?.addEventListener("cancel", () => requestAnimationFrame(updateModalScrollLock));
   });
