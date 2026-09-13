@@ -187,6 +187,7 @@ export function bindDetailInteractions(root, handlers) {
       if (back) back.src = original ? button.dataset.originalBack : button.dataset.customBack;
       button.setAttribute("aria-pressed", original ? "true" : "false");
       button.title = original ? "Show custom card graphic" : "Show original card graphic";
+      button.innerHTML = original ? crossedEyeIcon() : eyeIcon();
     });
     function requestGyroPermission() {
       if (gyroPermissionAsked || typeof DeviceOrientationEvent === "undefined") return;
@@ -232,6 +233,17 @@ function eyeIcon() {
     <svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6-3.2 6-9.2 6-9.2-6-9.2-6Z"></path>
       <circle cx="12" cy="12" r="2.6"></circle>
+    </svg>
+  `;
+}
+
+function crossedEyeIcon() {
+  return `
+    <svg class="eye-icon crossed-eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6a15.4 15.4 0 0 1-2.2 2.8"></path>
+      <path d="M9.8 17.6A9.8 9.8 0 0 1 2.8 12"></path>
+      <path d="M9.2 9.2a3.1 3.1 0 0 1 4.3 4.3"></path>
+      <path d="M4.6 4.6 19.4 19.4"></path>
     </svg>
   `;
 }

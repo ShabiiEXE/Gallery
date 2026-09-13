@@ -534,10 +534,9 @@ function renderGalleryOnly() {
 
 function renderLatestAdditions() {
   if (!latestAdditions) return;
-  const latestCount = window.matchMedia("(min-width: 821px)").matches ? 4 : 5;
   const latest = [...app.cards]
     .sort((a, b) => Date.parse(b.createdAt || b.updatedAt || "") - Date.parse(a.createdAt || a.updatedAt || ""))
-    .slice(0, latestCount);
+    .slice(0, 5);
   latestAdditions.innerHTML = latest.map((card) => renderCardTile(card, 1, { href: cardHashHref(card) })).join("");
   latestAdditions.querySelectorAll("[data-card-open]").forEach((link) => {
     link.addEventListener("click", (event) => {
