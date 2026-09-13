@@ -881,8 +881,10 @@ body.has-modal-open .modal-card {
 
 @media (min-width: 821px) {
   .latest-strip {
-    grid-auto-columns: minmax(0, calc((100% - 20px) / 3));
+    gap: 14px;
+    grid-auto-columns: minmax(240px, calc((100% - 28px) / 3));
     grid-template-rows: none;
+    scroll-snap-type: x mandatory;
   }
 }
 
