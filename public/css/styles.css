@@ -851,9 +851,9 @@ body.has-modal-open .modal-card {
 
 .gallery-summary {
   margin: 2px 0 12px;
-  color: #d5dae4;
-  font-size: 13px;
-  font-weight: 900;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 740;
   text-align: right;
   text-transform: uppercase;
 }
@@ -2812,7 +2812,7 @@ label:has(> .platform-logo-select.is-open),
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 8px;
-    padding: 28px 14px 12px;
+    padding: 32px 18px 16px;
     background: linear-gradient(179deg, #00000075, transparent);
     transition:
       transform 180ms ease,
@@ -2859,7 +2859,7 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .topbar {
-    padding: max(14px, env(safe-area-inset-top)) 10px 10px;
+    padding: max(18px, calc(env(safe-area-inset-top) + 4px)) 14px 14px;
   }
 
   .brand-mark,
@@ -2885,7 +2885,7 @@ label:has(> .platform-logo-select.is-open),
   .latest-toggle {
     min-height: 40px;
     margin-bottom: 8px;
-    padding-inline: 2px;
+    padding: 4px 6px 2px;
   }
 
   .latest-toggle span {
@@ -2894,8 +2894,8 @@ label:has(> .platform-logo-select.is-open),
 
   .latest-strip {
     gap: 8px;
-    margin-inline: -4px;
-    padding: 2px 4px 8px;
+    margin-inline: -2px;
+    padding: 5px 6px 10px;
   }
 
   .latest-strip .card-tile {
