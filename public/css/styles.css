@@ -1378,6 +1378,10 @@ label:has(> .platform-logo-select.is-open),
   align-items: start;
 }
 
+.gallery-grid.has-sort-separators {
+  --gallery-gap: 18px;
+}
+
 .card-tile {
   position: relative;
   display: block;
@@ -1408,20 +1412,20 @@ label:has(> .platform-logo-select.is-open),
 .card-tile.has-sort-separator::before {
   content: "";
   position: absolute;
-  left: calc(var(--gallery-gap, 12px) * -0.5);
+  left: calc(var(--gallery-gap, 12px) * -0.58);
   top: 7px;
   bottom: 7px;
   z-index: 5;
-  border-left: 1px dotted color-mix(in srgb, var(--dim) 54%, transparent);
+  border-left: 1px dotted rgba(255, 255, 255, 0.68);
   pointer-events: none;
 }
 
 .sort-separator-label {
   position: absolute;
-  left: calc(var(--gallery-gap, 12px) * -0.5);
+  left: calc(var(--gallery-gap, 12px) * -0.58);
   top: 50%;
   z-index: 6;
-  max-width: min(86px, 22vw);
+  max-width: min(148px, 36vw);
   padding: 3px 7px;
   overflow: hidden;
   color: var(--dim);

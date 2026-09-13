@@ -527,7 +527,10 @@ function renderGalleryOnly() {
   const mobileColumns = Math.max(1, Math.min(4, columns));
   galleryGrid?.style.setProperty("--gallery-columns", `${columns}`);
   galleryGrid?.style.setProperty("--gallery-mobile-columns", `${mobileColumns}`);
-  if (galleryGrid) galleryGrid.dataset.mobileColumns = String(mobileColumns);
+  if (galleryGrid) {
+    galleryGrid.dataset.mobileColumns = String(mobileColumns);
+    galleryGrid.classList.toggle("has-sort-separators", Boolean(app.device.showSortSeparators));
+  }
   renderGallery(groups, {
     onOpen: openDetail,
     getHref: cardHashHref,
