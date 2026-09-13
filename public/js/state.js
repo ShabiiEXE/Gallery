@@ -16,7 +16,7 @@ export const defaultDevice = {
   mobileBundleSameName: true,
   galleryColumns: 7,
   desktopGalleryColumns: 7,
-  mobileGalleryColumns: 4,
+  mobileGalleryColumns: 3,
   mobileFiltersOpen: false,
   latestAdditionsOpen: true,
 };

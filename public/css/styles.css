@@ -744,6 +744,13 @@ h2 {
   padding: 0;
 }
 
+.moxfield-button img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
 .button-icon {
   display: inline-grid;
   width: 17px;
@@ -868,36 +875,30 @@ body.has-modal-open .modal-card {
 .latest-toggle span {
   display: block;
   margin: 0;
-  color: var(--text);
+  color: var(--dim);
   font-family: var(--title-font);
-  font-size: clamp(28px, 4vw, 54px);
-  font-weight: 900;
-  line-height: 0.95;
+  font-size: 11px;
+  font-weight: 740;
+  line-height: 1.2;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .latest-toggle-icon {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  color: #b8c0ce;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  color: var(--dim);
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.6;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition:
-    color 160ms ease,
-    transform 160ms ease;
-}
-
-.latest-toggle:hover .latest-toggle-icon {
-  color: var(--text);
+  transition: none;
 }
 
 body.latest-closed .latest-toggle-icon {
-  transform: rotate(180deg);
+  transform: none;
 }
 
 body.latest-closed .latest-toggle {
@@ -1691,6 +1692,7 @@ label:has(> .platform-logo-select.is-open),
 .modal {
   width: min(1040px, calc(100vw - 24px));
   max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
   padding: 0;
   color: var(--text);
   border: 0;
@@ -1704,6 +1706,7 @@ label:has(> .platform-logo-select.is-open),
 
 .modal-card {
   max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2541,6 +2544,10 @@ label:has(> .platform-logo-select.is-open),
 }
 
 @media (max-width: 820px) {
+  .page-shell {
+    padding: 4px clamp(10px, 3.6vw, 18px) 28px;
+  }
+
   .module-head,
   .detail-layout {
     grid-template-columns: 1fr;
@@ -2549,6 +2556,23 @@ label:has(> .platform-logo-select.is-open),
 
   .top-actions {
     justify-content: stretch;
+  }
+
+  #settingsButton {
+    display: none;
+  }
+
+  .top-actions #addCardButton {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    flex: 0 0 42px;
+    padding: 0;
+  }
+
+  .top-actions #addCardButton .button-label {
+    display: none;
   }
 
   .top-actions .button {
@@ -2602,11 +2626,12 @@ label:has(> .platform-logo-select.is-open),
     stroke-width: 2.5;
     stroke-linecap: round;
     stroke-linejoin: round;
+    transform: rotate(180deg);
     transition: transform 160ms ease;
   }
 
   body.filters-open .filter-toggle-icon {
-    transform: rotate(180deg);
+    transform: none;
   }
 
   .toolbar {
@@ -2617,6 +2642,12 @@ label:has(> .platform-logo-select.is-open),
     margin-bottom: 28px;
     padding: 12px 10px 14px;
     overflow: visible;
+  }
+
+  .toolbar input:not([type="checkbox"]):not([type="range"]),
+  .toolbar select,
+  .platform-logo-button {
+    font-size: 16px;
   }
 
   body.filters-open .toolbar {
@@ -2645,7 +2676,7 @@ label:has(> .platform-logo-select.is-open),
 
   .gallery-grid {
     grid-template-columns: repeat(
-      var(--gallery-mobile-columns, 4),
+      var(--gallery-mobile-columns, 3),
       minmax(0, 1fr)
     );
     gap: 10px;
@@ -2694,11 +2725,21 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .module {
-    padding: 10px;
+    padding: 0;
+  }
+
+  .modal {
+    width: min(100%, calc(100vw - 12px));
+    max-height: calc(100dvh - 12px);
+  }
+
+  .modal-card {
+    max-height: calc(100dvh - 12px);
+    padding: 18px;
   }
 
   .detail-card {
-    padding-top: 84px;
+    padding-top: 72px;
   }
 
   .detail-card > .modal-head {
@@ -2771,6 +2812,10 @@ label:has(> .platform-logo-select.is-open),
     grid-column: 2;
   }
 
+  .top-actions {
+    gap: 6px;
+  }
+
   .brand strong {
     display: none;
   }
@@ -2798,11 +2843,128 @@ label:has(> .platform-logo-select.is-open),
 }
 
 @media (max-width: 460px) {
+  body {
+    font-size: 13px;
+  }
+
+  .topbar {
+    padding: max(14px, env(safe-area-inset-top)) 10px 10px;
+  }
+
+  .brand-mark,
+  .icon-button,
+  .icon-only-button {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    flex-basis: 38px;
+  }
+
+  .top-actions #addCardButton {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0 10px;
+  }
+
+  .top-actions #addCardButton .button-label {
+    display: none;
+  }
+
+  .latest-toggle {
+    min-height: 40px;
+    margin-bottom: 8px;
+  }
+
+  .latest-toggle span {
+    font-size: 11px;
+  }
+
+  .latest-strip {
+    gap: 8px;
+    margin-inline: -10px;
+    padding-inline: 10px;
+  }
+
+  .latest-strip .card-tile {
+    flex-basis: 38vw;
+  }
+
+  .gallery-summary {
+    margin-top: -4px;
+    text-align: left;
+  }
+
   .gallery-grid {
     grid-template-columns: repeat(
-      var(--gallery-mobile-columns, 1),
+      var(--gallery-mobile-columns, 2),
       minmax(0, 1fr)
     );
+    gap: 8px;
+  }
+
+  .card-tile,
+  .related-tile {
+    padding: 5px;
+  }
+
+  .tile-meta {
+    padding-top: 6px;
+  }
+
+  .bundle-count {
+    top: 8px;
+    right: 8px;
+    padding: 5px 7px;
+    font-size: 12px;
+  }
+
+  .filter-toggle-button {
+    min-height: 42px;
+    margin-bottom: 10px;
+  }
+
+  .toolbar {
+    margin-bottom: 18px;
+  }
+
+  .sort-action-row {
+    grid-template-columns: minmax(0, 1fr) 38px 38px;
+  }
+
+  .foil-filter-toggle,
+  .foil-filter-toggle > span,
+  .bundle-icon-toggle,
+  .bundle-icon-toggle > span {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+  }
+
+  .detail-layout {
+    gap: 18px;
+  }
+
+  .preview-card {
+    width: min(100%, 300px);
+  }
+
+  .deck-box {
+    min-height: 180px;
+    padding: 18px 16px;
+  }
+
+  .modal-head {
+    gap: 8px;
+  }
+
+  .modal-head-actions {
+    gap: 6px;
+  }
+
+  .edit-card [data-save-card] {
+    min-width: auto;
+    padding-inline: 14px;
   }
 }
 

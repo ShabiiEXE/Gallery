@@ -425,6 +425,7 @@ function render() {
   loginButton.title = loginTitle;
   loginButton.setAttribute("aria-label", loginTitle);
   settingsButton.hidden = !app.authed;
+  settingsButton.disabled = window.matchMedia("(max-width: 820px)").matches;
   addCardButton.hidden = !app.authed;
   addCardButton.disabled = !app.authed;
   addCardButton.title = app.authed ? "" : "Log in to add cards";
@@ -448,11 +449,13 @@ function render() {
 
 function syncDisplayRange() {
   const mobile = window.matchMedia("(max-width: 820px)").matches;
+  const mobileMaxColumns = window.matchMedia("(max-width: 380px)").matches ? 2 : 3;
+  settingsButton.disabled = mobile;
   cardScaleRange.min = mobile ? "1" : "2";
-  cardScaleRange.max = mobile ? "4" : "7";
+  cardScaleRange.max = mobile ? String(mobileMaxColumns) : "7";
   const key = mobile ? "mobileGalleryColumns" : "desktopGalleryColumns";
   const bundleKey = mobile ? "mobileBundleSameName" : "desktopBundleSameName";
-  const value = Number(app.device[key] ?? app.device.galleryColumns) || (mobile ? 4 : 7);
+  const value = Number(app.device[key] ?? app.device.galleryColumns) || (mobile ? mobileMaxColumns : 7);
   const clamped = Math.max(Number(cardScaleRange.min), Math.min(Number(cardScaleRange.max), value));
   app.device[key] = clamped;
   app.device.galleryColumns = clamped;
