@@ -29,7 +29,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     </div>
     <div class="detail-layout">
       <div class="card-stage" data-card-stage>
-        <div class="preview-card ${card.foil ? "foil-sheen" : ""} ${foilBothFaces ? "foil-both-faces" : ""} ${foilBackOnly ? "foil-back-only" : ""} ${saturationBoost ? "saturation-boost" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
+        <div class="preview-card ${card.foil ? "foil-sheen" : ""} ${foilBothFaces ? "foil-both-faces" : ""} ${foilBackOnly ? "foil-back-only" : ""} ${saturationBoost ? "saturation-boost" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}" data-saturation-boost="${saturationBoost ? "true" : "false"}">
           ${imageFace(shownFront || card.frontImage, "preview-front", "data-preview-front-image")}
           ${imageFace(shownBack, "preview-back", "data-preview-back-image")}
         </div>
@@ -185,6 +185,7 @@ export function bindDetailInteractions(root, handlers) {
       }
       front.src = original ? button.dataset.originalArt : button.dataset.customArt;
       if (back) back.src = original ? button.dataset.originalBack : button.dataset.customBack;
+      preview.classList.toggle("saturation-boost", !original && preview.dataset.saturationBoost === "true");
       button.setAttribute("aria-pressed", original ? "true" : "false");
       button.title = original ? "Show custom card graphic" : "Show original card graphic";
       button.innerHTML = original ? crossedEyeIcon() : eyeIcon();
@@ -242,7 +243,6 @@ function crossedEyeIcon() {
     <svg class="eye-icon crossed-eye-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6a15.4 15.4 0 0 1-2.2 2.8"></path>
       <path d="M9.8 17.6A9.8 9.8 0 0 1 2.8 12"></path>
-      <path d="M9.2 9.2a3.1 3.1 0 0 1 4.3 4.3"></path>
       <path d="M4.6 4.6 19.4 19.4"></path>
     </svg>
   `;
