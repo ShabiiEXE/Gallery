@@ -851,6 +851,15 @@ body.has-modal-open .modal-card {
   margin-bottom: 14px;
 }
 
+.latest-title {
+  margin: 0 0 8px;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 740;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .latest-strip {
   display: grid;
   grid-auto-columns: minmax(132px, 178px);
@@ -873,6 +882,7 @@ body.has-modal-open .modal-card {
 @media (min-width: 821px) {
   .latest-strip {
     grid-auto-columns: minmax(0, calc((100% - 20px) / 3));
+    grid-template-rows: none;
   }
 }
 
@@ -895,7 +905,9 @@ body.has-modal-open .modal-card {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--grid-fade), var(--grid-texture), color-mix(in srgb, var(--panel) 86%, rgba(0, 0, 0, 0.78));
+  background:
+    var(--grid-fade), var(--grid-texture),
+    color-mix(in srgb, var(--panel) 86%, rgba(0, 0, 0, 0.78));
   box-shadow:
     var(--shadow),
     0 10px 24px rgba(0, 0, 0, 0.24);
@@ -931,6 +943,8 @@ body.has-modal-open .modal-card {
   height: var(--toolbar-control-height);
   place-items: center;
   align-self: end;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .foil-filter-toggle input {
@@ -952,6 +966,7 @@ body.has-modal-open .modal-card {
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.07);
   transition:
+    transform 120ms ease,
     color 160ms ease,
     border-color 160ms ease,
     background 160ms ease,
@@ -964,12 +979,15 @@ body.has-modal-open .modal-card {
   fill: currentColor;
 }
 
-.foil-filter-toggle input:checked + span,
-.foil-filter-toggle:hover > span {
+.foil-filter-toggle input:checked + span {
   color: #ffd86f;
   border-color: color-mix(in srgb, #ffd86f 62%, transparent);
   background: color-mix(in srgb, var(--accent) 20%, transparent);
   box-shadow: 0 0 18px color-mix(in srgb, #ffd86f 18%, transparent);
+}
+
+.foil-filter-toggle:active > span {
+  transform: scale(0.96);
 }
 
 .sort-action-row {
@@ -1100,6 +1118,8 @@ label:has(> .platform-logo-select.is-open),
   min-width: 42px;
   height: 42px;
   place-items: center;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .bundle-icon-toggle input {
@@ -1121,6 +1141,7 @@ label:has(> .platform-logo-select.is-open),
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.08);
   transition:
+    transform 120ms ease,
     color 160ms ease,
     border-color 160ms ease,
     background 160ms ease,
@@ -1144,10 +1165,8 @@ label:has(> .platform-logo-select.is-open),
   box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
-.bundle-icon-toggle:hover > span {
-  color: #fff;
-  border-color: color-mix(in srgb, var(--accent) 58%, transparent);
-  background: color-mix(in srgb, var(--accent) 28%, transparent);
+.bundle-icon-toggle:active > span {
+  transform: scale(0.96);
 }
 
 .stars-check input:checked {
@@ -1170,12 +1189,14 @@ label:has(> .platform-logo-select.is-open),
 
 .card-tile {
   position: relative;
+  display: block;
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 7px;
   color: inherit;
   text-align: left;
+  text-decoration: none;
   background:
     linear-gradient(
       135deg,
@@ -1200,6 +1221,7 @@ label:has(> .platform-logo-select.is-open),
   overflow: hidden;
   color: inherit;
   text-align: left;
+  text-decoration: none;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -2228,13 +2250,34 @@ label:has(> .platform-logo-select.is-open),
   pointer-events: auto;
 }
 
-.card-control-button:hover,
 .card-control-button[aria-pressed="true"],
-.deck-art-toggle:hover,
+.card-control-button[data-copied="true"],
 .deck-art-toggle[aria-pressed="true"] {
   color: #fff;
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .foil-filter-toggle:hover > span {
+    color: #ffd86f;
+    border-color: color-mix(in srgb, #ffd86f 62%, transparent);
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    box-shadow: 0 0 18px color-mix(in srgb, #ffd86f 18%, transparent);
+  }
+
+  .bundle-icon-toggle:hover > span {
+    color: #fff;
+    border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+    background: color-mix(in srgb, var(--accent) 28%, transparent);
+  }
+
+  .card-control-button:hover,
+  .deck-art-toggle:hover {
+    color: #fff;
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
 }
 
 .eye-icon {
@@ -2253,6 +2296,16 @@ label:has(> .platform-logo-select.is-open),
   fill: none;
   stroke: currentColor;
   stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.share-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -2410,7 +2463,9 @@ label:has(> .platform-logo-select.is-open),
     color: var(--text);
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: var(--grid-fade), var(--grid-texture), color-mix(in srgb, var(--panel) 88%, rgba(0, 0, 0, 0.8));
+    background:
+      var(--grid-fade), var(--grid-texture),
+      color-mix(in srgb, var(--panel) 88%, rgba(0, 0, 0, 0.8));
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
     color: var(--dim);
     font-size: 11px;
@@ -2442,12 +2497,8 @@ label:has(> .platform-logo-select.is-open),
     overflow: visible;
   }
 
-  body:not(.filters-open) .toolbar > :not(.gallery-scale-controls) {
-    display: none;
-  }
-
   body:not(.filters-open) .toolbar {
-    padding-top: 8px;
+    display: none;
   }
 
   .type-filter-row {
@@ -2471,13 +2522,11 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .gallery-grid[data-mobile-columns="3"] .tile-name,
-  .gallery-grid[data-mobile-columns="3"] .set-icon,
   .gallery-grid[data-mobile-columns="3"] .tile-year,
   .gallery-grid[data-mobile-columns="4"] .tile-name,
   .gallery-grid[data-mobile-columns="4"] .set-icon,
   .gallery-grid[data-mobile-columns="4"] .tile-year,
   .latest-strip .tile-name,
-  .latest-strip .set-icon,
   .latest-strip .tile-year {
     display: none;
   }

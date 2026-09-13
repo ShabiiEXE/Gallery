@@ -61,6 +61,7 @@ const app = {
   remoteLoaded: false,
   authed: false,
   version: null,
+  activeCardId: "",
 };
 
 document.addEventListener("DOMContentLoaded", start);
@@ -86,6 +87,7 @@ async function start() {
   app.filters.sort = app.settings.defaultSort;
   app.filters.direction = app.settings.defaultSortDirection;
   render();
+  openDetailFromHash();
   warmOfflineCache();
 }
 
@@ -108,26 +110,22 @@ function bindEvents() {
   languageSelect.addEventListener("change", () => syncFlagSelect(languageSelect, LANGUAGES));
   document.addEventListener("click", () => closeFlagSelects());
   window.addEventListener("resize", syncDisplayRange);
+  window.addEventListener("hashchange", handleHashChange);
+  window.addEventListener("popstate", handleHashChange);
   [loginDialog, settingsDialog, editDialog, cardDialog].forEach((dialog) => {
     dialog?.addEventListener("close", () => {
+      if (dialog === cardDialog) {
+        const activeId = app.activeCardId;
+        app.activeCardId = "";
+        if (activeId && findCardByHash()?.id === activeId) clearCardHash();
+      }
       updateModalScrollLock();
       render();
     });
     dialog?.addEventListener("cancel", () => requestAnimationFrame(updateModalScrollLock));
   });
-  filterForm.addEventListener("input", () => {
-    app.filters = {
-      type: typeFilter.value,
-      foil: foilFilter.checked,
-      set: setFilter.value,
-      artist: artistFilter.value,
-      sort: sortSelect.value,
-      direction: sortDirectionButton.dataset.direction || "asc",
-    };
-    persistDeviceControls();
-    saveDevice(app.device);
-    renderGalleryOnly();
-  });
+  filterForm.addEventListener("input", updateFiltersFromForm);
+  filterForm.addEventListener("change", updateFiltersFromForm);
   sortDirectionButton.addEventListener("click", () => {
     const next = sortDirectionButton.dataset.direction === "asc" ? "desc" : "asc";
     sortDirectionButton.dataset.direction = next;
@@ -135,6 +133,20 @@ function bindEvents() {
     sortDirectionButton.setAttribute("aria-label", next === "asc" ? "Sort up" : "Sort down");
     filterForm.dispatchEvent(new Event("input", { bubbles: true }));
   });
+}
+
+function updateFiltersFromForm() {
+  app.filters = {
+    type: typeFilter.value,
+    foil: foilFilter.checked,
+    set: setFilter.value,
+    artist: artistFilter.value,
+    sort: sortSelect.value,
+    direction: sortDirectionButton.dataset.direction || "asc",
+  };
+  persistDeviceControls();
+  saveDevice(app.device);
+  renderGalleryOnly();
 }
 
 function bindBackdrop() {
@@ -290,17 +302,110 @@ async function deleteCard(id) {
   render();
 }
 
-function openDetail(id) {
+function openDetail(id, options = {}) {
+  const { updateHash = true } = options;
   const card = app.cards.find((item) => item.id === id);
   if (!card) return;
+  app.activeCardId = card.id;
+  if (updateHash) setCardHash(card);
   cardDetail.innerHTML = renderCardDetail({ card, cards: app.cards, canEdit: app.authed });
   bindDetailInteractions(cardDetail, {
     onEdit: () => openEditCard(card),
     onClose: () => cardDialog.close(),
     onSwitch: openDetail,
+    onShare: (button) => shareCardLink(card, button),
   });
   if (!cardDialog.open) cardDialog.showModal();
   updateModalScrollLock();
+}
+
+function handleHashChange() {
+  if (location.hash) {
+    openDetailFromHash();
+    return;
+  }
+  if (cardDialog.open) cardDialog.close();
+}
+
+function openDetailFromHash() {
+  const card = findCardByHash();
+  if (card) openDetail(card.id, { updateHash: false });
+}
+
+function setCardHash(card) {
+  const slug = cardSlug(card);
+  if (!slug) return;
+  const next = `${location.pathname}${location.search}#${slug}`;
+  if (location.hash.slice(1) === slug) return;
+  history.pushState(null, "", next);
+}
+
+function clearCardHash() {
+  history.pushState(null, "", `${location.pathname}${location.search}`);
+}
+
+function findCardByHash() {
+  const raw = location.hash.slice(1);
+  if (!raw) return null;
+  let requested = "";
+  try {
+    requested = decodeURIComponent(raw).toLowerCase();
+  } catch {
+    requested = raw.toLowerCase();
+  }
+  return app.cards.find((card) => cardSlug(card).toLowerCase() === requested) || null;
+}
+
+function cardSlug(card) {
+  const base = slugBase(card.name);
+  const matches = app.cards.filter((item) => slugBase(item.name) === base);
+  const index = matches.findIndex((item) => item.id === card.id);
+  return index > 0 ? `${base}_${index}` : base;
+}
+
+function slugBase(value) {
+  return String(value || "card")
+    .trim()
+    .replace(/\/\//g, " ")
+    .replace(/[^a-z0-9]+/gi, "_")
+    .replace(/^_+|_+$/g, "") || "card";
+}
+
+async function shareCardLink(card, button) {
+  setCardHash(card);
+  const url = location.href;
+  try {
+    await navigator.clipboard.writeText(url);
+    showShareFeedback(button, "Copied");
+  } catch {
+    fallbackCopy(url);
+    showShareFeedback(button, "Copied");
+  }
+}
+
+function fallbackCopy(value) {
+  const input = document.createElement("textarea");
+  input.value = value;
+  input.setAttribute("readonly", "");
+  input.style.position = "fixed";
+  input.style.left = "-9999px";
+  document.body.append(input);
+  input.select();
+  document.execCommand("copy");
+  input.remove();
+}
+
+function showShareFeedback(button, label) {
+  if (!button) return;
+  const previous = button.title || "Copy card link";
+  button.title = label;
+  button.setAttribute("aria-label", label);
+  button.dataset.copied = "true";
+  window.setTimeout(() => {
+    button.title = previous;
+    button.setAttribute("aria-label", previous);
+    delete button.dataset.copied;
+  }, 1200);
 }
 
 function render() {
@@ -362,7 +467,7 @@ function renderGalleryOnly() {
   galleryGrid?.style.setProperty("--gallery-columns", `${columns}`);
   galleryGrid?.style.setProperty("--gallery-mobile-columns", `${mobileColumns}`);
   if (galleryGrid) galleryGrid.dataset.mobileColumns = String(mobileColumns);
-  renderGallery(groups, { onOpen: openDetail });
+  renderGallery(groups, { onOpen: openDetail, getHref: cardHashHref });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
   renderFooter();
   renderLatestAdditions();
@@ -375,10 +480,19 @@ function renderLatestAdditions() {
   const latest = [...app.cards]
     .sort((a, b) => Date.parse(b.createdAt || b.updatedAt || "") - Date.parse(a.createdAt || a.updatedAt || ""))
     .slice(0, 5);
-  latestAdditions.innerHTML = latest.map((card) => renderCardTile(card)).join("");
-  latestAdditions.querySelectorAll("[data-card-open]").forEach((button) => {
-    button.addEventListener("click", () => openDetail(button.dataset.cardId));
+  latestAdditions.innerHTML = latest.map((card) => renderCardTile(card, 1, { href: cardHashHref(card) })).join("");
+  latestAdditions.querySelectorAll("[data-card-open]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      openDetail(link.dataset.cardId);
+    });
   });
+}
+
+function cardHashHref(card) {
+  const slug = cardSlug(card);
+  return slug ? `#${slug}` : "#";
 }
 
 function renderFooter() {

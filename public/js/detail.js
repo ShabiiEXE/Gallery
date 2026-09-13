@@ -32,12 +32,11 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
           ${imageFace(shownFront || card.frontImage, "preview-front", "data-preview-front-image")}
           ${imageFace(shownBack, "preview-back", "data-preview-back-image")}
         </div>
-        ${canFlip || originalImage ? `
-          <div class="card-stage-controls">
-            ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
-            ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(cacheImage(originalFront))}" data-custom-art="${escapeAttribute(cacheImage(shownFront || card.frontImage))}" data-original-back="${escapeAttribute(cacheImage(originalBack))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-is-ap="${isArtistProof(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(cacheImage(shownBack))}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
-          </div>
-        ` : ""}
+        <div class="card-stage-controls">
+          ${canFlip ? `<button class="card-control-button" type="button" data-card-flip title="Flip card" aria-label="Flip card">${flipIcon()}</button>` : ""}
+          ${originalImage ? `<button class="card-control-button card-art-toggle" type="button" data-card-art-toggle data-original-art="${escapeAttribute(cacheImage(originalFront))}" data-custom-art="${escapeAttribute(cacheImage(shownFront || card.frontImage))}" data-original-back="${escapeAttribute(cacheImage(originalBack))}" data-original-back-needs-fetch="${needsOriginalBackFetch(card) ? "true" : "false"}" data-is-ap="${isArtistProof(card) ? "true" : "false"}" data-scryfall-url="${escapeAttribute(card.scryfallUrl || "")}" data-custom-back="${escapeAttribute(cacheImage(shownBack))}" data-has-custom-back="${card.backImage ? "true" : "false"}" aria-pressed="false" title="Show original card graphic" aria-label="Toggle card graphic">${eyeIcon()}</button>` : ""}
+          <button class="card-control-button" type="button" data-share-card title="Copy card link" aria-label="Copy card link">${shareIcon()}</button>
+        </div>
       </div>
       <div class="detail-info">
         <div class="detail-title">
@@ -200,6 +199,9 @@ export function bindDetailInteractions(root, handlers) {
   }
   root.querySelector("[data-edit-card]")?.addEventListener("click", handlers.onEdit);
   root.querySelector("[data-close-detail]")?.addEventListener("click", handlers.onClose);
+  root.querySelector("[data-share-card]")?.addEventListener("click", (event) => {
+    handlers.onShare?.(event.currentTarget);
+  });
   root.querySelectorAll("[data-switch-card]").forEach((button) => {
     button.addEventListener("click", () => handlers.onSwitch(button.dataset.switchCard));
   });
@@ -243,6 +245,18 @@ function flipIcon() {
       <path d="M19 7.4v5.4h-5.4"></path>
       <path d="M16.8 16.4A7.2 7.2 0 0 1 5 11.2"></path>
       <path d="M5 16.6v-5.4h5.4"></path>
+    </svg>
+  `;
+}
+
+function shareIcon() {
+  return `
+    <svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8.5 12.8 15.5 16.9"></path>
+      <path d="M15.5 7.1 8.5 11.2"></path>
+      <circle cx="6" cy="12" r="2.4"></circle>
+      <circle cx="18" cy="6" r="2.4"></circle>
+      <circle cx="18" cy="18" r="2.4"></circle>
     </svg>
   `;
 }

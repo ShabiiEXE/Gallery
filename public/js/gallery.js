@@ -37,29 +37,33 @@ export function bundleCards(cards, enabled) {
   return [...groups.values()].map((items) => ({ card: pickBundleCover(items), count: items.length, items }));
 }
 
-export function renderGallery(groups, { onOpen }) {
-  galleryGrid.innerHTML = groups.map(({ card, count }) => cardTile(card, count)).join("");
+export function renderGallery(groups, { onOpen, getHref }) {
+  galleryGrid.innerHTML = groups.map(({ card, count }) => cardTile(card, count, getHref?.(card))).join("");
   markOverflowTitles();
-  galleryGrid.querySelectorAll("[data-card-open]").forEach((button) => {
-    button.addEventListener("click", () => onOpen(button.dataset.cardId));
+  galleryGrid.querySelectorAll("[data-card-open]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      onOpen(link.dataset.cardId);
+    });
   });
 }
 
-export function renderCardTile(card, count = 1) {
-  return cardTile(card, count);
+export function renderCardTile(card, count = 1, options = {}) {
+  return cardTile(card, count, options.href);
 }
 
-function cardTile(card, count) {
+function cardTile(card, count, href = "#") {
   const showingBack = isArtistProof(card) && card.backImage;
   const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   const foilImage = card.foil && !isArtistProof(card);
   return `
-    <article class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""}" data-card-tile data-card-id="${card.id}">
+    <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
-      <button class="card-open" type="button" data-card-open data-card-id="${card.id}">
+      <span class="card-open">
         <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt=""></span>
-      </button>
+      </span>
       <span class="tile-meta">
         <span class="tile-name" data-title="${escapeAttribute(card.name)}">${escapeHtml(card.name)}${card.foil ? foilStar() : ""}</span>
         <span class="tile-sub">
@@ -74,7 +78,7 @@ function cardTile(card, count) {
           <span class="tile-year">${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
         </span>
       </span>
-    </article>
+    </a>
   `;
 }
 

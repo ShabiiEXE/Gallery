@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gallery-v52-2026-09-12";
+const CACHE_VERSION = "gallery-v54-2026-09-13";
 const CORE_CACHE = `${CACHE_VERSION}-core`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
