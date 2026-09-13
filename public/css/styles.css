@@ -1993,7 +1993,7 @@ label:has(> .platform-logo-select.is-open),
   position: relative;
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 20px;
   perspective: 1200px;
   margin-top: 25px;
 }
