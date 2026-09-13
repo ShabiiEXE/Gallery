@@ -98,7 +98,6 @@ export function bindDetailInteractions(root, handlers) {
       preview.style.setProperty("--shine-x", `${Math.max(0, Math.min(100, x * 100)).toFixed(1)}%`);
       preview.style.setProperty("--shine-y", `${Math.max(0, Math.min(100, y * 100)).toFixed(1)}%`);
     };
-    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     preview.addEventListener("pointermove", (event) => {
       updateShine(event);
       if (drag) {
@@ -112,20 +111,13 @@ export function bindDetailInteractions(root, handlers) {
         applyRotation();
         return;
       }
-      if (!finePointer) return;
-      const rect = preview.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) - 0.5;
-      const y = ((event.clientY - rect.top) / rect.height) - 0.5;
-      tilt.y = x * 24;
-      tilt.x = y * -18;
-      applyRotation();
     });
     const handleOrientation = (event) => {
       if (drag) return;
       const beta = Number(event.beta) || 0;
       const gamma = Number(event.gamma) || 0;
-      gyro.x = Math.max(-18, Math.min(18, (beta - 45) * -0.36));
-      gyro.y = Math.max(-22, Math.min(22, gamma * 0.48));
+      gyro.x = Math.max(-24, Math.min(24, (beta - 48) * -0.48));
+      gyro.y = Math.max(-28, Math.min(28, gamma * 0.68));
       applyRotation();
     };
     window.addEventListener("deviceorientation", handleOrientation, { signal: controller.signal });
@@ -185,12 +177,6 @@ export function bindDetailInteractions(root, handlers) {
       }
       front.src = original ? button.dataset.originalArt : button.dataset.customArt;
       if (back) back.src = original ? button.dataset.originalBack : button.dataset.customBack;
-      const facingBack = Math.abs(normalizeRotation(manual.y) - 180) < 90;
-      manual.x = 0;
-      manual.y = facingBack ? 180 : 0;
-      tilt.x = 0;
-      tilt.y = 0;
-      applyRotation();
       button.setAttribute("aria-pressed", original ? "true" : "false");
       button.title = original ? "Show custom card graphic" : "Show original card graphic";
     });
@@ -514,37 +500,11 @@ function isProxy(card) {
 }
 
 function tileFoilStar() {
-  return `
-    <svg class="tile-foil-star" viewBox="0 0 18 18" aria-hidden="true">
-      <defs>
-        <linearGradient id="foil-star-gradient" x1="1.5" y1="2" x2="16.5" y2="16" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="#fff" />
-          <stop offset=".28" stop-color="#ffd86f" />
-          <stop offset=".58" stop-color="#79f2ce" />
-          <stop offset=".82" stop-color="#ff78d2" />
-          <stop offset="1" stop-color="#fff3b8" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#foil-star-gradient)" d="m9 1.7 1.35 4.08 4.3-1.2-2.28 3.62 3.68 2.45-4.38.38.47 4.45L9 12.45l-3.14 3.03.47-4.45-4.38-.38L5.63 8.2 3.35 4.58l4.3 1.2L9 1.7Z"></path>
-    </svg>
-  `;
+  return `<img class="tile-foil-star" src="assets/glow.svg" alt="" aria-hidden="true">`;
 }
 
 function foilStar() {
-  return `
-    <svg class="foil-title-star" viewBox="0 0 18 18" aria-hidden="true">
-      <defs>
-        <linearGradient id="foil-star-gradient" x1="1.5" y1="2" x2="16.5" y2="16" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="#fff" />
-          <stop offset=".28" stop-color="#ffd86f" />
-          <stop offset=".58" stop-color="#79f2ce" />
-          <stop offset=".82" stop-color="#ff78d2" />
-          <stop offset="1" stop-color="#fff3b8" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#foil-star-gradient)" d="m9 1.7 1.35 4.08 4.3-1.2-2.28 3.62 3.68 2.45-4.38.38.47 4.45L9 12.45l-3.14 3.03.47-4.45-4.38-.38L5.63 8.2 3.35 4.58l4.3 1.2L9 1.7Z"></path>
-    </svg>
-  `;
+  return `<img class="foil-title-star" src="assets/glow.svg" alt="" aria-hidden="true">`;
 }
 
 function escapeHtml(value) {

@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gallery-v54-2026-09-13";
+const CACHE_VERSION = "gallery-v56-2026-09-13";
 const CORE_CACHE = `${CACHE_VERSION}-core`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -25,6 +25,7 @@ const CORE_URLS = [
   "/assets/app-Icon-bw.png",
   "/assets/backdrop.png",
   "/assets/backdrop_light.png",
+  "/assets/glow.svg",
   "/assets/fonts/CascadiaCode.woff2",
   "/assets/flags/de.svg",
   "/assets/flags/es.svg",

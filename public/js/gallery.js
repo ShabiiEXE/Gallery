@@ -139,20 +139,7 @@ function normalizedKind(kind) {
 }
 
 function foilStar() {
-  return `
-    <svg class="tile-foil-star" viewBox="0 0 18 18" aria-hidden="true">
-      <defs>
-        <linearGradient id="foil-star-gradient" x1="1.5" y1="2" x2="16.5" y2="16" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="#fff" />
-          <stop offset=".28" stop-color="#ffd86f" />
-          <stop offset=".58" stop-color="#79f2ce" />
-          <stop offset=".82" stop-color="#ff78d2" />
-          <stop offset="1" stop-color="#fff3b8" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#foil-star-gradient)" d="m9 1.7 1.35 4.08 4.3-1.2-2.28 3.62 3.68 2.45-4.38.38.47 4.45L9 12.45l-3.14 3.03.47-4.45-4.38-.38L5.63 8.2 3.35 4.58l4.3 1.2L9 1.7Z"></path>
-    </svg>
-  `;
+  return `<img class="tile-foil-star" src="assets/glow.svg" alt="" aria-hidden="true">`;
 }
 
 function setIcon(code) {
