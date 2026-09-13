@@ -1214,7 +1214,9 @@ body.latest-closed .latest-strip {
   height: 30px;
   margin-top: -15px;
   border-radius: 5px;
-  background: var(--accent);
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 255, 255, 0.92) calc(50% - 1px), rgba(255, 255, 255, 0.92) calc(50% + 1px), transparent calc(50% + 1px)),
+    var(--accent);
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
 }
 
@@ -1229,7 +1231,9 @@ body.latest-closed .latest-strip {
   height: 30px;
   margin-top: -15px;
   border-radius: 5px;
-  background: var(--accent);
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 255, 255, 0.92) calc(50% - 1px), rgba(255, 255, 255, 0.92) calc(50% + 1px), transparent calc(50% + 1px)),
+    var(--accent);
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
 }
 
