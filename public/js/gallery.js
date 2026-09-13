@@ -75,7 +75,7 @@ function cardTile(card, count, href = "#", separator = null) {
         <span class="tile-foot">
           ${shouldShowSetIcon(card) ? `<span class="set-icon">${setIcon(card.setCode || card.setName)}</span>` : ""}
           <span class="tag tile-kind">
-            <span class="kind-default">${escapeHtml(shortKind(card.kind))}</span>
+            <span class="kind-default">${escapeHtml(desktopKind(card.kind))}</span>
             <span class="kind-mobile-three">${escapeHtml(mobileThreeKind(card.kind))}</span>
           </span>
           <span class="tile-year">${card.signatureYear ? escapeHtml(card.signatureYear) : ""}</span>
@@ -104,7 +104,7 @@ function separatorLabel(card, sort) {
   if (sort === "deck") return card.deckName || "No deck";
   if (sort === "name") return String(card.name || "?").trim().charAt(0).toUpperCase() || "?";
   if (sort === "year") return card.signatureYear || "No year";
-  if (sort === "type") return shortKind(card.kind) || "Other";
+  if (sort === "type") return desktopKind(card.kind) || "Other";
   return card.artist || card.cardArtist || "No artist";
 }
 
@@ -150,6 +150,14 @@ function shortKind(kind) {
     .replace("Signed + Altered", "Signed + Alt")
     .replace(/^Altered$/, "Alter")
     .replace("Artist Proof", "AP");
+}
+
+function desktopKind(kind) {
+  return String(kind || "")
+    .replace("Altered Artist Proof", "Altered Artist Proof")
+    .replace("Artist Proof", "Artist Proof")
+    .replace("Signed + Altered", "Signed + Alt")
+    .replace(/^Altered$/, "Alter");
 }
 
 function mobileThreeKind(kind) {
