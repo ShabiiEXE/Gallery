@@ -851,24 +851,66 @@ body.has-modal-open .modal-card {
   margin-bottom: 14px;
 }
 
-.latest-title {
-  margin: 0 0 8px;
-  color: var(--dim);
-  font-size: 11px;
-  font-weight: 740;
+.latest-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 12px;
+  padding: 0;
+  color: var(--text);
+  text-align: left;
+  border: 0;
+  background: transparent;
+}
+
+.latest-toggle span {
+  display: block;
+  margin: 0;
+  color: var(--text);
+  font-family: var(--title-font);
+  font-size: clamp(28px, 4vw, 54px);
+  font-weight: 900;
+  line-height: 0.95;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
+.latest-toggle-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  color: var(--dim);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.latest-toggle:hover .latest-toggle-icon {
+  color: var(--text);
+}
+
+body.latest-closed .latest-toggle-icon {
+  transform: rotate(-90deg);
+}
+
 .latest-strip {
-  display: grid;
-  grid-auto-columns: minmax(132px, 178px);
-  grid-auto-flow: column;
+  display: flex;
   gap: 10px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   padding: 4px 2px 8px;
   scroll-snap-type: x proximity;
+}
+
+.latest-strip .card-tile {
+  flex: 0 0 clamp(132px, 38vw, 178px);
 }
 
 .latest-strip:empty {
@@ -879,12 +921,19 @@ body.has-modal-open .modal-card {
   scroll-snap-align: start;
 }
 
+body.latest-closed .latest-strip {
+  display: none;
+}
+
 @media (min-width: 821px) {
   .latest-strip {
     gap: 14px;
-    grid-auto-columns: minmax(240px, calc((100% - 28px) / 3));
-    grid-template-rows: none;
     scroll-snap-type: x mandatory;
+  }
+
+  .latest-strip .card-tile {
+    flex-basis: calc((100% - 28px) / 3);
+    min-width: 0;
   }
 }
 
@@ -958,15 +1007,23 @@ body.has-modal-open .modal-card {
 }
 
 .foil-filter-toggle > span {
+  position: relative;
+  overflow: hidden;
   display: grid;
   width: var(--toolbar-control-height);
   height: var(--toolbar-control-height);
   margin: 0;
   place-items: center;
-  color: var(--muted);
-  border: 1px solid var(--line);
+  color: #ffe78e;
+  border: 1px solid color-mix(in srgb, #ffd86f 56%, var(--accent) 18%);
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.07);
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 245, 174, 0.28), transparent 24%),
+    linear-gradient(135deg, rgba(255, 216, 111, 0.2), rgba(238, 50, 179, 0.18) 48%, rgba(255, 0, 57, 0.2)),
+    rgba(76, 14, 43, 0.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 16px color-mix(in srgb, #ffd86f 14%, transparent);
   transition:
     transform 120ms ease,
     color 160ms ease,
@@ -975,17 +1032,39 @@ body.has-modal-open .modal-card {
     box-shadow 160ms ease;
 }
 
+.foil-filter-toggle > span::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  opacity: 0.4;
+  background:
+    linear-gradient(115deg, transparent 22%, rgba(255, 255, 255, 0.48) 35%, transparent 48%),
+    conic-gradient(from 160deg, rgba(255, 216, 111, 0.16), rgba(121, 242, 206, 0.2), rgba(255, 117, 218, 0.2), rgba(255, 216, 111, 0.16));
+  mix-blend-mode: screen;
+  transform: translateX(-18%) rotate(8deg);
+  pointer-events: none;
+}
+
 .foil-filter-toggle svg {
+  position: relative;
+  z-index: 1;
   width: 18px;
   height: 18px;
   fill: currentColor;
+  filter: drop-shadow(0 0 6px rgba(255, 216, 111, 0.52));
 }
 
 .foil-filter-toggle input:checked + span {
-  color: #ffd86f;
-  border-color: color-mix(in srgb, #ffd86f 62%, transparent);
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  box-shadow: 0 0 18px color-mix(in srgb, #ffd86f 18%, transparent);
+  color: #fff3b8;
+  border-color: color-mix(in srgb, #ffd86f 74%, var(--accent) 18%);
+  background:
+    radial-gradient(circle at 28% 20%, rgba(255, 255, 220, 0.34), transparent 26%),
+    linear-gradient(135deg, rgba(255, 216, 111, 0.36), rgba(238, 50, 179, 0.3) 48%, rgba(255, 0, 57, 0.3)),
+    rgba(92, 12, 45, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 22px color-mix(in srgb, #ffd86f 24%, transparent),
+    0 0 34px color-mix(in srgb, var(--accent-3) 14%, transparent);
 }
 
 .foil-filter-toggle:active > span {

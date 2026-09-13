@@ -18,6 +18,7 @@ export const defaultDevice = {
   desktopGalleryColumns: 7,
   mobileGalleryColumns: 4,
   mobileFiltersOpen: false,
+  latestAdditionsOpen: true,
 };
 
 export function loadSettings() {

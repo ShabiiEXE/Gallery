@@ -52,6 +52,7 @@ const galleryGrid = $("galleryGrid");
 const clearCacheButton = $("clearCacheButton");
 const lastEditText = $("lastEditText");
 const latestAdditions = $("latestAdditions");
+const latestToggle = $("latestToggle");
 
 const app = {
   cards: [],
@@ -107,6 +108,7 @@ function bindEvents() {
   saveSettingsButton.addEventListener("click", commitSettings);
   clearCacheButton.addEventListener("click", clearBrowserCache);
   filterToggleButton?.addEventListener("click", toggleMobileFilters);
+  latestToggle?.addEventListener("click", toggleLatestAdditions);
   languageSelect.addEventListener("change", () => syncFlagSelect(languageSelect, LANGUAGES));
   document.addEventListener("click", () => closeFlagSelects());
   window.addEventListener("resize", syncDisplayRange);
@@ -335,13 +337,13 @@ function openDetailFromHash() {
 function setCardHash(card) {
   const slug = cardSlug(card);
   if (!slug) return;
-  const next = `${location.pathname}${location.search}#${slug}`;
+  const next = `${cleanPathAndSearch()}#${slug}`;
   if (location.hash.slice(1) === slug) return;
   history.pushState(null, "", next);
 }
 
 function clearCardHash() {
-  history.pushState(null, "", `${location.pathname}${location.search}`);
+  history.pushState(null, "", cleanPathAndSearch());
 }
 
 function findCardByHash() {
@@ -373,7 +375,7 @@ function slugBase(value) {
 
 async function shareCardLink(card, button) {
   setCardHash(card);
-  const url = location.href;
+  const url = shareUrl(card);
   try {
     await navigator.clipboard.writeText(url);
     showShareFeedback(button, "Copied");
@@ -381,6 +383,13 @@ async function shareCardLink(card, button) {
     fallbackCopy(url);
     showShareFeedback(button, "Copied");
   }
+}
+
+function shareUrl(card) {
+  const url = new URL(location.href);
+  url.searchParams.delete("fresh");
+  url.hash = cardHashHref(card);
+  return url.toString();
 }
 
 function fallbackCopy(value) {
@@ -419,6 +428,7 @@ function render() {
   addCardButton.hidden = !app.authed;
   addCardButton.disabled = !app.authed;
   addCardButton.title = app.authed ? "" : "Log in to add cards";
+  syncLatestAdditions();
   syncDisplayRange();
   bundleToggle.checked = app.device.bundleSameName;
   cardScaleRange.value = app.device.galleryColumns || 7;
@@ -495,6 +505,13 @@ function cardHashHref(card) {
   return slug ? `#${slug}` : "#";
 }
 
+function cleanPathAndSearch() {
+  const url = new URL(location.href);
+  url.searchParams.delete("fresh");
+  const query = url.searchParams.toString();
+  return `${url.pathname}${query ? `?${query}` : ""}`;
+}
+
 function renderFooter() {
   if (app.version) clearCacheButton.textContent = formatVersion(app.version);
   const dates = app.cards.map((card) => Date.parse(card.updatedAt || card.createdAt || "")).filter(Number.isFinite);
@@ -549,6 +566,18 @@ function toggleMobileFilters() {
   saveDevice(app.device);
   document.body.classList.toggle("filters-open", app.device.mobileFiltersOpen);
   filterToggleButton?.setAttribute("aria-expanded", app.device.mobileFiltersOpen ? "true" : "false");
+}
+
+function toggleLatestAdditions() {
+  app.device.latestAdditionsOpen = app.device.latestAdditionsOpen === false;
+  saveDevice(app.device);
+  syncLatestAdditions();
+}
+
+function syncLatestAdditions() {
+  const open = app.device.latestAdditionsOpen !== false;
+  document.body.classList.toggle("latest-closed", !open);
+  latestToggle?.setAttribute("aria-expanded", open ? "true" : "false");
 }
 
 function registerServiceWorker() {

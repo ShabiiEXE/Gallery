@@ -14,7 +14,7 @@
   <body>
     <div class="backdrop" aria-hidden="true"></div>
     <header class="topbar">
-        <a class="brand" href="/" aria-label="Shabii's Gallery home">
+        <a class="brand" href="https://moxfield.com/users/Shabii" target="_blank" rel="noreferrer" aria-label="Open Shabii on Moxfield">
           <span class="brand-mark"><img src="assets/icon.png" alt=""></span>
           <span>
             <strong>Shabii's Gallery</strong>
@@ -42,7 +42,12 @@
 
     <main class="page-shell">
         <section class="module latest-module" data-module="latest">
-          <h2 class="latest-title">Latest additions</h2>
+          <button class="latest-toggle" id="latestToggle" type="button" aria-expanded="true" aria-controls="latestAdditions">
+            <span>Latest additions</span>
+            <svg class="latest-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </button>
           <div class="latest-strip" id="latestAdditions" aria-label="Last additions"></div>
         </section>
         <section class="module" data-module="gallery">
