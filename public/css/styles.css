@@ -1425,9 +1425,11 @@ label:has(> .platform-logo-select.is-open),
   left: calc(var(--gallery-gap, 12px) * -0.58);
   top: 50%;
   z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   max-width: min(148px, 36vw);
   padding: 3px 7px;
-  overflow: hidden;
   color: var(--dim);
   font-family: var(--title-font);
   font-size: 10px;
@@ -1445,6 +1447,17 @@ label:has(> .platform-logo-select.is-open),
   pointer-events: none;
   transform: translate(-50%, -50%) rotate(-90deg);
   transform-origin: center;
+}
+
+.sort-separator-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sort-separator-dot,
+.sort-separator-count {
+  flex: 0 0 auto;
 }
 
 .card-open {

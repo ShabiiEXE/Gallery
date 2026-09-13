@@ -113,12 +113,11 @@ export function bindDetailInteractions(root, handlers) {
         applyRotation();
         return;
       }
-      if (!mobileMotion) return;
       const rect = root.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) - 0.5;
       const y = ((event.clientY - rect.top) / rect.height) - 0.5;
-      tilt.y = x * 34;
-      tilt.x = y * -28;
+      tilt.y = x * (mobileMotion ? 34 : 14);
+      tilt.x = y * (mobileMotion ? -28 : -10);
       applyRotation();
     });
     const handleOrientation = (event) => {
@@ -336,6 +335,7 @@ function normalizeDeckColors(colors) {
 
 function signatureLabel(card) {
   if (card.kind?.toLowerCase().includes("proxy")) return "Created";
+  if (isArtistProof(card)) return "Art";
   return card.kind?.toLowerCase().includes("alter") ? "Alteration" : "Signature";
 }
 

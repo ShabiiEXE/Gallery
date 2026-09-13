@@ -39,7 +39,7 @@ export function bundleCards(cards, enabled) {
 
 export function renderGallery(groups, { onOpen, getHref, separators = false, sort = "artist" }) {
   const decoratedGroups = separators ? withSeparators(groups, sort) : groups;
-  galleryGrid.innerHTML = decoratedGroups.map(({ card, count, separatorLabel }) => cardTile(card, count, getHref?.(card), separatorLabel)).join("");
+  galleryGrid.innerHTML = decoratedGroups.map(({ card, count, separator }) => cardTile(card, count, getHref?.(card), separator)).join("");
   markOverflowTitles();
   galleryGrid.querySelectorAll("[data-card-open]").forEach((link) => {
     link.addEventListener("click", (event) => {
@@ -54,15 +54,15 @@ export function renderCardTile(card, count = 1, options = {}) {
   return cardTile(card, count, options.href);
 }
 
-function cardTile(card, count, href = "#", separatorLabel = "") {
+function cardTile(card, count, href = "#", separator = null) {
   const showingBack = isArtistProof(card) && card.backImage;
   const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   const foilImage = card.foil && !isArtistProof(card);
   const saturationBoost = !isProxy(card);
   return `
-    <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""} ${saturationBoost ? "saturation-boost" : ""} ${separatorLabel ? "has-sort-separator" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
-      ${separatorLabel ? `<span class="sort-separator-label">${escapeHtml(separatorLabel)}</span>` : ""}
+    <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""} ${saturationBoost ? "saturation-boost" : ""} ${separator ? "has-sort-separator" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
+      ${separator ? `<span class="sort-separator-label"><span class="sort-separator-name">${escapeHtml(separator.label)}</span><span class="sort-separator-dot">·</span><span class="sort-separator-count">${separator.count}</span></span>` : ""}
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <span class="card-open">
         <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt=""></span>
@@ -86,12 +86,17 @@ function cardTile(card, count, href = "#", separatorLabel = "") {
 }
 
 function withSeparators(groups, sort) {
+  const counts = groups.reduce((map, group) => {
+    const label = separatorLabel(group.card, sort);
+    map.set(label, (map.get(label) || 0) + (Number(group.count) || 1));
+    return map;
+  }, new Map());
   let previous = "";
   return groups.map((group, index) => {
     const label = separatorLabel(group.card, sort);
     const show = label && (index === 0 || label !== previous);
     previous = label;
-    return show ? { ...group, separatorLabel: label } : group;
+    return show ? { ...group, separator: { label, count: counts.get(label) || 1 } } : group;
   });
 }
 
