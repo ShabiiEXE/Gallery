@@ -58,8 +58,9 @@ function cardTile(card, count, href = "#") {
   const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
   const foilImage = card.foil && !isArtistProof(card);
+  const saturationBoost = !isProxy(card);
   return `
-    <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
+    <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""} ${saturationBoost ? "saturation-boost" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <span class="card-open">
         <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt=""></span>

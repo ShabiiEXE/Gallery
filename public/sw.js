@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gallery-v59-2026-09-13";
+const CACHE_VERSION = "gallery-v60-2026-09-13";
 const CORE_CACHE = `${CACHE_VERSION}-core`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -34,7 +34,7 @@ const CORE_URLS = [
   "/assets/flags/jp.svg",
   "/assets/flags/us.svg",
   "/assets/mot.png",
-  "/assets/moxfield-favicon.ico",
+  "/assets/moxfield.png",
   "/assets/pimp-my-deck.png",
   "/assets/scryfall-favicon.ico",
   "/assets/shabii_logo.png",

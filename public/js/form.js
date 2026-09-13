@@ -380,7 +380,7 @@ function faviconUrl(url) {
     const parsed = new URL(url);
     const host = parsed.hostname.replace(/^www\./, "");
     if (host.includes("scryfall")) return "assets/scryfall-favicon.ico";
-    if (host.includes("moxfield")) return "assets/moxfield-favicon.ico";
+    if (host.includes("moxfield")) return "assets/moxfield.png";
     return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(parsed.hostname)}&sz=64`;
   } catch {
     return "";

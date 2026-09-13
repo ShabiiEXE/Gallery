@@ -7,6 +7,7 @@ import { LANGUAGES } from "./constants.js";
 import { closeFlagSelects, syncCustomSelect, syncFlagSelect, syncSetSelect } from "./custom-select.js";
 import { icon } from "./icons.js";
 import {
+  loadCachedCards,
   loadDevice,
   loadRemoteCards,
   loadRemoteSettings,
@@ -43,6 +44,8 @@ const bundleToggle = $("bundleToggle");
 const cardScaleRange = $("cardScaleRange");
 const defaultSortSelect = $("defaultSortSelect");
 const defaultSortDirectionSelect = $("defaultSortDirectionSelect");
+const defaultMobileDisplaySelect = $("defaultMobileDisplaySelect");
+const defaultDesktopDisplaySelect = $("defaultDesktopDisplaySelect");
 const editDialog = $("editDialog");
 const cardDialog = $("cardDialog");
 const cardDetail = $("cardDetail");
@@ -65,12 +68,23 @@ const app = {
   activeCardId: "",
 };
 
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
 document.addEventListener("DOMContentLoaded", start);
 
 async function start() {
   registerServiceWorker();
   initForm({ onSave: upsertCard, onDelete: deleteCard, getCards: () => app.cards });
   bindEvents();
+  const cachedCards = loadCachedCards();
+  if (cachedCards.length) {
+    app.cards = cachedCards;
+    app.filters.sort = app.settings.defaultSort;
+    app.filters.direction = app.settings.defaultSortDirection;
+    render();
+    openDetailFromHash();
+    warmOfflineCache();
+  }
   const versionPromise = loadVersion();
   const settingsPromise = loadRemoteSettings();
   const authPromise = getAuthStatus();
@@ -91,7 +105,8 @@ async function start() {
   app.filters.sort = app.settings.defaultSort;
   app.filters.direction = app.settings.defaultSortDirection;
   render();
-  openDetailFromHash();
+  if (!cardDialog.open) openDetailFromHash();
+  else if (cardDialog.open && app.activeCardId) openDetail(app.activeCardId, { updateHash: false });
   warmOfflineCache();
   versionPromise.then((version) => {
     app.version = version;
@@ -121,9 +136,13 @@ function bindEvents() {
   clearCacheButton.addEventListener("click", clearBrowserCache);
   filterToggleButton?.addEventListener("click", toggleMobileFilters);
   latestToggle?.addEventListener("click", toggleLatestAdditions);
+  latestAdditions?.addEventListener("scroll", syncLatestMask, { passive: true });
   languageSelect.addEventListener("change", () => syncFlagSelect(languageSelect, LANGUAGES));
   document.addEventListener("click", () => closeFlagSelects());
-  window.addEventListener("resize", syncDisplayRange);
+  window.addEventListener("resize", () => {
+    syncDisplayRange();
+    syncLatestMask();
+  });
   window.addEventListener("hashchange", handleHashChange);
   window.addEventListener("popstate", handleHashChange);
   [loginDialog, settingsDialog, editDialog, cardDialog].forEach((dialog) => {
@@ -206,9 +225,13 @@ function openSettings() {
   languageSelect.value = app.settings.language;
   defaultSortSelect.value = app.settings.defaultSort || "artist";
   defaultSortDirectionSelect.value = app.settings.defaultSortDirection || "asc";
+  defaultMobileDisplaySelect.value = String(app.settings.defaultMobileGalleryColumns || 3);
+  defaultDesktopDisplaySelect.value = String(app.settings.defaultDesktopGalleryColumns || 7);
   syncFlagSelect(languageSelect, LANGUAGES);
   syncCustomSelect(defaultSortSelect);
   syncCustomSelect(defaultSortDirectionSelect);
+  syncCustomSelect(defaultMobileDisplaySelect);
+  syncCustomSelect(defaultDesktopDisplaySelect);
   moduleSettings.innerHTML = MODULES.map((module, index) => {
     const item = app.settings.modules.find((entry) => entry.id === module.id) || { order: index + 1, hidden: false };
     return `
@@ -227,6 +250,8 @@ async function commitSettings() {
   app.settings.language = languageSelect.value;
   app.settings.defaultSort = defaultSortSelect.value || "artist";
   app.settings.defaultSortDirection = defaultSortDirectionSelect.value || "asc";
+  app.settings.defaultMobileGalleryColumns = clamp(Number(defaultMobileDisplaySelect.value) || 3, 1, 3);
+  app.settings.defaultDesktopGalleryColumns = clamp(Number(defaultDesktopDisplaySelect.value) || 7, 2, 7);
   app.settings.modules = [...moduleSettings.querySelectorAll("[data-module-setting]")].map((row, index) => ({
     id: row.dataset.moduleSetting,
     order: Number(row.querySelector("[data-module-order]").value) || index + 1,
@@ -241,6 +266,12 @@ async function commitSettings() {
   }
   app.filters.sort = app.settings.defaultSort;
   app.filters.direction = app.settings.defaultSortDirection;
+  app.device.mobileGalleryColumns = app.settings.defaultMobileGalleryColumns;
+  app.device.desktopGalleryColumns = app.settings.defaultDesktopGalleryColumns;
+  app.device.galleryColumns = window.matchMedia("(max-width: 820px)").matches
+    ? app.device.mobileGalleryColumns
+    : app.device.desktopGalleryColumns;
+  saveDevice(app.device);
   settingsDialog.close();
   render();
 }
@@ -461,12 +492,13 @@ function render() {
 function syncDisplayRange() {
   const mobile = window.matchMedia("(max-width: 820px)").matches;
   const mobileMaxColumns = window.matchMedia("(max-width: 380px)").matches ? 2 : 3;
+  const fallback = mobile ? app.settings.defaultMobileGalleryColumns : app.settings.defaultDesktopGalleryColumns;
   settingsButton.disabled = mobile;
   cardScaleRange.min = mobile ? "1" : "2";
   cardScaleRange.max = mobile ? String(mobileMaxColumns) : "7";
   const key = mobile ? "mobileGalleryColumns" : "desktopGalleryColumns";
   const bundleKey = mobile ? "mobileBundleSameName" : "desktopBundleSameName";
-  const value = Number(app.device[key] ?? app.device.galleryColumns) || (mobile ? mobileMaxColumns : 7);
+  const value = Number(app.device[key] ?? app.device.galleryColumns) || fallback || (mobile ? mobileMaxColumns : 7);
   const clamped = Math.max(Number(cardScaleRange.min), Math.min(Number(cardScaleRange.max), value));
   app.device[key] = clamped;
   app.device.galleryColumns = clamped;
@@ -512,6 +544,14 @@ function renderLatestAdditions() {
       openDetail(link.dataset.cardId);
     });
   });
+  requestAnimationFrame(syncLatestMask);
+}
+
+function syncLatestMask() {
+  if (!latestAdditions) return;
+  const maxScroll = latestAdditions.scrollWidth - latestAdditions.clientWidth;
+  latestAdditions.classList.toggle("can-scroll-left", latestAdditions.scrollLeft > 1);
+  latestAdditions.classList.toggle("can-scroll-right", latestAdditions.scrollLeft < maxScroll - 1);
 }
 
 function cardHashHref(card) {

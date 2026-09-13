@@ -29,7 +29,7 @@
           </button>
           <button class="ghost-button icon-only-button" id="loginButton" type="button" title="Log in" aria-label="Log in"></button>
           <a class="ghost-button icon-only-button moxfield-button" href="https://moxfield.com/users/Shabii" target="_blank" rel="noreferrer" title="Moxfield" aria-label="Open Shabii on Moxfield">
-            <img src="assets/moxfield-favicon.ico" alt="" aria-hidden="true">
+            <img src="assets/moxfield.png" alt="" aria-hidden="true">
           </a>
           <button class="primary-button" id="addCardButton" type="button" hidden>
             <span class="button-label" data-i18n="add_card">Add card</span>
@@ -55,7 +55,13 @@
         </section>
         <section class="module" data-module="gallery">
           <button class="filter-toggle-button" id="filterToggleButton" type="button" aria-expanded="false" aria-controls="filterForm">
-            <span>Search & Filter</span>
+            <span class="filter-toggle-copy">
+              <svg class="filter-toggle-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.5"></circle>
+                <path d="m16 16 4 4"></path>
+              </svg>
+              <span>Search & Filter</span>
+            </span>
             <svg class="filter-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="m6 9 6 6 6-6"></path>
             </svg>
@@ -188,6 +194,25 @@
             <select id="defaultSortDirectionSelect">
               <option value="asc">Up</option>
               <option value="desc">Down</option>
+            </select>
+          </label>
+          <label>
+            <span>Mobile display</span>
+            <select id="defaultMobileDisplaySelect">
+              <option value="1">1 card</option>
+              <option value="2">2 cards</option>
+              <option value="3">3 cards</option>
+            </select>
+          </label>
+          <label>
+            <span>Desktop display</span>
+            <select id="defaultDesktopDisplaySelect">
+              <option value="2">2 cards</option>
+              <option value="3">3 cards</option>
+              <option value="4">4 cards</option>
+              <option value="5">5 cards</option>
+              <option value="6">6 cards</option>
+              <option value="7">7 cards</option>
             </select>
           </label>
           <section class="module-order">

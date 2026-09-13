@@ -2,11 +2,14 @@ import { MODULES } from "./constants.js";
 
 const SETTINGS_KEY = "magic-gallery.settings";
 const DEVICE_KEY = "magic-gallery.device";
+const CARDS_KEY = "magic-gallery.cards";
 
 export const defaultSettings = {
   language: "en",
   defaultSort: "artist",
   defaultSortDirection: "asc",
+  defaultMobileGalleryColumns: 3,
+  defaultDesktopGalleryColumns: 7,
   modules: MODULES.map((module, index) => ({ id: module.id, order: index + 1, hidden: false })),
 };
 
@@ -63,7 +66,9 @@ export async function loadRemoteCards() {
   const response = await fetch("/api/cards", { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error("Remote cards unavailable");
   const data = await response.json();
-  return Array.isArray(data.cards) ? data.cards : [];
+  const cards = Array.isArray(data.cards) ? data.cards : [];
+  saveCachedCards(cards);
+  return cards;
 }
 
 export async function saveRemoteCards(cards) {
@@ -76,6 +81,15 @@ export async function saveRemoteCards(cards) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.error || "Cloudflare save unavailable");
   }
+  saveCachedCards(cards);
+}
+
+export function loadCachedCards() {
+  return readJson(CARDS_KEY, []);
+}
+
+export function saveCachedCards(cards) {
+  localStorage.setItem(CARDS_KEY, JSON.stringify(Array.isArray(cards) ? cards : []));
 }
 
 function mergeSettings(settings) {
@@ -91,8 +105,16 @@ function mergeSettings(settings) {
   return {
     ...defaultSettings,
     ...settings,
+    defaultMobileGalleryColumns: clampNumber(settings.defaultMobileGalleryColumns, 1, 3, defaultSettings.defaultMobileGalleryColumns),
+    defaultDesktopGalleryColumns: clampNumber(settings.defaultDesktopGalleryColumns, 2, 7, defaultSettings.defaultDesktopGalleryColumns),
     modules,
   };
+}
+
+function clampNumber(value, min, max, fallback) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(min, Math.min(max, number));
 }
 
 function readJson(key, fallback) {

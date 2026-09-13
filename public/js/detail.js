@@ -17,6 +17,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
   const originalBack = originalBackImage(card);
   const foilBothFaces = card.foil && card.backImage && !isArtistProof(card);
   const foilBackOnly = card.foil && card.backImage && isArtistProof(card);
+  const saturationBoost = !isProxy(card);
 
   return `
     <div class="modal-head">
@@ -28,7 +29,7 @@ export function renderCardDetail({ card, cards, canEdit = false }) {
     </div>
     <div class="detail-layout">
       <div class="card-stage" data-card-stage>
-        <div class="preview-card ${card.foil ? "foil-sheen" : ""} ${foilBothFaces ? "foil-both-faces" : ""} ${foilBackOnly ? "foil-back-only" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
+        <div class="preview-card ${card.foil ? "foil-sheen" : ""} ${foilBothFaces ? "foil-both-faces" : ""} ${foilBackOnly ? "foil-back-only" : ""} ${saturationBoost ? "saturation-boost" : ""}" data-preview-card data-can-flip="${canFlip ? "true" : "false"}">
           ${imageFace(shownFront || card.frontImage, "preview-front", "data-preview-front-image")}
           ${imageFace(shownBack, "preview-back", "data-preview-back-image")}
         </div>
@@ -128,20 +129,7 @@ export function bindDetailInteractions(root, handlers) {
       gyro.y = Math.max(-18, Math.min(18, gamma * 0.42));
       applyRotation();
     };
-    const handleMotion = (event) => {
-      if (drag) return;
-      if (event.rotationRate?.beta || event.rotationRate?.gamma) return;
-      const gravity = event.accelerationIncludingGravity;
-      if (!gravity) return;
-      const x = Number(gravity.y) || 0;
-      const y = Number(gravity.x) || 0;
-      gyro.x = Math.max(-16, Math.min(16, x * -2.2));
-      gyro.y = Math.max(-18, Math.min(18, y * -2.4));
-      applyRotation();
-    };
     window.addEventListener("deviceorientation", handleOrientation, { signal: controller.signal });
-    window.addEventListener("deviceorientationabsolute", handleOrientation, { signal: controller.signal });
-    window.addEventListener("devicemotion", handleMotion, { signal: controller.signal });
     root.closest("dialog")?.addEventListener("close", () => controller.abort(), { once: true });
     preview.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -234,7 +222,7 @@ function deckBox(card) {
         ${deckOwners(card)}
       </span>
       <span class="deck-commander-art"></span>
-      <img class="moxfield-corner-mark" src="assets/moxfield-favicon.ico" alt="">
+      <img class="moxfield-corner-mark" src="assets/moxfield.png" alt="">
     </section>
   `;
 }
@@ -434,7 +422,7 @@ function faviconUrl(url) {
     const parsed = new URL(url);
     const host = parsed.hostname.replace(/^www\./, "");
     if (host.includes("scryfall")) return "assets/scryfall-favicon.ico";
-    if (host.includes("moxfield")) return "assets/moxfield-favicon.ico";
+    if (host.includes("moxfield")) return "assets/moxfield.png";
     return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(parsed.hostname)}&sz=64`;
   } catch {
     return "";
@@ -476,7 +464,7 @@ function relatedCard(card) {
   const showingBack = isArtistProof(card) && card.backImage;
   const image = showingBack ? card.backImage : card.frontImage || DEFAULT_CARD_BACK;
   return `
-    <button class="related-tile ${card.foil ? "foil" : ""}" type="button" data-switch-card="${card.id}">
+    <button class="related-tile ${card.foil ? "foil" : ""} ${!isProxy(card) ? "saturation-boost" : ""}" type="button" data-switch-card="${card.id}">
       <span class="card-image-wrap"><img src="${escapeAttribute(cacheImage(image))}" alt="" draggable="false"></span>
       <span class="tile-meta">
         <span class="tile-name" data-full-name="${escapeAttribute(card.name)}"><span class="tile-name-text">${escapeHtml(card.name)}</span>${card.foil ? tileFoilStar() : ""}</span>

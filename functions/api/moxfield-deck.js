@@ -26,6 +26,7 @@ function normalizeDeck(deck, id) {
   const commanders = zoneCards(deck.commanders || deck.commander || deck.boards?.commanders);
   const primaryCommander = commanders[0] || {};
   const commanderFace = deck.mainCardIdIsBackFace ? "back" : "front";
+  const mainFace = deck.mainCardIdIsBackFace ? "back" : "front";
   const owner = deck.createdByUser || deck.owner || deck.author || deck.user || {};
   const owners = deckOwners(deck, owner);
   const commanderImage = firstUrl([
@@ -34,8 +35,8 @@ function normalizeDeck(deck, id) {
     pickNamedUrl(commanders, ["art_crop", "image", "normal", "thumbnail"]),
   ]);
   const mainImage = firstUrl([
+    moxfieldCardImage(deck.main, mainFace),
     pickNamedUrl(deck.main, ["art_crop", "image", "normal", "thumbnail"]),
-    moxfieldCardImage(deck.main),
   ]);
   const deckImage = firstUrl([
     pickNamedUrl(deck.media, ["banner", "header", "cover", "thumbnail", "preview", "url"]),
@@ -195,6 +196,8 @@ function firstUrl(values) {
 }
 
 function moxfieldCardImage(card, face = "front") {
+  const selectedFaceUrl = pickSelectedFaceUrl(card, face);
+  if (selectedFaceUrl) return selectedFaceUrl;
   const faceId = moxfieldFaceId(card, face);
   if (faceId) return `https://assets.moxfield.net/cards/card-face-${faceId}-art_crop.webp`;
   const scryfallId = card?.card?.scryfall_id || card?.card?.scryfallId || card?.scryfall_id || card?.scryfallId || card?.scryfallOracleId || "";
@@ -204,10 +207,23 @@ function moxfieldCardImage(card, face = "front") {
 }
 
 function moxfieldFaceId(card, face) {
+  const directFaceId = card?.cardFaceId || card?.card_face_id || card?.selectedCardFaceId || card?.selected_card_face_id || card?.cardFace?.id || card?.card_face?.id || "";
+  if (directFaceId) return directFaceId;
   const faces = card?.card?.card_faces || card?.card_faces || card?.card?.faces || card?.faces || [];
   const faceIndex = face === "back" ? 1 : 0;
   const selected = Array.isArray(faces) ? faces[faceIndex] : null;
   return selected?.id || selected?.cardFaceId || "";
+}
+
+function pickSelectedFaceUrl(card, face) {
+  const faces = card?.card?.card_faces || card?.card_faces || card?.card?.faces || card?.faces || [];
+  const faceIndex = face === "back" ? 1 : 0;
+  const selected = Array.isArray(faces) ? faces[faceIndex] : null;
+  return firstUrl([
+    pickNamedUrl(selected, ["art_crop", "image", "normal", "thumbnail"]),
+    pickNamedUrl(selected?.image_uris, ["art_crop", "normal", "large", "small"]),
+    pickNamedUrl(selected?.imageUris, ["art_crop", "normal", "large", "small"]),
+  ]);
 }
 
 function pickDirectNamedUrl(value, hints) {
