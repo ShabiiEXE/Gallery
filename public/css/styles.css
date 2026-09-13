@@ -1430,9 +1430,9 @@ label:has(> .platform-logo-select.is-open),
   gap: 5px;
   max-width: min(148px, 36vw);
   padding: 3px 7px;
-  color: var(--dim);
+  color: rgba(255, 255, 255, 0.68);
   font-family: var(--title-font);
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 740;
   line-height: 1;
   text-overflow: ellipsis;
@@ -1443,7 +1443,6 @@ label:has(> .platform-logo-select.is-open),
     color-mix(in srgb, var(--bg) 92%, transparent);
   border: 1px solid color-mix(in srgb, var(--line) 64%, transparent);
   border-radius: 5px;
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--bg) 76%, transparent);
   pointer-events: none;
   transform: translate(-50%, -50%) rotate(-90deg);
   transform-origin: center;
