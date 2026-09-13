@@ -44,6 +44,7 @@ const deckOwnerInput = $("deckOwnerInput");
 const deckOwnersEditor = $("deckOwnersEditor");
 const commanderRoleField = $("commanderRoleField");
 const deckCommanderInput = $("deckCommanderInput");
+const deckTokenInput = $("deckTokenInput");
 const setNameInput = $("setNameInput");
 const setCodeInput = $("setCodeInput");
 const setCodeIcon = $("setCodeIcon");
@@ -87,6 +88,8 @@ export function initForm({ onSave, onDelete, getCards: getCardsCallback }) {
   backPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(backAssetSelect, backPhoto, backAssetPreview));
   artistSocialInput.addEventListener("input", updateSocialFavicon);
   deckFormatInput.addEventListener("input", updateCommanderRoleField);
+  deckCommanderInput.addEventListener("change", syncDeckRoleChecks);
+  deckTokenInput.addEventListener("change", syncDeckRoleChecks);
   setCodeInput.addEventListener("input", updateSetIcon);
   partnerInput.addEventListener("change", () => updatePartnerField());
   cardForm.addEventListener("keydown", preventAccidentalSubmit);
@@ -131,7 +134,8 @@ export function openCardForm(card = null) {
   deckFormatInput.value = data.deckFormat || "";
   deckBracketInput.value = data.deckBracket || "";
   deckOwnerInput.value = data.deckOwner || "";
-  deckCommanderInput.checked = Boolean(data.deckCommander);
+  deckTokenInput.checked = Boolean(data.deckToken);
+  deckCommanderInput.checked = !deckTokenInput.checked && Boolean(data.deckCommander);
   setNameInput.value = data.setName || "";
   setCodeInput.value = data.setCode || "";
   collectorNumberInput.value = data.collectorNumber || "";
@@ -304,7 +308,8 @@ async function saveCurrent(onSave) {
       deckFormat: deckFormatInput.value.trim(),
       deckBracket: deckBracketInput.value.trim(),
       deckOwner: deckOwnerInput.value.trim(),
-      deckCommander: isCommanderDeck() ? deckCommanderInput.checked : false,
+      deckCommander: isCommanderDeck() && !deckTokenInput.checked ? deckCommanderInput.checked : false,
+      deckToken: isCommanderDeck() ? deckTokenInput.checked : false,
       deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
       deckOwners: safeJsonArray(cardForm.dataset.deckOwners),
       deckColors: safeJsonArray(cardForm.dataset.deckColors),
@@ -396,11 +401,25 @@ function preventAccidentalSubmit(event) {
 
 function updateCommanderRoleField() {
   if (!commanderRoleField) return;
-  commanderRoleField.hidden = !isCommanderDeck();
+  const commanderDeck = isCommanderDeck();
+  commanderRoleField.hidden = !commanderDeck;
+  if (!commanderDeck) {
+    deckCommanderInput.checked = false;
+    deckTokenInput.checked = false;
+  }
 }
 
 function isCommanderDeck() {
   return deckFormatInput.value.trim().toLowerCase() === "commander";
+}
+
+function syncDeckRoleChecks(event) {
+  if (event?.target === deckTokenInput && deckTokenInput.checked) {
+    deckCommanderInput.checked = false;
+  }
+  if (event?.target === deckCommanderInput && deckCommanderInput.checked) {
+    deckTokenInput.checked = false;
+  }
 }
 
 function fillSelect(select, entries) {

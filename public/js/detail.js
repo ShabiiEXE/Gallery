@@ -285,6 +285,7 @@ function deckFormatPill(card) {
 
 function commanderRolePill(card) {
   if (card.deckFormat?.toLowerCase() !== "commander") return "";
+  if (card.deckToken) return `<span class="deck-role-pill">Token</span>`;
   return `<span class="deck-role-pill">${card.deckCommander ? "Commander" : "Part of the 99"}</span>`;
 }
 

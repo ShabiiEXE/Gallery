@@ -390,10 +390,16 @@
             </label>
           </div>
           <div class="wide deck-owners-editor" id="deckOwnersEditor"></div>
-          <label class="check-filter commander-role-field" id="commanderRoleField" hidden>
-            <input id="deckCommanderInput" type="checkbox" />
-            <span>Commander</span>
-          </label>
+          <div class="commander-role-field" id="commanderRoleField" hidden>
+            <label class="check-filter">
+              <input id="deckCommanderInput" type="checkbox" />
+              <span>Commander</span>
+            </label>
+            <label class="check-filter">
+              <input id="deckTokenInput" type="checkbox" />
+              <span>Token</span>
+            </label>
+          </div>
         </section>
         <p class="form-message" id="cardFormMessage"></p>
         <div class="modal-actions">
