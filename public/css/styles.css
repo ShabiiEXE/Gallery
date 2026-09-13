@@ -2880,7 +2880,14 @@ label:has(> .platform-logo-select.is-open),
     padding: max(18px, calc(env(safe-area-inset-top) + 4px)) 14px 14px;
   }
 
-  .brand-mark,
+  .brand-mark {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    min-height: 46px;
+    flex-basis: 46px;
+  }
+
   .icon-button,
   .icon-only-button {
     width: 38px;
@@ -2902,8 +2909,8 @@ label:has(> .platform-logo-select.is-open),
 
   .latest-toggle {
     min-height: 40px;
-    margin-bottom: 8px;
-    padding: 4px 6px 2px;
+    margin-bottom: 0px;
+    padding: 4px 13px 2px 10px;
   }
 
   .latest-toggle span {
