@@ -122,7 +122,7 @@ export function bindDetailInteractions(root, handlers) {
       applyRotation();
     });
     const handleOrientation = (event) => {
-      if (drag) return;
+      if (!mobileMotion || drag) return;
       const beta = Number(event.beta) || 0;
       const gamma = Number(event.gamma) || 0;
       gyro.x = Math.max(-16, Math.min(16, (beta - 48) * -0.32));

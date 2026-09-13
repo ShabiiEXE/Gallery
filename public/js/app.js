@@ -141,6 +141,7 @@ function bindEvents() {
   document.addEventListener("click", () => closeFlagSelects());
   window.addEventListener("resize", () => {
     syncDisplayRange();
+    renderLatestAdditions();
     syncLatestMask();
   });
   window.addEventListener("hashchange", handleHashChange);
@@ -533,9 +534,10 @@ function renderGalleryOnly() {
 
 function renderLatestAdditions() {
   if (!latestAdditions) return;
+  const latestCount = window.matchMedia("(min-width: 821px)").matches ? 4 : 5;
   const latest = [...app.cards]
     .sort((a, b) => Date.parse(b.createdAt || b.updatedAt || "") - Date.parse(a.createdAt || a.updatedAt || ""))
-    .slice(0, 5);
+    .slice(0, latestCount);
   latestAdditions.innerHTML = latest.map((card) => renderCardTile(card, 1, { href: cardHashHref(card) })).join("");
   latestAdditions.querySelectorAll("[data-card-open]").forEach((link) => {
     link.addEventListener("click", (event) => {
@@ -549,9 +551,10 @@ function renderLatestAdditions() {
 
 function syncLatestMask() {
   if (!latestAdditions) return;
-  const maxScroll = latestAdditions.scrollWidth - latestAdditions.clientWidth;
-  latestAdditions.classList.toggle("can-scroll-left", latestAdditions.scrollLeft > 1);
-  latestAdditions.classList.toggle("can-scroll-right", latestAdditions.scrollLeft < maxScroll - 1);
+  const maxScroll = Math.max(0, latestAdditions.scrollWidth - latestAdditions.clientWidth);
+  const edgeThreshold = 18;
+  latestAdditions.classList.toggle("can-scroll-left", latestAdditions.scrollLeft > edgeThreshold);
+  latestAdditions.classList.toggle("can-scroll-right", maxScroll - latestAdditions.scrollLeft > edgeThreshold);
 }
 
 function cardHashHref(card) {

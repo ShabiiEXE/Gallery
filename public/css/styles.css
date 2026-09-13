@@ -975,6 +975,7 @@ body.latest-closed .latest-strip {
 @media (min-width: 821px) {
   .latest-strip {
     gap: 14px;
+    max-height: 760px;
     scroll-snap-type: x mandatory;
   }
 
