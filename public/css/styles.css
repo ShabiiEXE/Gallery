@@ -906,11 +906,24 @@ body.latest-closed .latest-toggle {
 }
 
 .latest-strip {
+  --latest-strip-fade: 52px;
   display: flex;
   gap: 10px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   padding: 4px 2px 8px;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 0,
+    #000 calc(100% - var(--latest-strip-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    #000 0,
+    #000 calc(100% - var(--latest-strip-fade)),
+    transparent 100%
+  );
   scroll-snap-type: x proximity;
 }
 
@@ -932,12 +945,13 @@ body.latest-closed .latest-strip {
 
 @media (min-width: 821px) {
   .latest-strip {
+    --latest-strip-fade: clamp(120px, 14vw, 220px);
     gap: 14px;
     scroll-snap-type: x mandatory;
   }
 
   .latest-strip .card-tile {
-    flex-basis: calc((100% - 42px) / 4);
+    flex-basis: calc((100% - 28px) / 3);
     min-width: 0;
   }
 }
@@ -1554,10 +1568,10 @@ label:has(> .platform-logo-select.is-open),
 
 .tile-foil-star {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-left: 7px;
-  vertical-align: -2px;
+  width: 13px;
+  height: 13px;
+  margin-left: 5px;
+  vertical-align: -1px;
   object-fit: contain;
   filter: drop-shadow(0 0 5px rgba(255, 216, 111, 0.5))
     drop-shadow(0 0 9px rgba(255, 117, 218, 0.24));
@@ -2778,7 +2792,7 @@ label:has(> .platform-logo-select.is-open),
   .foil-title-star {
     width: 13px;
     height: 13px;
-    margin-left: 1px;
+    margin-left: 10px;
     vertical-align: 0;
   }
 
@@ -2913,6 +2927,7 @@ label:has(> .platform-logo-select.is-open),
   }
 
   .latest-strip {
+    --latest-strip-fade: 42px;
     gap: 8px;
     margin-inline: -2px;
     padding: 5px 6px 10px;

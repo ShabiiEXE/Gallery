@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gallery-v57-2026-09-13";
+const CACHE_VERSION = "gallery-v58-2026-09-13";
 const CORE_CACHE = `${CACHE_VERSION}-core`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -21,8 +21,8 @@ const CORE_URLS = [
   "/js/scryfall.js",
   "/js/set-icons.js",
   "/js/state.js",
-  "/assets/icon.png",
-  "/assets/app-Icon-bw.png",
+  "/assets/icon-v58.png",
+  "/assets/app-icon-v58.png",
   "/assets/backdrop.png",
   "/assets/backdrop_light.png",
   "/assets/glow.svg",
