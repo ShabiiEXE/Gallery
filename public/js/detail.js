@@ -123,8 +123,8 @@ export function bindDetailInteractions(root, handlers) {
       if (drag) return;
       const beta = Number(event.beta) || 0;
       const gamma = Number(event.gamma) || 0;
-      gyro.x = Math.max(-16, Math.min(16, (beta - 48) * -0.32));
-      gyro.y = Math.max(-18, Math.min(18, gamma * 0.42));
+      gyro.x = Math.max(-24, Math.min(24, (beta - 48) * -0.48));
+      gyro.y = Math.max(-28, Math.min(28, gamma * 0.68));
       applyRotation();
     }, { signal: controller.signal });
     root.closest("dialog")?.addEventListener("close", () => controller.abort(), { once: true });

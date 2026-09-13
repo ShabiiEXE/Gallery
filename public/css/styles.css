@@ -870,6 +870,12 @@ body.has-modal-open .modal-card {
   scroll-snap-align: start;
 }
 
+@media (min-width: 821px) {
+  .latest-strip {
+    grid-auto-columns: minmax(0, calc((100% - 20px) / 3));
+  }
+}
+
 .filter-toggle-button {
   display: none;
 }
@@ -2406,7 +2412,10 @@ label:has(> .platform-logo-select.is-open),
     border-radius: 8px;
     background: var(--grid-fade), var(--grid-texture), color-mix(in srgb, var(--panel) 88%, rgba(0, 0, 0, 0.8));
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
-    font-weight: 900;
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 740;
+    text-transform: uppercase;
   }
 
   .filter-toggle-icon {
@@ -2466,32 +2475,42 @@ label:has(> .platform-logo-select.is-open),
   .gallery-grid[data-mobile-columns="3"] .tile-year,
   .gallery-grid[data-mobile-columns="4"] .tile-name,
   .gallery-grid[data-mobile-columns="4"] .set-icon,
-  .gallery-grid[data-mobile-columns="4"] .tile-year {
+  .gallery-grid[data-mobile-columns="4"] .tile-year,
+  .latest-strip .tile-name,
+  .latest-strip .set-icon,
+  .latest-strip .tile-year {
     display: none;
   }
 
   .gallery-grid[data-mobile-columns="3"] .tile-meta,
-  .gallery-grid[data-mobile-columns="4"] .tile-meta {
+  .gallery-grid[data-mobile-columns="4"] .tile-meta,
+  .latest-strip .tile-meta {
     min-width: 0;
     gap: 4px;
     padding-top: 6px;
   }
 
   .gallery-grid[data-mobile-columns="3"] .tile-sub,
-  .gallery-grid[data-mobile-columns="4"] .tile-sub {
+  .gallery-grid[data-mobile-columns="4"] .tile-sub,
+  .latest-strip .tile-sub {
     overflow: hidden;
   }
 
   .gallery-grid[data-mobile-columns="3"] .tile-foot,
-  .gallery-grid[data-mobile-columns="4"] .tile-foot {
+  .gallery-grid[data-mobile-columns="4"] .tile-foot,
+  .latest-strip .tile-foot {
     gap: 0;
   }
 
-  .gallery-grid[data-mobile-columns="3"] .kind-default {
+  .gallery-grid[data-mobile-columns="3"] .kind-default,
+  .gallery-grid[data-mobile-columns="4"] .kind-default,
+  .latest-strip .kind-default {
     display: none;
   }
 
-  .gallery-grid[data-mobile-columns="3"] .kind-mobile-three {
+  .gallery-grid[data-mobile-columns="3"] .kind-mobile-three,
+  .gallery-grid[data-mobile-columns="4"] .kind-mobile-three,
+  .latest-strip .kind-mobile-three {
     display: inline;
   }
 
