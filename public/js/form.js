@@ -22,8 +22,6 @@ const partnerInput = $("partnerInput");
 const partnerSelect = $("partnerSelect");
 const partnerSelectField = $("partnerSelectField");
 const foilInput = $("foilInput");
-const frontPhoto = $("frontPhoto");
-const backPhoto = $("backPhoto");
 const frontAssetSelect = $("frontAssetSelect");
 const backAssetSelect = $("backAssetSelect");
 const frontAssetPreview = $("frontAssetPreview");
@@ -87,10 +85,8 @@ export function initForm({ onSave, onDelete, getCards: getCardsCallback }) {
   clearDeckButton.addEventListener("click", clearDeckData);
   moxfieldInput.addEventListener("input", scheduleDeckFetch);
   moxfieldInput.addEventListener("paste", scheduleDeckFetch);
-  frontAssetSelect?.addEventListener("change", () => applyPhotoAsset(frontAssetSelect, frontPhoto, frontAssetPreview, "frontImage"));
-  backAssetSelect?.addEventListener("change", () => applyPhotoAsset(backAssetSelect, backPhoto, backAssetPreview, "backImage"));
-  frontPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(frontAssetSelect, frontPhoto, frontAssetPreview));
-  backPhoto.addEventListener("change", () => clearPhotoAssetWhenUploaded(backAssetSelect, backPhoto, backAssetPreview));
+  frontAssetSelect?.addEventListener("change", () => applyPhotoAsset(frontAssetSelect, frontAssetPreview, "frontImage"));
+  backAssetSelect?.addEventListener("change", () => applyPhotoAsset(backAssetSelect, backAssetPreview, "backImage"));
   artistSocialInput.addEventListener("input", updateSocialFavicon);
   deckFormatInput.addEventListener("input", updateCommanderRoleField);
   deckCommanderInput.addEventListener("change", syncDeckRoleChecks);
@@ -342,12 +338,12 @@ async function cardFromForm({ copy = false } = {}) {
     return null;
   }
 
-  const frontImage = await imageValue(frontPhoto, cardForm.dataset.frontImage);
+  const frontImage = cardForm.dataset.frontImage || "";
   if (!frontImage) {
-    cardFormMessage.textContent = "Front photo is required. Use Scryfall lookup or upload an image.";
+    cardFormMessage.textContent = "Front photo is required. Use Scryfall lookup or pick an image.";
     return null;
   }
-  const backImage = await imageValue(backPhoto, cardForm.dataset.backImage);
+  const backImage = cardForm.dataset.backImage || "";
   return {
     id: copy ? crypto.randomUUID() : editingId.value || crypto.randomUUID(),
     name: cardName.value.trim(),
@@ -522,26 +518,17 @@ function usedPhotoAssetNames() {
   }, new Map());
 }
 
-function applyPhotoAsset(select, input, preview, datasetKey) {
+function applyPhotoAsset(select, preview, datasetKey) {
   if (!select) return;
   if (select.value === CLEAR_IMAGE_VALUE) {
     cardForm.dataset[datasetKey] = "";
-    if (input) input.value = "";
     updatePhotoAssetPreview(preview, "");
     syncCustomSelect(select);
     return;
   }
   if (!select.value) return;
   cardForm.dataset[datasetKey] = select.value;
-  if (input) input.value = "";
   updatePhotoAssetPreview(preview, select.value);
-  syncCustomSelect(select);
-}
-
-function clearPhotoAssetWhenUploaded(select, input, preview) {
-  if (!select || !input?.files?.length) return;
-  select.value = "";
-  updatePhotoAssetPreview(preview, "");
   syncCustomSelect(select);
 }
 
@@ -694,36 +681,4 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value);
-}
-
-function imageValue(input, fallback) {
-  const file = input.files?.[0];
-  if (!file) return Promise.resolve(fallback || "");
-  return compressImage(file).catch(() => readFileAsDataUrl(file));
-}
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function compressImage(file) {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1000;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext("2d");
-  context.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close?.();
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.72));
-  if (!blob) throw new Error("Could not compress image.");
-  return readFileAsDataUrl(blob);
 }
