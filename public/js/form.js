@@ -43,6 +43,7 @@ const deckFormatInput = $("deckFormatInput");
 const deckBracketInput = $("deckBracketInput");
 const deckOwnerInput = $("deckOwnerInput");
 const deckOwnersEditor = $("deckOwnersEditor");
+const deckMetaPreview = $("deckMetaPreview");
 const commanderRoleField = $("commanderRoleField");
 const deckCommanderInput = $("deckCommanderInput");
 const deckTokenInput = $("deckTokenInput");
@@ -161,6 +162,7 @@ export function openCardForm(card = null) {
   cardForm.dataset.deckColors = JSON.stringify(Array.isArray(data.deckColors) ? data.deckColors : []);
   fillPartnerSelect(data.partnerId || "");
   renderDeckOwnersEditor();
+  renderDeckMetaPreview();
   syncPhotoAssetSelect(frontAssetSelect, frontAssetPreview, cardForm.dataset.frontImage);
   syncPhotoAssetSelect(backAssetSelect, backAssetPreview, cardForm.dataset.backImage);
   updateArtistLabel();
@@ -203,6 +205,7 @@ function applyDeck(deck) {
   if (deck.deckImage) cardForm.dataset.deckImage = deck.deckImage;
   if (deck.commanderImage) cardForm.dataset.commanderImage = deck.commanderImage;
   renderDeckOwnersEditor();
+  renderDeckMetaPreview();
   updateCommanderRoleField();
 }
 
@@ -222,6 +225,7 @@ function clearDeckData() {
   cardForm.dataset.deckImage = "";
   cardForm.dataset.commanderImage = "";
   renderDeckOwnersEditor();
+  renderDeckMetaPreview();
   updateCommanderRoleField();
   cardFormMessage.textContent = "Moxfield deck data cleared.";
 }
@@ -598,6 +602,49 @@ function setDeckOwners(owners) {
   deckOwnerInput.value = owners.map((owner) => owner.name).filter(Boolean).join(", ");
   cardForm.dataset.deckOwnerAvatar = owners[0]?.avatar || "";
   renderDeckOwnersEditor();
+  renderDeckMetaPreview();
+}
+
+function renderDeckMetaPreview() {
+  if (!deckMetaPreview) return;
+  const colors = normalizeDeckColors(safeJsonArray(cardForm.dataset.deckColors));
+  const deckImage = cardForm.dataset.deckImage || cardForm.dataset.commanderImage || "";
+  deckMetaPreview.hidden = !colors.length && !deckImage;
+  if (deckMetaPreview.hidden) {
+    deckMetaPreview.innerHTML = "";
+    return;
+  }
+  deckMetaPreview.innerHTML = `
+    ${colors.length ? `
+      <div class="deck-meta-preview-row">
+        <span>Deck colors</span>
+        <span class="deck-color-pips" aria-label="Deck colors ${escapeAttribute(colors.join(""))}">
+          ${colors.map((color) => `<img class="mana-pip" src="${manaSymbolUrl(color)}" alt="${escapeAttribute(color)}">`).join("")}
+          <b>${escapeHtml(colors.join(""))}</b>
+        </span>
+      </div>
+    ` : ""}
+    ${deckImage ? `
+      <div class="deck-meta-preview-row deck-photo-preview">
+        <span>Deck photo</span>
+        <img src="${escapeAttribute(deckImage)}" alt="">
+      </div>
+    ` : ""}
+  `;
+}
+
+function manaSymbolUrl(color) {
+  return `https://svgs.scryfall.io/card-symbols/${encodeURIComponent(color)}.svg`;
+}
+
+function normalizeDeckColors(colors) {
+  const values = Array.isArray(colors) ? colors : String(colors || "").split("");
+  const seen = new Set();
+  values.forEach((value) => {
+    const color = String(value || "").trim().charAt(0).toUpperCase();
+    if ("WUBRG".includes(color)) seen.add(color);
+  });
+  return ["W", "U", "B", "R", "G"].filter((color) => seen.has(color));
 }
 
 function safeJsonArray(value) {
@@ -611,6 +658,10 @@ function safeJsonArray(value) {
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value);
 }
 
 function imageValue(input, fallback) {
