@@ -45,6 +45,7 @@ const deckOwnerInput = $("deckOwnerInput");
 const deckOwnersEditor = $("deckOwnersEditor");
 const deckMetaPreview = $("deckMetaPreview");
 const commanderRoleField = $("commanderRoleField");
+const deckCommanderRoleOption = $("deckCommanderRoleOption");
 const deckCommanderInput = $("deckCommanderInput");
 const deckTokenInput = $("deckTokenInput");
 const setNameInput = $("setNameInput");
@@ -368,7 +369,7 @@ async function cardFromForm({ copy = false } = {}) {
     deckBracket: deckBracketInput.value.trim(),
     deckOwner: deckOwnerInput.value.trim(),
     deckCommander: isCommanderDeck() && !deckTokenInput.checked ? deckCommanderInput.checked : false,
-    deckToken: isCommanderDeck() ? deckTokenInput.checked : false,
+    deckToken: hasDeckData() ? deckTokenInput.checked : false,
     deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
     deckOwners: safeJsonArray(cardForm.dataset.deckOwners),
     deckColors: safeJsonArray(cardForm.dataset.deckColors),
@@ -456,15 +457,30 @@ function preventAccidentalSubmit(event) {
 function updateCommanderRoleField() {
   if (!commanderRoleField) return;
   const commanderDeck = isCommanderDeck();
-  commanderRoleField.hidden = !commanderDeck;
+  commanderRoleField.hidden = !hasDeckData();
+  commanderRoleField.classList.toggle("token-only", !commanderDeck);
+  if (deckCommanderRoleOption) deckCommanderRoleOption.hidden = !commanderDeck;
   if (!commanderDeck) {
     deckCommanderInput.checked = false;
-    deckTokenInput.checked = false;
   }
 }
 
 function isCommanderDeck() {
   return deckFormatInput.value.trim().toLowerCase() === "commander";
+}
+
+function hasDeckData() {
+  return Boolean(
+    moxfieldInput.value.trim()
+    || deckNameInput.value.trim()
+    || deckFormatInput.value.trim()
+    || deckOwnerInput.value.trim()
+    || cardForm.dataset.deckImage
+    || cardForm.dataset.commanderImage
+    || safeJsonArray(cardForm.dataset.deckOwners).length
+    || safeJsonArray(cardForm.dataset.deckColors).length
+    || deckTokenInput.checked
+  );
 }
 
 function syncDeckRoleChecks(event) {
@@ -619,8 +635,12 @@ function renderDeckMetaPreview() {
       <div class="deck-meta-preview-row">
         <span>Deck colors</span>
         <span class="deck-color-pips" aria-label="Deck colors ${escapeAttribute(colors.join(""))}">
-          ${colors.map((color) => `<img class="mana-pip" src="${manaSymbolUrl(color)}" alt="${escapeAttribute(color)}">`).join("")}
-          <b>${escapeHtml(colors.join(""))}</b>
+          ${colors.map((color) => `
+            <button class="deck-color-remove" type="button" data-deck-color-remove="${escapeAttribute(color)}" title="Remove ${escapeAttribute(color)}" aria-label="Remove ${escapeAttribute(color)}">
+              <img class="mana-pip" src="${manaSymbolUrl(color)}" alt="${escapeAttribute(color)}">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          `).join("")}
         </span>
       </div>
     ` : ""}
@@ -631,6 +651,18 @@ function renderDeckMetaPreview() {
       </div>
     ` : ""}
   `;
+  deckMetaPreview.querySelectorAll("[data-deck-color-remove]").forEach((button) => {
+    button.addEventListener("click", () => removeDeckColor(button.dataset.deckColorRemove));
+  });
+}
+
+function removeDeckColor(color) {
+  const remove = String(color || "").trim().charAt(0).toUpperCase();
+  if (!remove) return;
+  const colors = normalizeDeckColors(safeJsonArray(cardForm.dataset.deckColors))
+    .filter((value) => value !== remove);
+  cardForm.dataset.deckColors = JSON.stringify(colors);
+  renderDeckMetaPreview();
 }
 
 function manaSymbolUrl(color) {
