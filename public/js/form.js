@@ -37,6 +37,7 @@ const signaturePlace = $("signaturePlace");
 const descriptionInput = $("descriptionInput");
 const moxfieldInput = $("moxfieldInput");
 const fetchDeckButton = $("fetchDeckButton");
+const clearDeckButton = $("clearDeckButton");
 const deckNameInput = $("deckNameInput");
 const deckFormatInput = $("deckFormatInput");
 const deckBracketInput = $("deckBracketInput");
@@ -81,6 +82,7 @@ export function initForm({ onSave, onDelete, getCards: getCardsCallback }) {
     runLookup();
   });
   fetchDeckButton.addEventListener("click", fetchDeck);
+  clearDeckButton.addEventListener("click", clearDeckData);
   moxfieldInput.addEventListener("input", scheduleDeckFetch);
   moxfieldInput.addEventListener("paste", scheduleDeckFetch);
   frontAssetSelect?.addEventListener("change", () => applyPhotoAsset(frontAssetSelect, frontPhoto, frontAssetPreview, "frontImage"));
@@ -123,6 +125,8 @@ export function openCardForm(card = null) {
 
   const data = card || {};
   editingId.value = data.id || "";
+  fillPhotoAssetSelect(frontAssetSelect);
+  fillPhotoAssetSelect(backAssetSelect);
   cardName.value = data.name || "";
   cardKind.value = data.kind === "Altered" ? "Alter" : data.kind || "Signed";
   cardLanguage.value = data.language || "en";
@@ -200,6 +204,26 @@ function applyDeck(deck) {
   if (deck.commanderImage) cardForm.dataset.commanderImage = deck.commanderImage;
   renderDeckOwnersEditor();
   updateCommanderRoleField();
+}
+
+function clearDeckData() {
+  window.clearTimeout(deckFetchTimer);
+  lastAutoFetchedDeck = "";
+  moxfieldInput.value = "";
+  deckNameInput.value = "";
+  deckFormatInput.value = "";
+  deckBracketInput.value = "";
+  deckOwnerInput.value = "";
+  deckCommanderInput.checked = false;
+  deckTokenInput.checked = false;
+  cardForm.dataset.deckOwnerAvatar = "";
+  cardForm.dataset.deckOwners = "[]";
+  cardForm.dataset.deckColors = "[]";
+  cardForm.dataset.deckImage = "";
+  cardForm.dataset.commanderImage = "";
+  renderDeckOwnersEditor();
+  updateCommanderRoleField();
+  cardFormMessage.textContent = "Moxfield deck data cleared.";
 }
 
 let deckFetchTimer = 0;
@@ -454,8 +478,28 @@ function fillSelect(select, entries) {
 
 function fillPhotoAssetSelect(select) {
   if (!select) return;
-  const options = PHOTO_ASSETS.map((path) => `<option value="${escapeHtml(path)}" data-image="${escapeHtml(path)}">${escapeHtml(photoAssetLabel(path))}</option>`);
+  const usedImages = usedPhotoAssetNames();
+  const options = PHOTO_ASSETS.map((path) => {
+    const usedBy = usedImages.get(path) || [];
+    const usedLabel = usedBy.length ? `Used by ${usedBy.join(", ")}` : "";
+    return `<option value="${escapeHtml(path)}" data-image="${escapeHtml(path)}" data-used="${usedBy.length ? "true" : ""}" data-used-label="${escapeHtml(usedLabel)}">${escapeHtml(photoAssetLabel(path))}</option>`;
+  });
   select.innerHTML = [`<option value="">Current/uploaded image</option>`, `<option value="${CLEAR_IMAGE_VALUE}">Clear image</option>`, ...options].join("");
+}
+
+function usedPhotoAssetNames() {
+  const currentId = editingId.value;
+  return getCards().reduce((map, card) => {
+    if (!card?.id || card.id === currentId) return map;
+    [card.frontImage, card.backImage].forEach((image) => {
+      if (!PHOTO_ASSETS.includes(image)) return;
+      if (!map.has(image)) map.set(image, []);
+      const names = map.get(image);
+      const name = card.name || "Untitled";
+      if (!names.includes(name)) names.push(name);
+    });
+    return map;
+  }, new Map());
 }
 
 function applyPhotoAsset(select, input, preview, datasetKey) {

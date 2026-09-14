@@ -134,6 +134,8 @@ export function syncCustomSelect(select) {
       value: option.value,
       label: option.textContent.trim(),
       image: option.dataset.image || "",
+      used: option.dataset.used === "true",
+      usedLabel: option.dataset.usedLabel || "",
       selected: option.selected,
     }));
   const selected = options.find((option) => option.selected) || options[0] || { value: "", label: "" };
@@ -144,7 +146,7 @@ export function syncCustomSelect(select) {
     </button>
     <div class="platform-logo-menu" role="listbox">
       ${options.map((option) => `
-        <button class="platform-logo-option ${option.selected ? "is-selected" : ""}" type="button" role="option" aria-selected="${option.selected ? "true" : "false"}" data-value="${escapeHtml(option.value)}">
+        <button class="platform-logo-option ${option.selected ? "is-selected" : ""} ${option.used ? "is-used" : ""}" type="button" role="option" aria-selected="${option.selected ? "true" : "false"}" data-value="${escapeHtml(option.value)}" title="${escapeHtml(option.usedLabel)}">
           ${basicChoiceMarkup(option)}
         </button>
       `).join("")}
@@ -189,6 +191,7 @@ function basicChoiceMarkup(option) {
     <span class="platform-logo-choice">
       ${option.image ? `<span class="platform-logo-choice-thumb"><img src="${escapeHtml(option.image)}" alt=""></span>` : ""}
       <span class="platform-logo-choice-label">${escapeHtml(option.label || option.value)}</span>
+      ${option.used ? `<span class="platform-logo-choice-used" aria-label="${escapeHtml(option.usedLabel || "Already in use")}">&#10003;</span>` : ""}
     </span>
   `;
 }

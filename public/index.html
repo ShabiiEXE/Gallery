@@ -363,13 +363,20 @@
             <span>Moxfield deck URL</span>
             <div class="inline-fetch">
               <input id="moxfieldInput" />
-              <button class="ghost-button" id="fetchDeckButton" type="button">
-                <span class="button-label" data-i18n="fetch_deck">Fetch</span>
+              <button class="ghost-button icon-only-button" id="fetchDeckButton" type="button" title="Fetch Moxfield deck" aria-label="Fetch Moxfield deck">
                 <span class="button-icon" aria-hidden="true">
                   <svg class="download-icon" viewBox="0 0 24 24">
                     <path d="M12 2.5v13.5"></path>
                     <path d="M6.5 10.5l5.5 5.5 5.5-5.5"></path>
                     <path d="M4.5 20.5h15"></path>
+                  </svg>
+                </span>
+              </button>
+              <button class="danger-button icon-only-button" id="clearDeckButton" type="button" title="Clear Moxfield deck data" aria-label="Clear Moxfield deck data">
+                <span class="button-icon" aria-hidden="true">
+                  <svg class="close-icon" viewBox="0 0 24 24">
+                    <path d="M6.5 6.5l11 11"></path>
+                    <path d="M17.5 6.5l-11 11"></path>
                   </svg>
                 </span>
               </button>

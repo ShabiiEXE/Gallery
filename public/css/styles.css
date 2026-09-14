@@ -453,6 +453,18 @@ select:hover {
   border-color: color-mix(in srgb, var(--accent-2) 18%, transparent);
 }
 
+.platform-logo-option.is-used::before {
+  background: rgba(255, 0, 57, 0.16);
+  border-color: rgba(255, 111, 133, 0.42);
+}
+
+.platform-logo-option.is-used:hover::before,
+.platform-logo-option.is-used:focus-visible::before,
+.platform-logo-option.is-used.is-selected::before {
+  background: rgba(255, 0, 57, 0.24);
+  border-color: rgba(255, 111, 133, 0.64);
+}
+
 .platform-logo-choice {
   position: relative;
   z-index: 2;
@@ -542,6 +554,27 @@ select:hover {
 .platform-logo-option:focus-visible .platform-logo-choice-label,
 .platform-logo-option.is-selected .platform-logo-choice-label {
   color: color-mix(in srgb, var(--accent-2) 46%, #ffffff);
+}
+
+.platform-logo-option.is-used .platform-logo-choice-label {
+  color: #ffb8c4;
+}
+
+.platform-logo-choice-used {
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  place-items: center;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .platform-logo-choice-label {
@@ -2074,8 +2107,15 @@ label:has(> .platform-logo-select.is-open),
 
 .inline-fetch {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 42px 42px;
   gap: 8px;
+}
+
+.inline-fetch .icon-only-button {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
 }
 
 .lookup-results {
@@ -2739,6 +2779,10 @@ label:has(> .platform-logo-select.is-open),
   .lookup-panel,
   .inline-fetch {
     grid-template-columns: 1fr;
+  }
+
+  .inline-fetch {
+    grid-template-columns: minmax(0, 1fr) 42px 42px;
   }
 
   .filter-toggle-button {
