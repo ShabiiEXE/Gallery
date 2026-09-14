@@ -539,17 +539,19 @@ function renderGalleryOnly() {
   const groups = bundleCards(visible, app.device.bundleSameName);
   const columns = app.device.galleryColumns || 7;
   const mobileColumns = Math.max(1, Math.min(4, columns));
+  const activeSort = app.filters.sort || app.settings.defaultSort || "artist";
+  const showSeparators = app.device.showSortSeparators && !["name", "latest"].includes(activeSort);
   galleryGrid?.style.setProperty("--gallery-columns", `${columns}`);
   galleryGrid?.style.setProperty("--gallery-mobile-columns", `${mobileColumns}`);
   if (galleryGrid) {
     galleryGrid.dataset.mobileColumns = String(mobileColumns);
-    galleryGrid.classList.toggle("has-sort-separators", Boolean(app.device.showSortSeparators));
+    galleryGrid.classList.toggle("has-sort-separators", Boolean(showSeparators));
   }
   renderGallery(groups, {
     onOpen: openDetail,
     getHref: cardHashHref,
-    separators: app.device.showSortSeparators,
-    sort: app.filters.sort || app.settings.defaultSort || "artist",
+    separators: showSeparators,
+    sort: activeSort,
   });
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
   renderFooter();

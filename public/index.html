@@ -93,7 +93,9 @@
                 <select id="sortSelect">
                   <option value="artist">Artist</option>
                   <option value="deck">Deck</option>
+                  <option value="latest">Latest additions</option>
                   <option value="name">Name</option>
+                  <option value="set">Set</option>
                   <option value="year">Year</option>
                   <option value="type">Type</option>
                 </select>
@@ -194,7 +196,9 @@
             <select id="defaultSortSelect">
               <option value="artist">Artist</option>
               <option value="deck">Deck</option>
+              <option value="latest">Latest additions</option>
               <option value="name">Name</option>
+              <option value="set">Set</option>
               <option value="year">Year</option>
               <option value="type">Type</option>
             </select>
@@ -403,7 +407,12 @@
         </section>
         <p class="form-message" id="cardFormMessage"></p>
         <div class="modal-actions">
-          <span class="spacer"></span>
+          <button class="ghost-button icon-only-button" id="copyCardButton" type="button" title="Copy listing" aria-label="Copy listing">
+            <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="8" y="7" width="11" height="13" rx="2"></rect>
+              <path d="M5 16V6a2 2 0 0 1 2-2h9"></path>
+            </svg>
+          </button>
           <button class="danger-button icon-only-button" id="deleteCardButton" type="button" title="Delete" aria-label="Delete">
             <svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 6h18"></path>
@@ -413,6 +422,7 @@
               <path d="M14 11v5"></path>
             </svg>
           </button>
+          <span class="spacer"></span>
           <button class="primary-button" id="saveCardButton" type="button" data-save-card data-i18n="save">Save</button>
         </div>
       </form>

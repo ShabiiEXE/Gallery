@@ -53,6 +53,7 @@ const setYearInput = $("setYearInput");
 const cardArtistInput = $("cardArtistInput");
 const scryfallInput = $("scryfallInput");
 const saveCardButton = $("saveCardButton");
+const copyCardButton = $("copyCardButton");
 const deleteCardButton = $("deleteCardButton");
 const closeEditButton = document.querySelector("[data-close-edit]");
 let getCards = () => [];
@@ -96,6 +97,7 @@ export function initForm({ onSave, onDelete, getCards: getCardsCallback }) {
   document.querySelectorAll("[data-save-card]").forEach((button) => {
     button.addEventListener("click", () => saveCurrent(onSave));
   });
+  copyCardButton.addEventListener("click", () => copyCurrent(onSave));
   closeEditButton?.addEventListener("click", () => editDialog.close());
   deleteCardButton.addEventListener("click", async () => {
     cardFormMessage.textContent = "Saving to Cloudflare...";
@@ -116,6 +118,7 @@ export function openCardForm(card = null) {
   lookupResults.innerHTML = "";
   cardFormMessage.textContent = "";
   deleteCardButton.hidden = !card;
+  copyCardButton.hidden = !card;
   editTitle.textContent = card ? "Edit card" : "Add card";
 
   const data = card || {};
@@ -273,63 +276,85 @@ function applyScryfall(card) {
 }
 
 async function saveCurrent(onSave) {
-  if (!cardName.value.trim()) {
-    cardFormMessage.textContent = "Card name is required.";
-    return;
-  }
-
-  const frontImage = await imageValue(frontPhoto, cardForm.dataset.frontImage);
-  if (!frontImage) {
-    cardFormMessage.textContent = "Front photo is required. Use Scryfall lookup or upload an image.";
-    return;
-  }
-  const backImage = await imageValue(backPhoto, cardForm.dataset.backImage);
+  const card = await cardFromForm();
+  if (!card) return;
 
   setSaveDisabled(true);
   cardFormMessage.textContent = "Saving to Cloudflare...";
   try {
-    await onSave({
-      id: editingId.value || crypto.randomUUID(),
-      name: cardName.value.trim(),
-      kind: cardKind.value,
-      foil: foilInput.checked,
-      language: cardLanguage.value,
-      frontImage,
-      backImage,
-      originalImage: cardForm.dataset.originalImage || "",
-      originalBackImage: cardForm.dataset.originalBackImage || "",
-      artist: collectorArtist.value.trim(),
-      signatureYear: signatureYear.value.trim(),
-      signaturePlace: signaturePlace.value.trim(),
-      description: descriptionInput.value.trim(),
-      artistSocialUrl: artistSocialInput.value.trim(),
-      moxfieldUrl: moxfieldInput.value.trim(),
-      deckName: deckNameInput.value.trim(),
-      deckFormat: deckFormatInput.value.trim(),
-      deckBracket: deckBracketInput.value.trim(),
-      deckOwner: deckOwnerInput.value.trim(),
-      deckCommander: isCommanderDeck() && !deckTokenInput.checked ? deckCommanderInput.checked : false,
-      deckToken: isCommanderDeck() ? deckTokenInput.checked : false,
-      deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
-      deckOwners: safeJsonArray(cardForm.dataset.deckOwners),
-      deckColors: safeJsonArray(cardForm.dataset.deckColors),
-      deckImage: cardForm.dataset.deckImage || "",
-      commanderImage: cardForm.dataset.commanderImage || frontImage,
-      setName: setNameInput.value.trim(),
-      setCode: setCodeInput.value.trim(),
-      collectorNumber: collectorNumberInput.value.trim(),
-      setYear: setYearInput.value.trim(),
-      cardArtist: cardArtistInput.value.trim(),
-      scryfallUrl: scryfallInput.value.trim(),
-      partnerId: partnerInput.checked ? partnerSelect.value : "",
-      updatedAt: new Date().toISOString(),
-    });
+    await onSave(card);
     editDialog.close();
   } catch (error) {
     cardFormMessage.textContent = error.message;
   } finally {
     setSaveDisabled(false);
   }
+}
+
+async function copyCurrent(onSave) {
+  const card = await cardFromForm({ copy: true });
+  if (!card) return;
+
+  setSaveDisabled(true);
+  cardFormMessage.textContent = "Copying listing...";
+  try {
+    await onSave(card);
+    editDialog.close();
+  } catch (error) {
+    cardFormMessage.textContent = error.message;
+  } finally {
+    setSaveDisabled(false);
+  }
+}
+
+async function cardFromForm({ copy = false } = {}) {
+  if (!cardName.value.trim()) {
+    cardFormMessage.textContent = "Card name is required.";
+    return null;
+  }
+
+  const frontImage = await imageValue(frontPhoto, cardForm.dataset.frontImage);
+  if (!frontImage) {
+    cardFormMessage.textContent = "Front photo is required. Use Scryfall lookup or upload an image.";
+    return null;
+  }
+  const backImage = await imageValue(backPhoto, cardForm.dataset.backImage);
+  return {
+    id: copy ? crypto.randomUUID() : editingId.value || crypto.randomUUID(),
+    name: cardName.value.trim(),
+    kind: cardKind.value,
+    foil: foilInput.checked,
+    language: cardLanguage.value,
+    frontImage,
+    backImage,
+    originalImage: cardForm.dataset.originalImage || "",
+    originalBackImage: cardForm.dataset.originalBackImage || "",
+    artist: collectorArtist.value.trim(),
+    signatureYear: signatureYear.value.trim(),
+    signaturePlace: signaturePlace.value.trim(),
+    description: descriptionInput.value.trim(),
+    artistSocialUrl: artistSocialInput.value.trim(),
+    moxfieldUrl: moxfieldInput.value.trim(),
+    deckName: deckNameInput.value.trim(),
+    deckFormat: deckFormatInput.value.trim(),
+    deckBracket: deckBracketInput.value.trim(),
+    deckOwner: deckOwnerInput.value.trim(),
+    deckCommander: isCommanderDeck() && !deckTokenInput.checked ? deckCommanderInput.checked : false,
+    deckToken: isCommanderDeck() ? deckTokenInput.checked : false,
+    deckOwnerAvatar: cardForm.dataset.deckOwnerAvatar || "",
+    deckOwners: safeJsonArray(cardForm.dataset.deckOwners),
+    deckColors: safeJsonArray(cardForm.dataset.deckColors),
+    deckImage: cardForm.dataset.deckImage || "",
+    commanderImage: cardForm.dataset.commanderImage || frontImage,
+    setName: setNameInput.value.trim(),
+    setCode: setCodeInput.value.trim(),
+    collectorNumber: collectorNumberInput.value.trim(),
+    setYear: setYearInput.value.trim(),
+    cardArtist: cardArtistInput.value.trim(),
+    scryfallUrl: scryfallInput.value.trim(),
+    partnerId: copy ? "" : partnerInput.checked ? partnerSelect.value : "",
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 function fillPartnerSelect(value = "") {
@@ -353,6 +378,7 @@ function setSaveDisabled(disabled) {
     button.disabled = disabled;
   });
   saveCardButton.disabled = disabled;
+  copyCardButton.disabled = disabled;
 }
 
 function updateArtistLabel() {

@@ -101,9 +101,10 @@ function withSeparators(groups, sort) {
 }
 
 function separatorLabel(card, sort) {
-  if (sort === "deck") return card.deckName || "No deck";
+  if (sort === "deck") return deckGroupLabel(card);
   if (sort === "name") return String(card.name || "?").trim().charAt(0).toUpperCase() || "?";
-  if (sort === "year") return card.signatureYear || "No year";
+  if (sort === "set") return setGroupLabel(card);
+  if (sort === "year") return card.signatureYear || "Unknown";
   if (sort === "type") return desktopKind(card.kind) || "Other";
   return card.artist || card.cardArtist || "No artist";
 }
@@ -207,10 +208,18 @@ function uniqueSets(cards) {
 
 function compareCards(a, b, sort, direction = 1) {
   if (sort === "deck") return compareDecks(a, b, direction);
+  if (sort === "latest") return compareLatest(a, b, direction);
   if (sort === "name") return compareText(a.name, b.name) * direction;
-  if (sort === "year") return (compareText(a.signatureYear, b.signatureYear) || compareText(a.name, b.name)) * direction;
+  if (sort === "set") return (compareText(setGroupLabel(a), setGroupLabel(b)) || compareText(a.collectorNumber, b.collectorNumber) || compareText(a.name, b.name)) * direction;
+  if (sort === "year") return (compareText(a.signatureYear || "Unknown", b.signatureYear || "Unknown") || compareText(a.name, b.name)) * direction;
   if (sort === "type") return (compareType(a.kind, b.kind) || compareText(a.name, b.name)) * direction;
   return (compareText(a.artist || a.cardArtist, b.artist || b.cardArtist) || compareText(a.name, b.name)) * direction;
+}
+
+function compareLatest(a, b, direction) {
+  const aTime = Date.parse(a.createdAt || a.updatedAt || "") || 0;
+  const bTime = Date.parse(b.createdAt || b.updatedAt || "") || 0;
+  return ((bTime - aTime) || compareText(a.name, b.name)) * (direction === -1 ? -1 : 1);
 }
 
 function compareType(a, b) {
@@ -226,7 +235,17 @@ function compareDecks(a, b, direction) {
   if (aDeck && !bDeck) return -1;
   if (!aDeck && bDeck) return 1;
   if (aDeck || bDeck) return (compareText(aDeck, bDeck) || compareText(a.name, b.name)) * direction;
-  return compareText(a.name, b.name);
+  return (compareText(deckGroupLabel(a), deckGroupLabel(b)) || compareText(a.name, b.name)) * direction;
+}
+
+function deckGroupLabel(card) {
+  const deck = String(card.deckName || "").trim();
+  if (deck) return deck;
+  return String(card.setCode || "").trim().toLowerCase() === "fin" ? "FF Album" : "Album";
+}
+
+function setGroupLabel(card) {
+  return card.setName || card.setCode || "Unknown";
 }
 
 function compareText(a, b) {
