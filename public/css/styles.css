@@ -718,7 +718,6 @@ label > span {
   transition:
     opacity 160ms ease,
     background-position 180ms ease;
-  animation: foilPrism 6.8s ease-in-out infinite;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -730,6 +729,7 @@ label > span {
 
   .brand:hover .brand-mark::before {
     opacity: 0.88;
+    animation: foilPrism 6.8s ease-in-out infinite;
   }
 }
 
