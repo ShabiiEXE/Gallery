@@ -211,7 +211,7 @@ function compareCards(a, b, sort, direction = 1) {
   if (sort === "latest") return compareLatest(a, b, direction);
   if (sort === "name") return compareText(a.name, b.name) * direction;
   if (sort === "set") return (compareText(setGroupLabel(a), setGroupLabel(b)) || compareText(a.collectorNumber, b.collectorNumber) || compareText(a.name, b.name)) * direction;
-  if (sort === "year") return (compareText(a.signatureYear || "Unknown", b.signatureYear || "Unknown") || compareText(a.name, b.name)) * direction;
+  if (sort === "year") return (compareYear(a, b) || compareText(a.name, b.name)) * direction;
   if (sort === "type") return (compareType(a.kind, b.kind) || compareText(a.name, b.name)) * direction;
   return (compareText(a.artist || a.cardArtist, b.artist || b.cardArtist) || compareText(a.name, b.name)) * direction;
 }
@@ -220,6 +220,14 @@ function compareLatest(a, b, direction) {
   const aTime = Date.parse(a.createdAt || a.updatedAt || "") || 0;
   const bTime = Date.parse(b.createdAt || b.updatedAt || "") || 0;
   return ((bTime - aTime) || compareText(a.name, b.name)) * (direction === -1 ? -1 : 1);
+}
+
+function compareYear(a, b) {
+  const aYear = String(a.signatureYear || "").trim();
+  const bYear = String(b.signatureYear || "").trim();
+  if (!aYear && bYear) return -1;
+  if (aYear && !bYear) return 1;
+  return compareText(aYear || "Unknown", bYear || "Unknown");
 }
 
 function compareType(a, b) {
