@@ -594,7 +594,7 @@ function renderLatestAdditions() {
   const latest = [...app.cards]
     .sort((a, b) => Date.parse(b.createdAt || b.updatedAt || "") - Date.parse(a.createdAt || a.updatedAt || ""))
     .slice(0, 5);
-  latestAdditions.innerHTML = latest.map((card) => renderCardTile(card, 1, { href: cardHashHref(card) })).join("");
+  latestAdditions.innerHTML = latest.map((card) => renderCardTile(card, 1, { href: cardHashHref(card), loading: "eager" })).join("");
   latestAdditions.querySelectorAll("[data-card-open]").forEach((link) => {
     link.addEventListener("click", (event) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

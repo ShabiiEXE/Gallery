@@ -2920,6 +2920,10 @@ label:has(> .platform-logo-select.is-open),
     grid-template-columns: minmax(0, 1fr) 42px 42px;
   }
 
+  .lookup-panel {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
   .filter-toggle-button {
     position: relative;
     z-index: 130;
@@ -3261,6 +3265,10 @@ label:has(> .platform-logo-select.is-open),
     height: 38px;
     min-height: 38px;
     flex-basis: 38px;
+  }
+
+  .lookup-panel {
+    grid-template-columns: minmax(0, 1fr) 38px;
   }
 
   .top-actions #addCardButton {

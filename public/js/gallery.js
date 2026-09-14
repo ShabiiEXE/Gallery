@@ -51,10 +51,10 @@ export function renderGallery(groups, { onOpen, getHref, separators = false, sor
 }
 
 export function renderCardTile(card, count = 1, options = {}) {
-  return cardTile(card, count, options.href);
+  return cardTile(card, count, options.href, null, options.loading);
 }
 
-function cardTile(card, count, href = "#", separator = null) {
+function cardTile(card, count, href = "#", separator = null, loading = "lazy") {
   const showingBack = isArtistProof(card) && card.backImage;
   const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
@@ -65,7 +65,7 @@ function cardTile(card, count, href = "#", separator = null) {
       ${separator ? `<span class="sort-separator-label"><span class="sort-separator-name">${escapeHtml(separator.label)}</span><span class="sort-separator-dot">·</span><span class="sort-separator-count">${separator.count}</span></span>` : ""}
       ${count > 1 ? `<span class="bundle-count">×${count}</span>` : ""}
       <span class="card-open">
-        <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt=""></span>
+        <span class="card-image-wrap"><img data-card-image src="${escapeAttribute(cacheImage(showImage))}" alt="" loading="${escapeAttribute(loading)}" decoding="async"></span>
       </span>
       <span class="tile-meta">
         <span class="tile-name" data-title="${escapeAttribute(card.name)}"><span class="tile-name-text">${escapeHtml(card.name)}</span>${card.foil ? foilStar() : ""}</span>

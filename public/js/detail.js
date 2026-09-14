@@ -443,7 +443,7 @@ function faviconUrl(url) {
 }
 
 function imageFace(src, className, attributes = "") {
-  return `<div class="preview-face ${className}"><img src="${escapeAttribute(cacheImage(src))}" alt="" draggable="false" ${attributes}></div>`;
+  return `<div class="preview-face ${className}"><img src="${escapeAttribute(cacheImage(src))}" alt="" draggable="false" decoding="async" ${attributes}></div>`;
 }
 
 function normalizeRotation(value) {

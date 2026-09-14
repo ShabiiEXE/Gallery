@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gallery-v86-2026-09-14";
+const CACHE_VERSION = "gallery-v88-2026-09-14";
 const CORE_CACHE = `${CACHE_VERSION}-core`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -75,6 +75,11 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(request, CORE_CACHE, "/index.html"));
+    return;
+  }
+
+  if (url.origin === self.location.origin && url.pathname === "/api/cards") {
+    event.respondWith(staleWhileRevalidate(request, RUNTIME_CACHE));
     return;
   }
 
