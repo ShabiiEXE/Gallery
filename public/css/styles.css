@@ -1944,6 +1944,10 @@ label:has(> .platform-logo-select.is-open),
   margin: 0;
 }
 
+.detail-nav-button {
+  display: none;
+}
+
 .form-message {
   min-height: 20px;
   margin: 8px 0;
@@ -2022,12 +2026,8 @@ label:has(> .platform-logo-select.is-open),
 .lookup-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
+  align-items: end;
   margin-bottom: 10px;
-}
-
-.lookup-panel > .icon-only-button {
-  margin-top: 27px;
 }
 
 .moxfield-field > span {
@@ -2659,6 +2659,68 @@ label:has(> .platform-logo-select.is-open),
   stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 1180px) {
+  .detail-nav-button {
+    position: fixed;
+    top: 50%;
+    z-index: 10;
+    display: grid;
+    width: 54px;
+    height: 76px;
+    place-items: center;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    background:
+      var(--grid-texture),
+      color-mix(in srgb, var(--panel-dark) 88%, rgba(0, 0, 0, 0.7));
+    background-size:
+      18px 18px,
+      18px 18px,
+      auto;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+    transform: translateY(-50%);
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .detail-nav-button[hidden] {
+    display: none;
+  }
+
+  .detail-nav-prev {
+    left: max(18px, calc(50vw - 596px));
+  }
+
+  .detail-nav-next {
+    right: max(18px, calc(50vw - 596px));
+  }
+
+  .detail-nav-button:hover,
+  .detail-nav-button:focus-visible {
+    color: #fff;
+    border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+    background-color: color-mix(in srgb, var(--accent) 24%, transparent);
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.38),
+      0 0 24px color-mix(in srgb, var(--accent) 16%, transparent);
+    outline: none;
+  }
+
+  .detail-nav-icon {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 }
 
 .deck-meta-row,

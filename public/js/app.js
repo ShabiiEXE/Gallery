@@ -50,6 +50,8 @@ const defaultDesktopDisplaySelect = $("defaultDesktopDisplaySelect");
 const editDialog = $("editDialog");
 const cardDialog = $("cardDialog");
 const cardDetail = $("cardDetail");
+const detailPrevButton = $("detailPrevButton");
+const detailNextButton = $("detailNextButton");
 const resultCount = $("resultCount");
 const emptyState = $("emptyState");
 const galleryGrid = $("galleryGrid");
@@ -135,6 +137,8 @@ function bindEvents() {
   settingsButton.addEventListener("click", openSettings);
   saveSettingsButton.addEventListener("click", commitSettings);
   clearCacheButton.addEventListener("click", clearBrowserCache);
+  detailPrevButton?.addEventListener("click", () => cycleDetailCard(-1));
+  detailNextButton?.addEventListener("click", () => cycleDetailCard(1));
   filterToggleButton?.addEventListener("click", toggleMobileFilters);
   latestToggle?.addEventListener("click", toggleLatestAdditions);
   latestAdditions?.addEventListener("scroll", syncLatestMask, { passive: true });
@@ -153,6 +157,7 @@ function bindEvents() {
         const activeId = app.activeCardId;
         app.activeCardId = "";
         if (activeId && findCardByHash()?.id === activeId) clearCardHash();
+        updateDetailNav();
       }
       updateModalScrollLock();
     });
@@ -372,7 +377,30 @@ function openDetail(id, options = {}) {
     onShare: (button) => shareCardLink(card, button),
   });
   if (!cardDialog.open) cardDialog.showModal();
+  updateDetailNav();
   updateModalScrollLock();
+}
+
+function cycleDetailCard(direction) {
+  const cards = detailNavigationCards();
+  if (cards.length < 2 || !app.activeCardId) return;
+  const index = cards.findIndex((card) => card.id === app.activeCardId);
+  const currentIndex = index >= 0 ? index : 0;
+  const nextIndex = (currentIndex + direction + cards.length) % cards.length;
+  openDetail(cards[nextIndex].id);
+}
+
+function detailNavigationCards() {
+  const visible = filteredCards(app.cards, app.filters);
+  return visible.some((card) => card.id === app.activeCardId) ? visible : app.cards;
+}
+
+function updateDetailNav() {
+  const canCycle = cardDialog.open && detailNavigationCards().length > 1;
+  [detailPrevButton, detailNextButton].forEach((button) => {
+    if (!button) return;
+    button.hidden = !canCycle;
+  });
 }
 
 function handleHashChange() {
@@ -553,6 +581,7 @@ function renderGalleryOnly() {
     separators: showSeparators,
     sort: activeSort,
   });
+  if (cardDialog.open) updateDetailNav();
   resultCount.textContent = `${visible.length} card${visible.length === 1 ? "" : "s"}`;
   renderFooter();
   renderLatestAdditions();
