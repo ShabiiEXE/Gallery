@@ -5,6 +5,9 @@ import { searchScryfall } from "./scryfall.js";
 import { setIconUrl } from "./set-icons.js";
 
 const CLEAR_IMAGE_VALUE = "__clear_image__";
+const RESERVED_PHOTO_ASSETS = new Map([
+  ["assets/cards/blackmage_og.jpg", ["Reserved"]],
+]);
 
 const $ = (id) => document.getElementById(id);
 const cardKind = $("cardKind");
@@ -515,7 +518,7 @@ function usedPhotoAssetNames() {
       if (!names.includes(name)) names.push(name);
     });
     return map;
-  }, new Map());
+  }, new Map(RESERVED_PHOTO_ASSETS));
 }
 
 function applyPhotoAsset(select, preview, datasetKey) {
