@@ -59,6 +59,8 @@ const clearCacheButton = $("clearCacheButton");
 const lastEditText = $("lastEditText");
 const latestAdditions = $("latestAdditions");
 const latestToggle = $("latestToggle");
+const brandLink = document.querySelector(".brand");
+const brandMark = document.querySelector(".brand-mark");
 
 const app = {
   cards: [],
@@ -124,6 +126,7 @@ async function start() {
 
 function bindEvents() {
   bindBackdrop();
+  bindBrandFoil();
   loginButton.addEventListener("click", () => {
     if (app.authed) {
       doLogout();
@@ -215,6 +218,28 @@ function bindBackdrop() {
       document.documentElement.style.setProperty("--backdrop-y", `${backdropY.toFixed(2)}px`);
     });
   }, { passive: true });
+}
+
+function bindBrandFoil() {
+  if (!brandLink || !brandMark) return;
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  brandLink.addEventListener("pointermove", (event) => {
+    const rect = brandMark.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    const clampedX = Math.max(0, Math.min(1, x));
+    const clampedY = Math.max(0, Math.min(1, y));
+    brandMark.style.setProperty("--brand-shine-x", `${(clampedX * 100).toFixed(1)}%`);
+    brandMark.style.setProperty("--brand-shine-y", `${(clampedY * 100).toFixed(1)}%`);
+    brandMark.style.setProperty("--brand-tilt-y", `${((clampedX - 0.5) * 18).toFixed(2)}deg`);
+    brandMark.style.setProperty("--brand-tilt-x", `${((0.5 - clampedY) * 16).toFixed(2)}deg`);
+  }, { passive: true });
+  brandLink.addEventListener("pointerleave", () => {
+    brandMark.style.setProperty("--brand-shine-x", "50%");
+    brandMark.style.setProperty("--brand-shine-y", "50%");
+    brandMark.style.setProperty("--brand-tilt-x", "0deg");
+    brandMark.style.setProperty("--brand-tilt-y", "0deg");
+  });
 }
 
 async function doLogin() {
