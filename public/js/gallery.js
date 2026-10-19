@@ -58,7 +58,7 @@ function cardTile(card, count, href = "#", separator = null, loading = "lazy") {
   const showingBack = isArtistProof(card) && card.backImage;
   const showImage = showingBack ? card.backImage : card.frontImage;
   const artist = card.artist || card.cardArtist || "";
-  const foilImage = card.foil && !isArtistProof(card);
+  const foilImage = card.foil && (!isArtistProof(card) || !card.backImage);
   const saturationBoost = !isProxy(card);
   return `
     <a class="card-tile ${foilImage ? "foil" : ""} ${card.foil ? "is-foil" : ""} ${saturationBoost ? "saturation-boost" : ""} ${separator ? "has-sort-separator" : ""}" href="${escapeAttribute(href)}" data-card-tile data-card-open data-card-id="${card.id}" aria-label="${escapeAttribute(`Open ${card.name}`)}">
